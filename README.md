@@ -14,3 +14,6 @@ Lembrem sempre de evitar enviar arquivos muito grandes (>5MB). No caso de vídeo
 1. Crie o repositório do projeto utilizando a nomenclatura padrão no formato: `<ano>.<semestre>_PI1_Grupo<n>_<professor>`. Como um exemplo, um nome formado corretamente seria `2026.1_PI1_Grupo1_Diogo`. 
 
 2. Crie uma equipe do projeto com a mesma nomenclatura do repositório porém com o sufixo `_Equipe`, como `2026.1_PI1_Grupo1_Diogo_Equipe`, e solicite, caso necessário, que a equipe tenha permissão de escrita no repositório do projeto.
+
+
+<!-- Fix #26 -->
