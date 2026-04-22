@@ -1,20 +1,61 @@
 # Micromouse — Documentação de Hardware e Decisões Técnicas
 
-> Projeto Integrador de Engenharias — UnB Gama  
-> Labirinto: 16x16 células | Navegação sem rodada de reconhecimento
+> Projeto Integrador de Engenharias — UnB Gama - FCTE
 
 ---
 
 ## Lista de Componentes
 
-|             Componente          | Quantidade |
+### Principais
+
+|            Componente           | Quantidade | 
 |---------------------------------|------------|
 | ESP32                           |      1     |
 | Motor DC N20 100:1 com Encoder  |      2     |
-| Ponte H TB6612FNG               |      1     | 
-| Placa de Fenolite               |      5+    |
+| Ponte H TB6612FNG               |      1     |
 | Sensor ToF VL53L0X              |      3     | 
-| Giroscópio MPU-6050             |      1     | 
+| Bateria LiPo                    |      1     | 
+| Regulador de Tensão AMS1117-3.3 |      1     | 
+| Chave Liga/Desliga              |      1     | 
+| Conector JST                    |      1     | 
+
+### Passivos
+
+|        Componente      | Valor | Quantidade |                        Uso                        |
+|------------------------|-------|------------|---------------------------------------------------|
+| Resistor               | 4.7kΩ |      2     | Pull-up I2C                                       |
+| Resistor               | 10kΩ  |      2     | Divisor de tensão (leitura de bateria)            |
+| Resistor               | 100Ω  |      3     | Proteção pinos XSHUT dos VL53L0X                  |
+| Capacitor cerâmico     | 100nF |      5     | Desacoplamento sensores e regulador               |
+| Capacitor eletrolítico | 10µF  |      3     | Bulk: entrada bateria, saída regulador, TB6612FNG |
+
+**Total: 7 resistores | 8 capacitores**
+
+### Estrutura e Montagem
+
+|        Componente        | Quantidade |
+|--------------------------|------------|
+| Placa de Fenolite        |      5+    |
+| Pinos header macho/fêmea |     ~40    |
+| Fios jumper              |  conjunto  |
+
+> **Nota:** A protoboard será usada apenas na fase inicial de validação do circuito, antes da migração para a fenolite.
+
+> **Em aberto:** Tensão da bateria (1S 3.7V ou 2S 7.4V) e solução mecânica das rodas — dependem de decisão da equipe de estruturas e energia.
+
+---
+
+## Layout das Placas de Fenolite
+
+Serão utilizadas **2 placas funcionais:**
+
+**Placa principal (~15x10cm)**
+ESP32, TB6612FNG, regulador AMS1117-3.3, capacitores e resistores.
+
+**Placa dos sensores (~8x3cm)**
+3x VL53L0X posicionados em ângulo (esquerda, frente, direita) na parte frontal do robô.
+
+As demais placas adquiridas são reserva para retrabalho. O tamanho final deve ser validado com o chassi definido pela equipe de estruturas, respeitando o limite de **25x25cm** do regulamento.
 
 ---
 
@@ -28,25 +69,33 @@ O ESP32 foi escolhido após comparação com as alternativas mais comuns no cont
 Dual-core 240MHz com FreeRTOS nativo. Isso permite separar a tarefa de controle de motor (core 0, alta prioridade, loop determinístico) da tarefa de navegação/lógica (core 1) sem interferência entre elas. Arduino Uno opera a 16MHz single-core — insuficiente para PID + leitura de múltiplos sensores I2C em paralelo com a frequência necessária.
 
 **Periféricos nativos relevantes para o projeto**
-- **2x I2C** — necessário para VL53L0X (múltiplos sensores) e MPU-6050 simultaneamente
+- **I2C** — para comunicação com os 3x VL53L0X
+
 - **LEDC (PWM de alta resolução)** — até 16 canais PWM independentes, essencial para controle fino dos dois motores via TB6612FNG
+
 - **Interrupções externas em qualquer pino GPIO** — necessário para leitura dos encoders por interrupção (método mais preciso)
-- **ADC de 12 bits** — caso seja necessário adicionar sensores analógicos futuramente
+
+- **WiFi nativo** — necessário para transmissão de telemetria em tempo real (requisito do projeto)
+
+- **ADC de 12 bits** — leitura de nível de bateria via divisor de tensão
 
 **Ecossistema e documentação**
 Ampla base de tutoriais, bibliotecas Arduino compatíveis e comunidade ativa. Para um projeto acadêmico com prazo definido, isso reduz o tempo gasto com troubleshooting de hardware e aumenta o tempo disponível para o desenvolvimento do algoritmo.
 
 **Custo**
-Comparável ao Arduino Nano e significativamente mais barato que soluções equivalentes em performance (ex: STM32 com placa de desenvolvimento).
+Comparável ao Arduino Nano e significativamente mais barato que soluções equivalentes em performance.
 
 **Atenção:** Usar apenas pinos do **ADC1** para leituras analógicas. O ADC2 compartilha hardware com o WiFi e apresenta leituras instáveis.
+
 ---
 
 ## Motores — DC N20 100:1 com Encoder
 
 Redução 100:1 prioriza torque e controle em detrimento de velocidade máxima. Dado que o projeto não é uma competição de velocidade, essa troca é favorável — o controle de posição e curva fica mais preciso.
 
-Os encoders integrados são usados tanto para **odometria** (cálculo de distância percorrida) quanto para **tracking de orientação** em conjunto com o giroscópio.
+Os encoders integrados são usados para **odometria** (cálculo de distância percorrida) e **tracking de orientação**, inferindo heading a partir da diferença de pulsos entre os dois lados.
+
+> **Em aberto:** A configuração mecânica das rodas (1 motor por lado via engrenagem ou 1 roda tracionada + 1 boba) está a cargo da equipe de estruturas e não altera a lista de componentes eletrônicos.
 
 ---
 
@@ -56,49 +105,33 @@ Ponte H dupla, padrão para esse tipo de projeto. Para os motores N20 ela opera 
 
 ---
 
-## Placa de Fenolite
-
-Usada para soldagem dos componentes. Recomendado adquirir **pelo menos 5 unidades** para prototipagem e possíveis retrabalhos.
-
----
-
 ## Sensores de Distância — VL53L0X (ToF)
 
 Sensor Time-of-Flight. Preferido ao IR analógico pelos seguintes motivos:
 
-- **Independente de cor e reflectividade** da parede — IR analógico falha em superfícies escuras ou fosca
-- **Imune à luz ambiente** — IR sofre interferência de lâmpadas fluorescentes (60Hz)
-- **Interface I2C** — compartilha barramento com o MPU-6050
+- **Independente de cor e reflectividade** — Independente de cor e reflectividade — IR analógico mede intensidade de luz refletida, o que gera leituras inconsistentes em ambientes com superfícies de cores diferentes. Com chão preto e paredes brancas, a calibração se tornaria problemática. O VL53L0X mede tempo de voo e é imune a esse efeito. 
 
-**Atenção de implementação:** Todos os módulos VL53L0X saem de fábrica com o mesmo endereço I2C (`0x29`). Com múltiplos sensores no mesmo barramento, é necessário controlar o pino **XSHUT** de cada módulo individualmente na inicialização para reendereçá-los.
+- **Imune à luz ambiente** — IR sofre interferência de lâmpadas fluorescentes (60Hz)
+
+- **Interface I2C** — integra no mesmo barramento dos demais sensores
+
+**Atenção de implementação:** Todos os módulos VL53L0X saem de fábrica com o mesmo endereço I2C (`0x29`). Com 3 sensores no mesmo barramento, é necessário controlar o pino **XSHUT** de cada módulo individualmente na inicialização para reendereçá-los. Os resistores de 100Ω nos pinos XSHUT protegem o GPIO do ESP32.
 
 ---
 
-## Orientação — MPU-6050 + Encoders (Sensor Fusion)
+## Orientação — Odometria por Encoder
 
-### Por que não só encoder?
-
-Em um labirinto 16x16, o robô pode executar 50+ curvas no pior caso. Cada curva com ~2° de erro acumula até 100° de desvio total — o suficiente para quebrar completamente o algoritmo de navegação.
-
-### Por que não só giroscópio?
-
-O giroscópio tem *drift* — um bias que faz o heading derivar lentamente mesmo sem movimento. Sozinho também acumula erro, porém de forma diferente.
-
-### Solução: Filtro Complementar
-
-Combina os dois sensores em uma única linha:
+O tracking de orientação será feito exclusivamente pelos encoders dos motores N20, calculando a diferença de distância percorrida entre os dois lados:
 
 ```cpp
-// alpha entre 0.95 e 0.98 — ajustar empiricamente
-heading = alpha * (heading + gyroZ * dt)
-        + (1 - alpha) * headingFromEncoders;
+float leftDist  = leftPulses  * DIST_PER_PULSE;
+float rightDist = rightPulses * DIST_PER_PULSE;
+
+float deltaTheta = (rightDist - leftDist) / WHEEL_BASE;
+heading += deltaTheta; // em radianos
 ```
 
-O giroscópio responde bem a variações rápidas (curvas). O encoder serve de referência de longo prazo. Juntos, o erro acumulado cai para menos de 5° em toda a execução.
-
-### Discretização por 90°
-
-Como o labirinto é uma grade, o heading não precisa ser contínuo — basta distinguir Norte/Sul/Leste/Oeste. Após cada curva, o heading é "snapeado" para o múltiplo de 90° mais próximo, resetando a incerteza acumulada.
+Após cada curva, o heading é discretizado para o múltiplo de 90° mais próximo, resetando a incerteza acumulada:
 
 ```cpp
 enum Direction { NORTH, EAST, SOUTH, WEST };
@@ -109,15 +142,31 @@ Direction turnLeft(Direction d)  { return (Direction)((d + 3) % 4); }
 
 ---
 
+## Alimentação
+
+O sistema será alimentado por bateria LiPo. A tensão (1S 3.7V ou 2S 7.4V) está a definir, mas a arquitetura de alimentação será:
+
+- Bateria → TB6612FNG (tensão direta para os motores)
+- Bateria → AMS1117-3.3 → ESP32 e sensores (3.3V regulado)
+- Divisor de tensão resistivo (10kΩ + 10kΩ) → ADC1 do ESP32 (monitoramento de bateria)
+
+O monitoramento de bateria é requisito explícito do projeto (telemetria em tempo real).
+
+---
+
 ## Linguagem — C++
 
 Escolhido sobre MicroPython pelos seguintes motivos:
 
 - **Tempo de ciclo determinístico** — o loop de controle (leitura de sensor → PID → PWM) precisa rodar em ciclos fixos, centenas de vezes por segundo. MicroPython não garante isso por causa do GIL e do garbage collector
+
 - **Controle baixo nível** — sem dependência de bibliotecas externas que adicionam overhead imprevisível
+
 - **Framework Arduino no ESP32** — oferece abstração suficiente para facilitar o desenvolvimento sem abrir mão de performance
 
 ---
+
+## SUGESTÃO DE ALGORITMO DE NAVEGAÇÃO
 
 ## Algoritmo de Navegação — Pledge Algorithm
 
@@ -129,8 +178,10 @@ Evolução do Wall Follower que resolve o problema de ficar preso em loops ao re
 - Vira à direita: `contador + 1`
 - Contador == 0: abandona a parede e segue em linha reta na direção original
 
+**Detecção do objetivo:** a área 2x2 no centro do labirinto será detectada por ausência simultânea de paredes nos lados esquerdo, direito e frontal — inferível diretamente pelas leituras dos 3x VL53L0X.
+
 **Limitação conhecida:** não garante caminho ótimo, mas garante que o robô encontra a saída em labirintos sem configurações patológicas — suficiente para o contexto do projeto.
 
 ---
 
-*Documentação gerada com base nas discussões técnicas do grupo e pesquisas. Para alterações, abrir PR no repositório.*
+*Documentação gerada com base nas discussões técnicas do grupo e nos requisitos do PI1 2026/1.*
