@@ -27,7 +27,11 @@ theme:
 
 nav:
   - Home: index.md
-  - Eletronica: eletronica/index.md
+  - Eletronica:
+      - Home: eletronica/index.md
+      - Documentação de Hardware:
+          - Microcontrolador: eletronica/DocumentacaoodeHardwareeDecisoesTecnicas.md
+          - Sensores: eletronica/Sensores.md
   - Energia: energia/index.md
   - Estruturas: estruturas/index.md
   - Software: software/index.md
