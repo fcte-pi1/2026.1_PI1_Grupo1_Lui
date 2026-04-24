@@ -34,4 +34,6 @@ nav:
           - Sensores: eletronica/Sensores.md
   - Energia: energia/index.md
   - Estruturas: estruturas/index.md
-  - Software: software/index.md
+  - Software: 
+      - Home: software/index.md
+      - Documentação: software/requisitos.md
