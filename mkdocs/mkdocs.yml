@@ -32,7 +32,9 @@ nav:
       - Documentação de Hardware:
           - Microcontrolador: eletronica/DocumentacaoodeHardwareeDecisoesTecnicas.md
           - Sensores: eletronica/Sensores.md
-  - Energia: energia/index.md
+  - Energia: 
+      - Home: energia/index.md
+      - Requisitos: energia/requisitos.md
   - Estruturas: estruturas/index.md
   - Software: 
       - Home: software/index.md
