@@ -22,3 +22,10 @@
 Garantir qualidade, evitar erros e manter o projeto estável para todos.
 
 ---
+
+## Tabela de Versionamento
+
+| Versão | Descrição | Autor(es) | Revisor(es) |
+| :--- | :--- | :--- | :--- |
+| `1.0` | Criação do arquivo de regras de revisão e merge | [Carlos Paz](https://github.com/dudupaz) e [Renan Castro](https://github.com/thatsrenan) | [Júlia Fortunato](https://github.com/julia-fortunato), [Ian Costa](https://github.com/iancostag) |
+

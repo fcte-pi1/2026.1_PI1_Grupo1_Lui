@@ -98,3 +98,11 @@ git branch -d nome-da-branch
 # Forçado (cuidado: pode perder trabalho!)
 git branch -D nome-da-branch
 ```
+---
+
+## Tabela de Versionamento
+
+| Versão | Descrição | Autor(es) | Revisor(es) |
+| :--- | :--- | :--- | :--- |
+| `1.0` | Criação do arquivo de estratégia de branches | [Carlos Paz](https://github.com/dudupaz) e [Renan Castro](https://github.com/thatsrenan) | [Júlia Fortunato](https://github.com/julia-fortunato), [Ian Costa](https://github.com/iancostag) |
+

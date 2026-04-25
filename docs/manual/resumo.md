@@ -37,3 +37,9 @@ criar branch → codar → commit → push → PR → revisão → merge
 Manter o projeto **organizado**, **seguro** e **escalável** para toda a equipe.
 
 ---
+
+## Tabela de Versionamento
+
+| Versão | Descrição | Autor(es) | Revisor(es) |
+| :--- | :--- | :--- | :--- |
+| `1.0` | Criação do arquivo de resumo final | [Carlos Paz](https://github.com/dudupaz) e [Renan Castro](https://github.com/thatsrenan) | [Júlia Fortunato](https://github.com/julia-fortunato), [Ian Costa](https://github.com/iancostag) |

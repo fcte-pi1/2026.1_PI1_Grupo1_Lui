@@ -31,3 +31,10 @@ atividade → engenharia → main
 - Pular a branch `engenharia`
 
 ---
+
+## Tabela de Versionamento
+
+| Versão | Descrição | Autor(es) | Revisor(es) |
+| :--- | :--- | :--- | :--- |
+| `1.0` | Criação do arquivo de fluxo de pull request | [Carlos Paz](https://github.com/dudupaz) e [Renan Castro](https://github.com/thatsrenan) | [Júlia Fortunato](https://github.com/julia-fortunato), [Ian Costa](https://github.com/iancostag) |
+

@@ -89,3 +89,10 @@ git branch -D nome-da-branch
 Evite usar comandos com `-f` ou `--force` sem entender o que estão fazendo. Em caso de dúvida, peça ajuda à equipe de Software.
 
 ---
+
+## Tabela de Versionamento
+
+| Versão | Descrição | Autor(es) | Revisor(es) |
+| :--- | :--- | :--- | :--- |
+| `1.0` | Criação do arquivo de comandos git | [Carlos Paz](https://github.com/dudupaz) e [Renan Castro](https://github.com/thatsrenan) | [Júlia Fortunato](https://github.com/julia-fortunato), [Ian Costa](https://github.com/iancostag) |
+

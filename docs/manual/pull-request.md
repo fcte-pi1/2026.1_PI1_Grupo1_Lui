@@ -40,3 +40,10 @@ Inclui:
 - Não abrir PR sem ter testado localmente
 
 ---
+
+## Tabela de Versionamento
+
+| Versão | Descrição | Autor(es) | Revisor(es) |
+| :--- | :--- | :--- | :--- |
+| `1.0` | Criação do arquivo de definição de pull request | [Carlos Paz](https://github.com/dudupaz), [Renan Castro](https://github.com/thatsrenan) | [Júlia Fortunato](https://github.com/julia-fortunato), [Ian Costa](https://github.com/iancostag) |
+
