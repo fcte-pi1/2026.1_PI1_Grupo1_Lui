@@ -1,4 +1,4 @@
-# Manual de Criação e Edição de Documentação em Markdown
+# Manual de Documentação em Markdown
 
 Este manual fornece um guia prático para que qualquer membro da equipe possa criar, editar e manter documentação no formato Markdown para o projeto Micromouse. O objetivo é padronizar a escrita, facilitar a manutenção e permitir a migração futura para LaTeX sem grandes dificuldades.
 
@@ -89,18 +89,6 @@ Os nomes de arquivo devem ser descritivos e refletir seu conteúdo. Siga estas p
 | `guiaInstalacao.md` | `Guia Instalação.md` | Sem espaços, letras minúsculas |
 | `01_introducao.md` | `introducao.md` | Ordem clara em sequências |
 | `analiseSensores.md` | `analise_de_sensores.md` | Evitar palavras funcionais desnecessárias |
-
-```
-<!-- LaTeX equivalente para referência em tabelas:
-\begin{tabular}{|c|c|c|}
-\hline
-Correto & Incorreto & Motivo \\
-\hline
-requisitos_software.md & req_soft.md & O nome completo é mais descritivo \\
-\hline
-\end{tabular}
--->
-```
 
 ## 4. Padrão de Escrita em Prosa
 
@@ -247,14 +235,6 @@ Para maior controle sobre propriedades da imagem e centralização:
 
 Ambas as sintaxes são válidas. Use HTML quando quiser mais liberdade de utilização da imagem.
 
-### 6.3 Práticas Recomendadas
-
-* **Descrição alternativa:** A descrição dentro dos colchetes deve ser clara e descrever o conteúdo da imagem para acessibilidade.
-* **Caminho relativo:** Use caminhos relativos ao arquivo .md (ex: `./assets/imagem.png`).
-* **Formatos recomendados:** PNG para diagramas e screenshots, JPEG para fotografias.
-* **Resolução:** Imagens devem ter pelo menos 96 DPI para clareza na web.
-* **Tamanho:** Comprima imagens para reduzir tamanho do repositório (< 2 MB por imagem).
-
 ## 7. Uso de Tabelas
 
 ### 7.1 Sintaxe Básica
@@ -284,30 +264,8 @@ Resultará em:
 | :------- | :----: | ------: |
 | Esq      | Cen    | Dir     |
 
-### 7.3 Comentário LaTeX para Tabelas
 
-Quando uma tabela é inserida, adicione um comentário com o equivalente LaTeX abaixo, facilitando futura migração para LaTeX:
-
-```markdown
-| Versão | Descrição | Autor |
-| ------ | --------- | ----- |
-| 1.0 | Criação inicial | João Silva |
-| 1.1 | Revisão | Maria Santos |
-
-<!-- LaTeX equivalente:
-\begin{tabular}{|c|c|c|}
-\hline
-Versão & Descrição & Autor \\
-\hline
-1.0 & Criação inicial & João Silva \\
-\hline
-1.1 & Revisão & Maria Santos \\
-\hline
-\end{tabular}
--->
-```
-
-### 7.4 Contextualização de Tabelas
+### 7.3 Contextualização de Tabelas
 
 Sempre explique em prosa o propósito da tabela:
 
@@ -319,6 +277,19 @@ de qualidade.
 | Versão | Descrição | Autor |
 | ------ | --------- | ----- |
 | 1.0 | Criação inicial | João Silva |
+```
+
+### 7.4 Sintaxe em LaTex 
+LaTeX equivalente para referência em tabelas:
+
+```
+\begin{tabular}{|c|c|c|}
+\hline
+Esq & Centro & Dir \\
+\hline
+esq & centro & dir \\
+\hline
+\end{tabular}
 ```
 
 ## 8. Referências e Citações
@@ -354,7 +325,6 @@ Antes de considerar um documento pronto, verifique:
 * [x] Hierarquia de títulos sem saltos de nível (`#` → `##` → `###`).
 * [x] Conteúdo escrito majoritariamente em prosa.
 * [x] Sem erros de digitação ou gramática.
-* [x] Tabelas possuem comentário LaTeX.
 * [x] Imagens estão referenciadas corretamente com descrição alternativa.
 * [x] Formatação consistente com outros documentos.
 * [x] Seção de referências presente (se aplicável).
