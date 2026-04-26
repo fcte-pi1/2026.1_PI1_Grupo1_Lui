@@ -32,6 +32,7 @@ nav:
       - Componentes:
           - Microcontrolador: eletronica/microcontrolador.md
           - Sensores: eletronica/Sensores.md
+          - Motor: eletronica/Motor.md
   - Energia: energia/index.md
   - Estruturas: estruturas/index.md
   - Software: software/index.md
