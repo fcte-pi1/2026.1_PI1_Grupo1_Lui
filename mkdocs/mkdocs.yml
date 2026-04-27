@@ -28,7 +28,8 @@ theme:
 nav:
   - Home: index.md
   - Eletronica:
-      - Elicitação de requisitos: eletronica/index.md
+      - Home: eletronica/index.md
+      - Elicitação de requisitos: eletronica/Requisitos.md
       - Componentes:
           - Microcontrolador: eletronica/microcontrolador.md
           - Sensores: eletronica/Sensores.md
