@@ -29,9 +29,11 @@ nav:
   - Home: index.md
   - Eletronica:
       - Home: eletronica/index.md
-      - Documentação de Hardware:
-          - Microcontrolador: eletronica/DocumentacaoodeHardwareeDecisoesTecnicas.md
+      - Elicitação de requisitos: eletronica/Requisitos.md
+      - Componentes:
+          - Microcontrolador: eletronica/microcontrolador.md
           - Sensores: eletronica/Sensores.md
+          - Motor: eletronica/Motor.md
   - Energia: 
       - Home: energia/index.md
       - Requisitos: energia/requisitos.md
