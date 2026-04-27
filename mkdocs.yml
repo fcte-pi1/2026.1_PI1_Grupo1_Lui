@@ -31,3 +31,14 @@ nav:
   - Energia: energia/index.md
   - Estruturas: estruturas/index.md
   - Software: software/index.md
+  - Manual Git/Github: 
+      - Objetivo: manual/index.md
+      - Estratégia de Branches: manual/branches.md
+      - Commits: manual/commits.md
+      - Envio de Alterações: manual/envio-alteracoes.md
+      - Pull Request (PR): manual/pull-request.md
+      - Fluxo de Pull Request: manual/fluxo-pr.md
+      - Revisão e Merge: manual/revisao-merge.md
+      - Comandos Git: manual/comandos-git.md
+      - Boas Práticas: manual/boas-praticas.md
+      - Resumo: manual/resumo.md
