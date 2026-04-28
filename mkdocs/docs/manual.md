@@ -229,7 +229,7 @@ Para maior controle sobre propriedades da imagem e centralização:
 ```
 
 <figure style="text-align: center;">
-  <img src="./assets/unbLogo.png" alt="Logo Unb" width="200" height="auto">
+  <img src="../assets/unbLogo.png" alt="Logo Unb" width="200" height="auto">
   <figcaption>Figura 1: Logo da Universidade de Brasília</figcaption>
 </figure>
 
