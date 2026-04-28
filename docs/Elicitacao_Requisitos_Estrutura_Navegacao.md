@@ -1,5 +1,11 @@
 # Levantamento de Requisitos de Alto Nível - Estruturas
 
+## Tabela de Versionamento
+
+| Versão | Descrição | Autor | Revisor |
+| ------ | --------- | ----- | ------- |
+| `1.0` | Criação inicial do levantamento de requisitos | [Alexandre Alvarez](https://github.com/alexandremacedoalvarez-cpu) | [Yzabella Pimenta](https://github.com/redjsun) |
+
 ## 1. Requisitos Funcionais (RF)
 
 | ID | Descrição do Requisito | Prioridade |
