@@ -1,187 +1,101 @@
-# Micromouse — Documentação de Hardware e Decisões Técnicas
+# Microcontrolador
 
-> Projeto Integrador de Engenharias — UnB Gama - FCTE
+# Contextualização
 
----
+Segundo Espressif Systems [1], o ESP32 é um microcontrolador de alto desempenho projetado para aplicações embarcadas que exigem conectividade, processamento e controle em tempo real. De acordo com Chase e Almeida [6], microcontroladores são pequenos sistemas computacionais bastante poderosos que englobam em um único chip interfaces de entrada e saída digitais e analógicas, além de periféricos importantes como memória RAM, memória FLASH, interfaces de comunicação serial, conversores analógico-digitais e temporizadores/contadores. 
 
-## Lista de Componentes
+A principal vantagem desses dispositivos é a integração de diversos periféricos em um único chip, além da capacidade de executar e armazenar programas (firmware). Com o avanço tecnológico, esses sistemas também passaram a incorporar funcionalidades adicionais, como comunicação USB, pilha TCP/IP, comunicação RF e outras interfaces, sendo amplamente utilizados no processamento de dados, leitura de sensores e controle de atuadores em sistemas embarcados, especialmente em robótica móvel.
 
-### Principais
+No contexto do micromouse, o microcontrolador é o componente central do sistema, sendo responsável por executar o algoritmo de navegação, processar os dados provenientes dos sensores e controlar os motores do robô. Dessa forma, a escolha do microcontrolador impacta diretamente no desempenho, precisão e confiabilidade do sistema.
 
-|            Componente           | Quantidade | 
-|---------------------------------|------------|
-| ESP32                           |      1     |
-| Motor DC N20 100:1 com Encoder  |      2     |
-| Ponte H TB6612FNG               |      1     |
-| Sensor ToF VL53L0X              |      3     | 
-| Bateria LiPo                    |      1     | 
-| Regulador de Tensão AMS1117-3.3 |      1     | 
-| Chave Liga/Desliga              |      1     | 
-| Conector JST                    |      1     | 
+Diante disso, foi realizado um estudo comparativo entre as principais plataformas utilizadas em projetos acadêmicos, visando selecionar a alternativa mais adequada para os requisitos do projeto.
 
-### Passivos
+#
+#
 
-|        Componente      | Valor | Quantidade |                        Uso                        |
-|------------------------|-------|------------|---------------------------------------------------|
-| Resistor               | 4.7kΩ |      2     | Pull-up I2C                                       |
-| Resistor               | 10kΩ  |      2     | Divisor de tensão (leitura de bateria)            |
-| Resistor               | 100Ω  |      3     | Proteção pinos XSHUT dos VL53L0X                  |
-| Capacitor cerâmico     | 100nF |      5     | Desacoplamento sensores e regulador               |
-| Capacitor eletrolítico | 10µF  |      3     | Bulk: entrada bateria, saída regulador, TB6612FNG |
+# Microcontroladores escolhidos para análise
 
-**Total: 7 resistores | 8 capacitores**
+A equipe selecionou os seguintes microcontroladores para comparação:
 
-### Estrutura e Montagem
+- ESP32: Microcontrolador com conectividade WiFi/Bluetooth e arquitetura dual-core.
+- Arduino Uno (ATmega328P): Plataforma baseada em microcontrolador AVR de 8 bits.
+- STM32 (STM32F103C8T6): Microcontrolador baseado em arquitetura ARM Cortex-M3.
+- Raspberry Pi Pico (RP2040): Microcontrolador dual-core com foco em custo-benefício.
 
-|        Componente        | Quantidade |
-|--------------------------|------------|
-| Placa de Fenolite        |      5+    |
-| Pinos header macho/fêmea |     ~40    |
-| Fios jumper              |  conjunto  |
+#
+#
 
-> **Nota:** A protoboard será usada apenas na fase inicial de validação do circuito, antes da migração para a fenolite.
+# Tabela de Comparação
 
-> **Em aberto:** Tensão da bateria (1S 3.7V ou 2S 7.4V) e solução mecânica das rodas — dependem de decisão da equipe de estruturas e energia.
+**A tabela foi construída conforme as fontes listadas nas Referências**
 
----
+| Critério              | ESP32                     | Arduino Uno           | STM32 (F103)                          | Raspberry Pi Pico     |
+|----------------------|--------------------------|-----------------------|----------------------------------------|-----------------------|
+| Clock                | 240 MHz (dual-core)      | 16 MHz                | 72 MHz                                 | 133 MHz (dual-core)   |
+| Arquitetura          | Xtensa dual-core         | AVR 8 bits            | ARM Cortex-M3                          | ARM Cortex-M0+        |
+| Memória RAM          | ~520 KB                  | 2 KB                  | 20 KB                                  | 264 KB                |
+| WiFi/Bluetooth       | Sim (nativo)             | Não                   | Não                                    | Não                   |
+| PWM                  | Até 16 canais (LEDC)     | 6 canais              | Múltiplos canais (timers avançados)    | 16 canais             |
+| ADC                  | 12 bits                  | 10 bits               | 12 bits                                | 12 bits               |
+| Interrupções         | Em todos GPIOs           | Limitadas             | Avançadas                              | Avançadas             |
+| Facilidade de uso    | Alta                     | Muito alta            | Média                                  | Alta                  |
+| Custo                | Médio (~R$30–50)         | Médio (~R$40–60)      | Baixo (~R$20–30)                       | Baixo (~R$25–35)      |
+| Tensão típica        | 3,3 V                    | 5 V                   | 3,3 V                                  | 3,3 V                 |
+| Consumo ativo (CPU, sem RF) | 30–68 mA @ 240 MHz | ~12 mA @ 16 MHz (chip isolado) | ~5,5 mA @ 72 MHz (periféricos off) | ~25 mA @ 133 MHz |
+| Consumo com Wi-Fi ativo | 95–240 mA             | —                     | —                                      | —                     |
 
-## Layout das Placas de Fenolite
+*Nota: Os valores de consumo referem-se a condições típicas de operação, podendo variar conforme o uso de periféricos e configuração do sistema.*
 
-Serão utilizadas **2 placas funcionais:**
+#
+#
 
-**Placa principal (~15x10cm)**
-ESP32, TB6612FNG, regulador AMS1117-3.3, capacitores e resistores.
+# Justificativa
 
-**Placa dos sensores (~8x3cm)**
-3x VL53L0X posicionados em ângulo (esquerda, frente, direita) na parte frontal do robô.
+A escolha pelo microcontrolador ESP32 se justifica principalmente pelo seu alto desempenho computacional aliado à grande quantidade de periféricos integrados, o que o torna especialmente adequado para aplicações em robótica móvel autônoma.
 
-As demais placas adquiridas são reserva para retrabalho. O tamanho final deve ser validado com o chassi definido pela equipe de estruturas, respeitando o limite de **25x25cm** do regulamento.
+Um dos principais diferenciais do ESP32 é sua arquitetura dual-core operando a 240 MHz, permitindo a separação de tarefas críticas. Dessa forma, é possível dedicar um núcleo ao controle dos motores, garantindo comportamento determinístico, enquanto o outro executa algoritmos de navegação e tomada de decisão, reduzindo interferências entre processos.
 
----
+Além disso, o microcontrolador possui periféricos essenciais para o projeto, como interface I2C para comunicação com sensores de distância, módulos PWM de alta resolução para controle dos motores, suporte a interrupções em múltiplos pinos para leitura de encoders e conectividade WiFi nativa para transmissão de dados em tempo real, atendendo aos requisitos estabelecidos.
 
-## Microcontrolador — ESP32
+Outro fator relevante é o seu ecossistema consolidado, com ampla disponibilidade de bibliotecas, documentação e comunidade ativa, o que reduz significativamente o tempo de desenvolvimento e facilita a integração dos diferentes módulos do sistema.
 
-### Por que o ESP32?
+Em comparação, plataformas como o Arduino Uno apresentam limitações significativas de processamento e memória, enquanto alternativas como STM32, embora potentes, possuem maior complexidade de configuração. Já o Raspberry Pi Pico, apesar de apresentar bom desempenho, não possui conectividade nativa.
 
-O ESP32 foi escolhido após comparação com as alternativas mais comuns no contexto de robótica acadêmica (Arduino Uno/Nano, STM32, Raspberry Pi Pico). Os critérios foram custo, periféricos disponíveis, ecossistema e adequação ao projeto.
+Destaca-se ainda que, durante a transmissão Wi-Fi, o consumo do ESP32 pode atingir valores entre 180 mA e 240 mA, dependendo da configuração de operação. Entretanto, com o Wi-Fi desativado (modo modem sleep), o consumo reduz-se para aproximadamente 30 mA a 68 mA a 240 MHz. No contexto do micromouse, isso permite desligar o rádio durante a execução das rotas e ativá-lo apenas para transmissão de telemetria, otimizando o consumo energético.
 
-**Processamento**
-Dual-core 240MHz com FreeRTOS nativo. Isso permite separar a tarefa de controle de motor (core 0, alta prioridade, loop determinístico) da tarefa de navegação/lógica (core 1) sem interferência entre elas. Arduino Uno opera a 16MHz single-core — insuficiente para PID + leitura de múltiplos sensores I2C em paralelo com a frequência necessária.
+Por fim, o ESP32 apresenta uma excelente relação custo-benefício, oferecendo alto desempenho a um custo acessível, o que o torna a escolha mais adequada para o projeto.
 
-**Periféricos nativos relevantes para o projeto**
-- **I2C** — para comunicação com os 3x VL53L0X
+#
+#
 
-- **LEDC (PWM de alta resolução)** — até 16 canais PWM independentes, essencial para controle fino dos dois motores via TB6612FNG
+# Observações Técnicas
 
-- **Interrupções externas em qualquer pino GPIO** — necessário para leitura dos encoders por interrupção (método mais preciso)
+- Recomenda-se utilizar apenas os pinos do ADC1 para leituras analógicas, pois o ADC2 compartilha recursos com o módulo WiFi, podendo causar instabilidade nas medições.
+- A leitura dos encoders deve ser realizada preferencialmente por meio de interrupções, garantindo maior precisão na obtenção dos dados.
 
-- **WiFi nativo** — necessário para transmissão de telemetria em tempo real (requisito do projeto)
+#
+#
 
-- **ADC de 12 bits** — leitura de nível de bateria via divisor de tensão
+# Referências
 
-**Ecossistema e documentação**
-Ampla base de tutoriais, bibliotecas Arduino compatíveis e comunidade ativa. Para um projeto acadêmico com prazo definido, isso reduz o tempo gasto com troubleshooting de hardware e aumenta o tempo disponível para o desenvolvimento do algoritmo.
+[1] ESPRESSIF SYSTEMS. ESP32 Series Datasheet. Disponível em: <https://www.espressif.com/sites/default/files/documentation/esp32_datasheet_en.pdf>. Acesso em: 27 abr. 2026.
 
-**Custo**
-Comparável ao Arduino Nano e significativamente mais barato que soluções equivalentes em performance.
+[2] ARDUINO. Arduino Uno Rev3 Documentation. Disponível em: <https://docs.arduino.cc/hardware/uno-rev3/>. Acesso em: 27 abr. 2026.
 
-**Atenção:** Usar apenas pinos do **ADC1** para leituras analógicas. O ADC2 compartilha hardware com o WiFi e apresenta leituras instáveis.
+[3] MICROCHIP TECHNOLOGY. ATmega328P Datasheet. Disponível em: <https://ww1.microchip.com/downloads/en/DeviceDoc/Atmel-7810-Automotive-Microcontrollers-ATmega328P_Datasheet.pdf>. Acesso em: 27 abr. 2026.
 
----
+[4] STMICROELECTRONICS. STM32F103C8. Disponível em: <https://www.st.com/en/microcontrollers-microprocessors/stm32f103c8.html>. Acesso em: 27 abr. 2026.
 
-## Motores — DC N20 100:1 com Encoder
+[5] RASPBERRY PI. RP2040 Datasheet: a microcontroller by Raspberry Pi. Disponível em: <https://datasheets.raspberrypi.com/rp2040/rp2040-datasheet.pdf>. Acesso em: 27 abr. 2026.
 
-Redução 100:1 prioriza torque e controle em detrimento de velocidade máxima. Dado que o projeto não é uma competição de velocidade, essa troca é favorável — o controle de posição e curva fica mais preciso.
+[6] CHASE, Otavio; ALMEIDA, F. Sistemas embarcados. Mídia eletrônica. Disponível em: <http://www.sbajovem.org/chase>. Acesso em: 27 abr. 2026.
 
-Os encoders integrados são usados para **odometria** (cálculo de distância percorrida) e **tracking de orientação**, inferindo heading a partir da diferença de pulsos entre os dois lados.
+#
+#
 
-> **Em aberto:** A configuração mecânica das rodas (1 motor por lado via engrenagem ou 1 roda tracionada + 1 boba) está a cargo da equipe de estruturas e não altera a lista de componentes eletrônicos.
+## Tabela de versionamento
 
----
-
-## Ponte H — TB6612FNG
-
-Ponte H dupla, padrão para esse tipo de projeto. Para os motores N20 ela opera com folga considerável de corrente, o que evita aquecimento e aumenta a confiabilidade.
-
----
-
-## Sensores de Distância — VL53L0X (ToF)
-
-Sensor Time-of-Flight. Preferido ao IR analógico pelos seguintes motivos:
-
-- **Independente de cor e reflectividade** — Independente de cor e reflectividade — IR analógico mede intensidade de luz refletida, o que gera leituras inconsistentes em ambientes com superfícies de cores diferentes. Com chão preto e paredes brancas, a calibração se tornaria problemática. O VL53L0X mede tempo de voo e é imune a esse efeito. 
-
-- **Imune à luz ambiente** — IR sofre interferência de lâmpadas fluorescentes (60Hz)
-
-- **Interface I2C** — integra no mesmo barramento dos demais sensores
-
-**Atenção de implementação:** Todos os módulos VL53L0X saem de fábrica com o mesmo endereço I2C (`0x29`). Com 3 sensores no mesmo barramento, é necessário controlar o pino **XSHUT** de cada módulo individualmente na inicialização para reendereçá-los. Os resistores de 100Ω nos pinos XSHUT protegem o GPIO do ESP32.
-
----
-
-## Orientação — Odometria por Encoder
-
-O tracking de orientação será feito exclusivamente pelos encoders dos motores N20, calculando a diferença de distância percorrida entre os dois lados:
-
-```cpp
-float leftDist  = leftPulses  * DIST_PER_PULSE;
-float rightDist = rightPulses * DIST_PER_PULSE;
-
-float deltaTheta = (rightDist - leftDist) / WHEEL_BASE;
-heading += deltaTheta; // em radianos
-```
-
-Após cada curva, o heading é discretizado para o múltiplo de 90° mais próximo, resetando a incerteza acumulada:
-
-```cpp
-enum Direction { NORTH, EAST, SOUTH, WEST };
-
-Direction turnRight(Direction d) { return (Direction)((d + 1) % 4); }
-Direction turnLeft(Direction d)  { return (Direction)((d + 3) % 4); }
-```
-
----
-
-## Alimentação
-
-O sistema será alimentado por bateria LiPo. A tensão (1S 3.7V ou 2S 7.4V) está a definir, mas a arquitetura de alimentação será:
-
-- Bateria → TB6612FNG (tensão direta para os motores)
-- Bateria → AMS1117-3.3 → ESP32 e sensores (3.3V regulado)
-- Divisor de tensão resistivo (10kΩ + 10kΩ) → ADC1 do ESP32 (monitoramento de bateria)
-
-O monitoramento de bateria é requisito explícito do projeto (telemetria em tempo real).
-
----
-
-## Linguagem — C++
-
-Escolhido sobre MicroPython pelos seguintes motivos:
-
-- **Tempo de ciclo determinístico** — o loop de controle (leitura de sensor → PID → PWM) precisa rodar em ciclos fixos, centenas de vezes por segundo. MicroPython não garante isso por causa do GIL e do garbage collector
-
-- **Controle baixo nível** — sem dependência de bibliotecas externas que adicionam overhead imprevisível
-
-- **Framework Arduino no ESP32** — oferece abstração suficiente para facilitar o desenvolvimento sem abrir mão de performance
-
----
-
-## SUGESTÃO DE ALGORITMO DE NAVEGAÇÃO
-
-## Algoritmo de Navegação — Pledge Algorithm
-
-Evolução do Wall Follower que resolve o problema de ficar preso em loops ao redor de ilhas (obstáculos isolados).
-
-**Lógica central:** mantém um contador de rotação acumulada. O wall follower é ativado ao encontrar uma parede, mas só é desativado quando o contador retorna a zero — garantindo que o robô não abandone a parede no meio de um contorno de obstáculo.
-
-- Vira à esquerda: `contador - 1`
-- Vira à direita: `contador + 1`
-- Contador == 0: abandona a parede e segue em linha reta na direção original
-
-**Detecção do objetivo:** a área 2x2 no centro do labirinto será detectada por ausência simultânea de paredes nos lados esquerdo, direito e frontal — inferível diretamente pelas leituras dos 3x VL53L0X.
-
-**Limitação conhecida:** não garante caminho ótimo, mas garante que o robô encontra a saída em labirintos sem configurações patológicas — suficiente para o contexto do projeto.
-
----
-
-*Documentação gerada com base nas discussões técnicas do grupo e nos requisitos do PI1 2026/1.*
+| Data       | Versão | Descrição              | Autores |
+|------------|--------|-----------------------|--------|
+| 27/04/2026 | 0.1    | Criação do documento  | Caio Bechepeche Mota |
+|            |        |                       | Renato Rodrigues |
