@@ -184,7 +184,7 @@ Imagens devem ser armazenadas em um diretório dedicado dentro da estrutura do p
 ```
 mkdocs/
 ├── docs/
-│   ├── asstes/
+│   ├── assets/
 │   ├── software/
 │   │   ├── index.md
 │   │   ├── requisitos.md
