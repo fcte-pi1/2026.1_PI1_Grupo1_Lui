@@ -59,6 +59,13 @@ vai bater ao virar pra esquerda ou pra direita.
 Os encoders (sensores que medem o ângulo dos motores) serão posicionados no eixo 
 dos motores.
 
+# Justificativa
+
+Diferente de aplicações que exigem medição precisa de distância em longos alcances, o micromouse opera em um ambiente estruturado, com paredes próximas, distâncias curtas e decisões rápidas. Nesse contexto, a principal necessidade é detectar sua presença de forma rápida e confiável para evitar colisões e guiar o movimento. Os sensores laser do tipo Time-of-Flight (ToF) se destacam. Isso ocorre porque eles oferecem alta precisão na ordem de milímetros, o que é essencial para manter o robô bem alinhado às paredes e evitar colisões. Além disso, possuem um tempo de resposta rápido (20 ms a 33 ms), permitindo leituras frequentes. Outro ponto importante é que seu funcionamento é pouco afetado pela cor ou textura da superfície, o que aumenta a confiabilidade das medições em diferentes condições.
+
+Dessa forma, a arquitetura proposta considera o uso mínimo de três sensores ToF, posicionados na frente, à esquerda e à direita do micromouse, garantindo percepção espacial suficiente para navegação no labirinto. Complementarmente, sensores infravermelhos podem ser adicionados para reforçar a detecção de obstáculos em curtas distâncias. Por fim, o uso de encoders nos motores é essencial para medir o deslocamento e controlar com precisão o movimento do robô.
+
+
 ## Referências
 
 [1] MESKERNEL. **How to choosing the best measuring distance sensor**. Disponível em: https://meskernel.net/en/measuring-distance-sensor/. Acesso em: 23 abr. 2026.
@@ -81,3 +88,4 @@ dos motores.
 |Data      |Versão    |Descrição                                |Autores|
 |----------|----------|-----------------------------------------|-------|
 |22/04/2026|0.1       |Criação do documento    | Arthur Augusto |
+|29/04/206| 0.2 | Adicionando justificativa | José Vinicius| 

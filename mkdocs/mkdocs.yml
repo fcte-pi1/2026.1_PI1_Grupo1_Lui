@@ -30,9 +30,8 @@ nav:
   - Manual: manual.md
   - Eletronica:
       - Home: eletronica/index.md
-      - Requisitos: eletronica/Requisitos.md
-      - Documentação de Hardware:
-          - Decisões Técnicas: eletronica/decisoesTecnicas.md
+      - Requisitos: eletronica/RequisitosEletronica.md
+      - Componentes:
           - Microcontrolador: eletronica/microcontrolador.md
           - Sensores: eletronica/analiseSensores.md
           - Motor: eletronica/Motor.md
@@ -42,5 +41,5 @@ nav:
   - Estruturas: estruturas/index.md
   - Software: 
       - Home: software/index.md
-      - Documentação: software/requisitos.md
+      - Documentação: software/requisitosSoftware.md
       - Avaliação de Tecnologias Front-end: software/avaliacao-tecnologias-frontend.md
