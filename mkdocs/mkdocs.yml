@@ -42,4 +42,5 @@ nav:
   - Estruturas: estruturas/index.md
   - Software: 
       - Home: software/index.md
-      - Documentação: software/requisitosSoftware.md
+      - Documentação: software/requisitos.md
+      - Avaliação de Tecnologias Front-end: software/avaliacao-tecnologias-frontend.md
