@@ -27,11 +27,12 @@ theme:
 
 nav:
   - Home: index.md
+  - Manual: manual.md
   - Eletronica:
       - Home: eletronica/index.md
       - Documentação de Hardware:
-          - Microcontrolador: eletronica/DocumentacaoodeHardwareeDecisoesTecnicas.md
-          - Sensores: eletronica/Sensores.md
+          - Microcontrolador: eletronica/decicoesTecnicas.md
+          - Sensores: eletronica/analiseSensores.md
   - Energia: 
       - Home: energia/index.md
       - Requisitos: energia/requisitos.md
