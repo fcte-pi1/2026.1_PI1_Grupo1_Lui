@@ -24,9 +24,18 @@ theme:
       toggle:
         icon: material/weather-cloudy-alert
         name: Switch to high contrast
-
+extra_css:
+  - stylesheets/organograma.css
+markdown_extensions:
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
 nav:
-  - Home: index.md
+  - Home: 
+      - Visão Geral: index.md
+      - Equipe: equipe.md 
   - Manual: manual.md
   - Eletronica:
       - Home: eletronica/index.md
