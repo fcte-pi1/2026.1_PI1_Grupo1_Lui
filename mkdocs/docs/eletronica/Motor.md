@@ -64,10 +64,13 @@ Outro fator relevante é o seu tamanho compacto, que facilita a integração em 
 
 [5]COMPONENTS101. 28BYJ-48 Stepper Motor. Disponível em: <https://components101.com/motors/28byj-48-stepper-motor>. Acesso em: 25 abr. 2026.
 
+[6] SHOPEE. Motor DC com encoder 6V. Disponível em: <https://shopee.com.br/product/592592863/57402066299>. Acesso em: 3 maio 2026.
+
 
 ## Tabela de versionamento
 
 |Data      |Versão    |Descrição                                |Autores|
 |----------|----------|-----------------------------------------|-------|
 |25/04/2026|0.1       |Criação do documento    | Jose Vinicius |
+|03/05/2026|0.2       |Atualização da tabela de comparação    | Jose Vinicius |
 
