@@ -26,13 +26,13 @@
 | Critério                  | N20 100:1 | 3-6V tipo 130 | 28BYJ-48 Stepper Motor |
 |--------------------------|---------------------|------------------------|----------------------------|
 | Tipo                     | DC c/ redutor       | DC escovado            | Motor de passo                  | 
-| Torque                   | 1.7 kg.cm              | 0.01 kg·cm                | ~0.3 kg·cm (médio)                     | 
-| Velocidade (RPM)         | 310  RPM            | ~9100 RPM (sem carga)                  | Baixa (~10–15 RPM)                     |
-| Precisão de posição      | Alta (encoder incremental 12 CPR)      | Nenhuma (sem Encoder)                | Alta (controle por passos)                   | 
-| Controle                 | Médio (PWM + leitura)| Simples (tensão)       | Complexo (driver)          | Médio/Alto (requer driver e controle por sequência de passos) | 
+| Torque                   | Alto             | Medio               | Medio                    | 
+| Velocidade (RPM)         | 300 RPM ((±10%))            | ~9100 RPM (sem carga)                  | Baixa (~10–15 RPM)                     |
+| Precisão de posição      | Alta (encoder)      | Nenhuma (sem Encoder)                | Alta (controle por passos)                   | 
+| Controle                 | Médio (PWM + encoder)| Simples (tensão)       | Complexo (driver)          | Médio/Alto (requer driver e controle por sequência de passos) | 
 | Custo                    | Médio (~R$ 34,90)             | Baixo (~R$3,00)                 | Baixo(~R$17,00)              | 
-| Consumo de energia       | 100 mA (sem carga) / 1.6 A (máximo)               | 70 mA (sem carga) / 500 mA (máx)                 | ~200–300 mA                     | 
-| Tamanho                  | 10×12 mm gearbox      | 27.5 × 20 × 15 mm               | ~28 mm de diâmetro                     | 
+| Consumo de energia       | 6V              | 70 mA (sem carga) / 500 mA (máx)                 | ~200–300 mA                     | 
+| Tamanho                  | 12 mm (diâmetro) x 30,5 mm (corpo) + eixo de 10 mm      | 27.5 × 20 × 15 mm               | ~28 mm de diâmetro                     | 
 
 
 
@@ -64,10 +64,13 @@ Outro fator relevante é o seu tamanho compacto, que facilita a integração em 
 
 [5]COMPONENTS101. 28BYJ-48 Stepper Motor. Disponível em: <https://components101.com/motors/28byj-48-stepper-motor>. Acesso em: 25 abr. 2026.
 
+[6] SHOPEE. Motor DC com encoder 6V. Disponível em: <https://shopee.com.br/product/592592863/57402066299>. Acesso em: 3 maio 2026.
+
 
 ## Tabela de versionamento
 
 |Data      |Versão    |Descrição                                |Autores|
 |----------|----------|-----------------------------------------|-------|
 |25/04/2026|0.1       |Criação do documento    | Jose Vinicius |
+|03/05/2026|0.2       |Atualização da tabela de comparação    | Jose Vinicius |
 
