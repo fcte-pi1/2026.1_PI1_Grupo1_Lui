@@ -36,13 +36,19 @@ nav:
   - Home: 
       - Visão Geral: index.md
       - Equipe: equipe.md 
+  - Manual: manual.md
   - Eletronica:
       - Home: eletronica/index.md
-      - Documentação de Hardware:
-          - Microcontrolador: eletronica/DocumentacaoodeHardwareeDecisoesTecnicas.md
-          - Sensores: eletronica/Sensores.md
+      - Requisitos: eletronica/RequisitosEletronica.md
+      - Componentes:
+          - Microcontrolador: eletronica/microcontrolador.md
+          - Sensores: eletronica/analiseSensores.md
+          - Motor: eletronica/Motor.md
   - Energia: 
       - Home: energia/index.md
       - Requisitos: energia/requisitos.md
   - Estruturas: estruturas/index.md
-  - Software: software/index.md
+  - Software: 
+      - Home: software/index.md
+      - Documentação: software/requisitosSoftware.md
+      - Avaliação de Tecnologias Front-end: software/avaliacao-tecnologias-frontend.md
