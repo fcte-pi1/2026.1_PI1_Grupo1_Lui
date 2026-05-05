@@ -38,6 +38,7 @@ nav:
   - Energia: 
       - Home: energia/index.md
       - Requisitos: energia/requisitos.md
+      - Dimensionamento: energia/dim_ene.md
   - Estruturas: estruturas/index.md
   - Software: 
       - Home: software/index.md
