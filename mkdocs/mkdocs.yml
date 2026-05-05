@@ -53,4 +53,5 @@ nav:
   - Software: 
       - Home: software/index.md
       - Documentação: software/requisitosSoftware.md
-      - Avaliação de Tecnologias Front-end: software/avaliacao-tecnologias-frontend.md
+      - Front-end: software/avaliacao-tecnologias-frontend.md
+      - Back-end: software/stackBackend.md
