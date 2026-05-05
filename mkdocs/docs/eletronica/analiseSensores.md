@@ -28,6 +28,22 @@ o seu tempo de resposta é muito alto, o seu preço é razoável;
 |**Ultrassônico** (HC-SR04)|~2 cm a 400 cm|**Média.** Erro de ~3 mm, porém o feixe sonoro abre em cone (~15°), pegando obstáculos laterais.|**Lento.** Limitado pela velocidade do som e tempo de eco (~50 ms+ por ciclo).|Baixo<br><br>  <br><br>_(R$ 10 - R$ 20)_|
 |**Infravermelho Reflexivo** (Módulo c/ CI LM393)|~2 cm a 30 cm|**Muito Baixa.** Altamente dependente da cor da parede e da luz ambiente.|**Quase instantâneo.** Limitado apenas pelo circuito analógico (< 1 ms).|Muito Baixo<br><br>  <br><br>_(R$ 5 - R$ 10)_|
 
+Para complementar a análise, também é relevante considerar o consumo energético dos sensores, uma vez que ele impacta diretamente na autonomia do micromouse. A tabela a seguir apresenta os principais parâmetros elétricos de cada sensor analisado:
+
+| Sensor (Modelo) | Tensão ($V$) | Corrente Mínima | Corrente Média | Corrente Máxima | Potência ($P_{média}$) |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **HC-SR04** (Ultrassônico) | 5V | 15 mA | **15 mA** | 15 mA | **75,00 mW** |
+| **VL53L0X** (Laser ToF) | 2,8V | 3 µA | **19 mA** | 40 mA (pico) | **53,20 mW** |
+| **Módulo IR** (Módulo Completo) | 5V | 10,45 mA | **11,00 mA** | 12,50 mA | **55,00 mW** |
+
+Observações:
+
+- **Laser ToF:** Possui modos de baixo consumo (*HW Standby*) entre **3 µA e 7 µA**, além do pino **XSHUT**, que permite seu desligamento via hardware. Embora a corrente média ativa seja de 19 mA, em frequências de operação mais baixas (ex.: 10 Hz), a potência média pode ser reduzida para aproximadamente **20 mW**.
+
+- **Ultrassônico:** Apresenta consumo constante de **15 mA** durante a operação. Recomenda-se respeitar um intervalo mínimo de **60 ms** entre medições para evitar interferências no sinal de eco.
+
+- **Módulo Infravermelho:** O consumo médio foi estimado em **11 mA**, considerando aproximadamente **1 mA** do CI **LM393** e **10 mA** do conjunto emissor/receptor infravermelho, valor típico para sensores dessa categoria.
+
 Possíveis problemas:
 
 - Ao usar o sensor ultrassônico pode ser que as ondas ultrassônicas reflitam nas 
@@ -68,19 +84,19 @@ Dessa forma, a arquitetura proposta considera o uso mínimo de três sensores To
 
 ## Referências
 
-[1] MESKERNEL. **How to choosing the best measuring distance sensor**. Disponível em: https://meskernel.net/en/measuring-distance-sensor/. Acesso em: 23 abr. 2026.
+[1] MESKERNEL. **How to choosing the best measuring distance sensor**. Disponível em: <https://meskernel.net/en/measuring-distance-sensor/>. Acesso em: 23 abr. 2026.
 
-[2] MERCADO LIVRE. **VL53L0X sensor distância ToF laser LiDAR p/ Arduino PIC AVR**. Disponível em: https://www.mercadolivre.com.br/vl53l0x-sensor-distancia-tof-laser-lidar-p-arduino-pic-avr/up/MLBU1723215944. Acesso em: 23 abr. 2026.
+[2] MERCADO LIVRE. **VL53L0X sensor distância ToF laser LiDAR p/ Arduino PIC AVR**. Disponível em: <https://www.mercadolivre.com.br/vl53l0x-sensor-distancia-tof-laser-lidar-p-arduino-pic-avr/up/MLBU1723215944>. Acesso em: 23 abr. 2026.
 
-[3] POLOLU. **World’s smallest Time-of-Flight ranging and gesture detection sensor – VL53L0X**. Disponível em: https://www.pololu.com/file/0J1187/vl53l0x.pdf. Acesso em: 23 abr. 2026.
+[3] POLOLU. **World’s smallest Time-of-Flight ranging and gesture detection sensor – VL53L0X**. Disponível em: <https://www.pololu.com/file/0J1187/vl53l0x.pdf>. Acesso em: 23 abr. 2026.
 
-[4] MERCADO LIVRE. **Módulo sensor ultrassônico de distância HC-SR04**. Disponível em: https://www.mercadolivre.com.br/modulo-sensor-ultra-sonico-distancia-hcsr04/up/MLBU1973452557. Acesso em: 23 abr. 2026.
+[4] MERCADO LIVRE. **Módulo sensor ultrassônico de distância HC-SR04**. Disponível em: <https://www.mercadolivre.com.br/modulo-sensor-ultra-sonico-distancia-hcsr04/up/MLBU1973452557>. Acesso em: 23 abr. 2026.
 
-[5] SPARKFUN ELECTRONICS. **HC-SR04 Ultrasonic Distance Sensor Datasheet**. Disponível em: https://cdn.sparkfun.com/datasheets/Sensors/Proximity/HCSR04.pdf. Acesso em: 23 abr. 2026.
+[5] SPARKFUN ELECTRONICS. **HC-SR04 Ultrasonic Distance Sensor Datasheet**. Disponível em: <https://cdn.sparkfun.com/datasheets/Sensors/Proximity/HCSR04.pdf>. Acesso em: 23 abr. 2026.
 
-[6] MERCADO LIVRE. **5x sensor de obstáculo infravermelho LM393 para Arduino**. Disponível em: https://www.mercadolivre.com.br/5x-sensor-de-obstaculo-infravermelho-lm393--para-arduino-/up/MLBU726571647. Acesso em: 23 abr. 2026.
+[6] MERCADO LIVRE. **5x sensor de obstáculo infravermelho LM393 para Arduino**. Disponível em: <https://www.mercadolivre.com.br/5x-sensor-de-obstaculo-infravermelho-lm393--para-arduino-/up/MLBU726571647>. Acesso em: 23 abr. 2026.
 
-[7] TEXAS INSTRUMENTS. **LM393B, LM2903B, LM193, LM293, LM393 and LM2903 Dual Comparators datasheet**. Disponível em: https://www.ti.com/lit/ds/symlink/lm393.pdf. Acesso em: 23 abr. 2026.
+[7] TEXAS INSTRUMENTS. **LM393B, LM2903B, LM193, LM293, LM393 and LM2903 Dual Comparators datasheet**. Disponível em: <https://www.ti.com/lit/ds/symlink/lm393.pdf>. Acesso em: 23 abr. 2026.
 
 ## Tabela de versionamento
 
@@ -89,3 +105,4 @@ Dessa forma, a arquitetura proposta considera o uso mínimo de três sensores To
 |----------|----------|-----------------------------------------|-------|
 |22/04/2026|0.1       |Criação do documento    | Arthur Augusto |
 |29/04/206| 0.2 | Adicionando justificativa | José Vinicius| 
+|05/05/2026|0.3       | Adicionando comparação do consumo dos sensores| Arthur Augusto |
