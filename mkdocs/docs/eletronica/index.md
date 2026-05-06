@@ -55,3 +55,11 @@ A lista a seguir reúne todos os elementos necessários para o desenvolvimento d
 | Protoboard 400 pontos | 2          | 8,3 x 5,5 x 1,0 cm   | Prototipagem   |
 
 ---
+
+
+## Tabela de versionamento
+
+|Data      |Versão    |Descrição                                |Autores|
+|----------|----------|-----------------------------------------|-------|
+|06/05/2026|0.1       |Criação do documento    | Jose Vinicius |
+
