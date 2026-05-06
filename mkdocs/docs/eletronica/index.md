@@ -1,4 +1,4 @@
-# 📦 Lista Consolidada de Componentes - Eletrônica
+# Lista Consolidada de Componentes - Eletrônica
 
 Nesta seção, é apresentada uma visão geral dos componentes que serão utilizados na parte eletrônica do projeto Micromouse.  
 A lista a seguir reúne todos os elementos necessários para o desenvolvimento do sistema.
@@ -7,7 +7,7 @@ A lista a seguir reúne todos os elementos necessários para o desenvolvimento d
 
 ## Componentes Principais
 
-### 🧠 Microcontrolador
+### Microcontrolador
 
 | Componente                                   | Quantidade | Dimensões Aproximadas | Observações                                   |
 |---------------------------------------------|------------|----------------------|-----------------------------------------------|
@@ -15,7 +15,7 @@ A lista a seguir reúne todos os elementos necessários para o desenvolvimento d
 
 ---
 
-### 👁️ Sensores
+### Sensores
 
 | Componente            | Quantidade | Dimensões Aproximadas | Observações                                   |
 |----------------------|------------|----------------------|-----------------------------------------------|
@@ -23,7 +23,7 @@ A lista a seguir reúne todos os elementos necessários para o desenvolvimento d
 
 ---
 
-### ⚙️ Motores
+### Motores
 
 | Componente                | Quantidade | Dimensões Aproximadas                          | Observações                          |
 |--------------------------|------------|-----------------------------------------------|--------------------------------------|
@@ -31,7 +31,7 @@ A lista a seguir reúne todos os elementos necessários para o desenvolvimento d
 
 ---
 
-### 🔋 Alimentação
+### Alimentação
 
 | Componente                         | Quantidade | Dimensões Aproximadas | Observações           |
 |----------------------------------|------------|----------------------|----------------------|
@@ -40,7 +40,7 @@ A lista a seguir reúne todos os elementos necessários para o desenvolvimento d
 
 ---
 
-### 🔄 Drivers
+### Drivers
 
 | Componente  | Quantidade | Dimensões Aproximadas | Observações             |
 |------------|------------|----------------------|------------------------|
@@ -48,7 +48,7 @@ A lista a seguir reúne todos os elementos necessários para o desenvolvimento d
 
 ---
 
-## 🧩 Componentes Auxiliares
+## Componentes Auxiliares
 
 | Componente             | Quantidade | Dimensões Aproximadas | Observações    |
 |----------------------|------------|----------------------|----------------|
