@@ -44,7 +44,7 @@ A lista a seguir reúne todos os elementos necessários para o desenvolvimento d
 
 | Componente  | Quantidade | Dimensões Aproximadas | Observações             |
 |------------|------------|----------------------|------------------------|
-| TB6612FNG  | 1          | 18 x 21 x 1 mm       | Driver para motores DC |
+| TB6612FNG  | 1          | 20 x 18 x 3,6mm       | Driver para motores DC |
 
 ---
 
@@ -56,7 +56,19 @@ A lista a seguir reúne todos os elementos necessários para o desenvolvimento d
 
 ---
 
+# Links dos produtos
 
+- [1] ESP32 CP2102 CH340 ESP-32S – Disponível em: <https://pt.aliexpress.com/item/32790946216.html>
+
+- [2] Sensor ToF VL53L0X - Disponível em: <https://pt.aliexpress.com/item/1005009986621721.html>
+
+- [3] Motor GA12-N20-S0310D-E - Disponível em: <https://shopee.com.br/product/592592863/57402066299>
+
+- [4] Conversor DC-DC Buck (LM2596) - Disponível em: <https://pt.aliexpress.com/item/1005007979483973.html>
+
+- [5] TB6612FNG - Disponível em: <https://pt.aliexpress.com/item/1005008849179664.html>
+
+- [6] Protoboard 400 pontos - Disponível em: <https://www.eletrogate.com/protoboard-400-pontos>
 ## Tabela de versionamento
 
 |Data      |Versão    |Descrição                                |Autores|
