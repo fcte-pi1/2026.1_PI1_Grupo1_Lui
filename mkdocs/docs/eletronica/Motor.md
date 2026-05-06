@@ -11,7 +11,7 @@
 
   A estratégia adotada pela equipe foi primeiramente escolher alguns motores para uma análise mais profunda, dessa forma serão comparados os seguintes motores:
 
-      - Motor DC N20 100:1 com encoder: Micro motor DC com caixa de redução.
+      - Motor GA12-N20-S0310D-E com encoder: Micro motor DC.
       - Motor DC 3-6V tipo 130: Modelo de corrente contínua (DC) sem caixa de redução.
       - 28BYJ-48 Stepper Motor: Motor de passo (stepper motor) unipolar.
 
@@ -23,7 +23,7 @@
 
 **A tabela foi construida conforme as fontes listadas nas Referências**
 
-| Critério                  | N20 100:1 | 3-6V tipo 130 | 28BYJ-48 Stepper Motor |
+| Critério                  | GA12-N20-S0310D-E  | 3-6V tipo 130 | 28BYJ-48 Stepper Motor |
 |--------------------------|---------------------|------------------------|----------------------------|
 | Tipo                     | DC c/ redutor       | DC escovado            | Motor de passo                  | 
 | Torque                   | Alto             | Medio               | Medio                    | 
@@ -40,7 +40,7 @@
 # Justificativa
 
 
-A escolha pelo motor DC N20 100:1 justifica-se pelo equilíbrio entre torque, tamanho reduzido e capacidade de controle preciso. Devido à presença de uma caixa de redução com relação aproximada de 100:1, o motor é capaz de fornecer torque suficiente para movimentação eficiente do robô, mesmo em partidas e mudanças de direção, situações comuns em percursos de labirinto. Essa característica é fundamental, uma vez que motores DC simples apresentam baixa capacidade de força, comprometendo o desempenho em aplicações móveis.
+A escolha pelo motor GA12-N20-S0310D-E  justifica-se pelo equilíbrio entre torque, tamanho reduzido e capacidade de controle preciso. Devido à presença de uma caixa de redução, o motor é capaz de fornecer torque suficiente para movimentação eficiente do robô, mesmo em partidas e mudanças de direção, situações comuns em percursos de labirinto. Essa característica é fundamental, uma vez que motores DC simples apresentam baixa capacidade de força, comprometendo o desempenho em aplicações móveis.
 
 Além disso, o motor possui encoder acoplado, o que possibilita medir a velocidade e o deslocamento do robô com maior precisão, o que é fundamental para a nossa equipe, já que o robô precisa calcular sua posição em relação ao mapa, conforme os [Requisitos](index.md), vantagem que não teríamos se o motor não tivesse encoder, como o 3-6V tipo 130.
 
