@@ -1,0 +1,82 @@
+/* Container de Scroll */
+.org-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    padding: 20px 0;
+    display: flex;
+    justify-content: flex-start; /* Essencial para o scroll funcionar corretamente */
+}
+
+.org-tree {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: max-content;
+    padding: 0 50px;
+    margin: 0 auto;
+}
+
+/* Níveis da Árvore */
+.org-level {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 15px;
+    position: relative;
+}
+
+/* Cartão Compacto (125px) */
+.org-card {
+    background: var(--md-default-bg-color, #fff);
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    padding: 10px 5px;
+    width: 125px; 
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.org-avatar {
+    width: 50px !important;   /* Tamanho fixo */
+    height: 50px !important;  /* Tamanho fixo */
+    border-radius: 50%;       /* Garante o círculo */
+    margin-bottom: 8px;
+    background: #f3f4f6;
+    
+    /* O SEGREDO ESTÁ AQUI: */
+    object-fit: cover;        /* Corta a imagem para caber no círculo sem esticar */
+    object-position: center;  /* Centraliza o corte no rosto da pessoa */
+    display: block;
+    flex-shrink: 0;           /* Impede que o flexbox amasse a imagem */
+}
+
+.org-card h3 {
+    margin: 0 !important;
+    font-size: 0.72em !important;
+    font-weight: bold;
+    color: var(--md-typeset-color);
+    line-height: 1.1;
+}
+
+.org-card p {
+    margin: 3px 0 0 0 !important;
+    font-size: 0.6em !important;
+    color: #6b7280;
+    text-transform: uppercase;
+}
+
+/* Conectores */
+.line-v {
+    width: 2px;
+    height: 18px;
+    background-color: #ccc;
+}
+
+.area-connector {
+    width: 100%;
+    border-top: 2px solid #ccc;
+}

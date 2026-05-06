@@ -24,12 +24,21 @@ theme:
       toggle:
         icon: material/weather-cloudy-alert
         name: Switch to high contrast
-
+extra_css:
+  - stylesheets/organograma.css
+markdown_extensions:
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
 nav:
-  - Home: index.md
+  - Home: 
+      - Visão Geral: index.md
+      - Equipe: equipe.md 
   - Manual: manual.md
   - Eletronica:
-      - Home: eletronica/index.md
+      - Lista de Componentes: eletronica/index.md
       - Requisitos: eletronica/RequisitosEletronica.md
       - Componentes:
           - Microcontrolador: eletronica/microcontrolador.md
@@ -38,9 +47,11 @@ nav:
   - Energia: 
       - Home: energia/index.md
       - Requisitos: energia/requisitos.md
-      - Dimensionamento: energia/dim_ene.md
-  - Estruturas: estruturas/index.md
+  - Estruturas: 
+      - Home: estruturas/index.md
+      - Requisitos: estruturas/Elicitacao_Requisitos_Estrutura_Navegacao.md
   - Software: 
       - Home: software/index.md
       - Documentação: software/requisitosSoftware.md
-      - Avaliação de Tecnologias Front-end: software/avaliacao-tecnologias-frontend.md
+      - Front-end: software/avaliacao-tecnologias-frontend.md
+      - Back-end: software/stackBackend.md
