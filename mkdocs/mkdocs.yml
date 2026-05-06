@@ -38,7 +38,7 @@ nav:
       - Equipe: equipe.md 
   - Manual: manual.md
   - Eletronica:
-      - Home: eletronica/index.md
+      - Lista de Componentes: eletronica/index.md
       - Requisitos: eletronica/RequisitosEletronica.md
       - Componentes:
           - Microcontrolador: eletronica/microcontrolador.md
