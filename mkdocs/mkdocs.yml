@@ -24,20 +24,47 @@ theme:
       toggle:
         icon: material/weather-cloudy-alert
         name: Switch to high contrast
-find docs -name "*6-atividade-1121-front-end*"
+extra_css:
+  - stylesheets/organograma.css
+markdown_extensions:
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
 nav:
-  - Home: index.md
+  - Home: 
+      - Visão Geral: index.md
+      - Equipe: equipe.md 
   - Eletronica:
-      - Home: eletronica/index.md
-      - Documentação de Hardware:
-          - Microcontrolador: eletronica/DocumentacaoodeHardwareeDecisoesTecnicas.md
-          - Sensores: eletronica/Sensores.md
+      - Lista de Componentes: eletronica/index.md
+      - Requisitos: eletronica/RequisitosEletronica.md
+      - Componentes:
+          - Microcontrolador: eletronica/microcontrolador.md
+          - Sensores: eletronica/analiseSensores.md
+          - Motor: eletronica/Motor.md
   - Energia: 
       - Home: energia/index.md
       - Requisitos: energia/requisitos.md
-  - Estruturas: estruturas/index.md
+      - Dimensionamento Energético: energia/dim_ene.md
+  - Estruturas: 
+      - Home: estruturas/index.md
+      - Requisitos: estruturas/Elicitacao_Requisitos_Estrutura_Navegacao.md
+      - Labirinto Teste: estruturas/projeto_labirinto.md
   - Software: 
       - Home: software/index.md
-      - Documentação: software/requisitos.md
-      - Avaliação de Tecnologias Front-end: software/avaliacao-tecnologias-frontend.md
-      - Requisitos -> Histórias de Usuário e testes: software/requisitos-testes.md
+      - Documentação: software/requisitosSoftware.md
+      - Front-end: software/avaliacao-tecnologias-frontend.md
+      - Back-end: software/stackBackend.md
+  - Manual Git/Github: 
+      - Objetivo: manual/index.md
+      - Markdown: manual/markdown.md
+      - Estratégia de Branches: manual/branches.md
+      - Commits: manual/commits.md
+      - Envio de Alterações: manual/envio-alteracoes.md
+      - Pull Request (PR): manual/pull-request.md
+      - Fluxo de Pull Request: manual/fluxo-pr.md
+      - Revisão e Merge: manual/revisao-merge.md
+      - Comandos Git: manual/comandos-git.md
+      - Boas Práticas: manual/boas-praticas.md
+      - Resumo: manual/resumo.md
