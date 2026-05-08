@@ -50,6 +50,7 @@ nav:
   - Estruturas: 
       - Home: estruturas/index.md
       - Requisitos: estruturas/Elicitacao_Requisitos_Estrutura_Navegacao.md
+      - Labirinto Teste: estruturas/projeto_labirinto.md
   - Software: 
       - Home: software/index.md
       - Documentação: software/requisitosSoftware.md
