@@ -46,6 +46,7 @@ nav:
   - Energia: 
       - Home: energia/index.md
       - Requisitos: energia/requisitos.md
+      - Dimensionamento Energético: energia/dim_ene.md
   - Estruturas: 
       - Home: estruturas/index.md
       - Requisitos: estruturas/Elicitacao_Requisitos_Estrutura_Navegacao.md
