@@ -24,7 +24,7 @@ theme:
       toggle:
         icon: material/weather-cloudy-alert
         name: Switch to high contrast
-
+find docs -name "*6-atividade-1121-front-end*"
 nav:
   - Home: index.md
   - Eletronica:
@@ -40,3 +40,4 @@ nav:
       - Home: software/index.md
       - Documentação: software/requisitos.md
       - Avaliação de Tecnologias Front-end: software/avaliacao-tecnologias-frontend.md
+      - Requisitos -> Histórias de Usuário e testes: software/requisitos-testes.md
