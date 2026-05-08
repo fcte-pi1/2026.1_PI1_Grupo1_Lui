@@ -1,4 +1,4 @@
-# 📦 Lista Consolidada de Componentes - Eletrônica
+# Lista Consolidada de Componentes - Eletrônica
 
 Nesta seção, é apresentada uma visão geral dos componentes que serão utilizados na parte eletrônica do projeto Micromouse.  
 A lista a seguir reúne todos os elementos necessários para o desenvolvimento do sistema.
@@ -7,7 +7,7 @@ A lista a seguir reúne todos os elementos necessários para o desenvolvimento d
 
 ## Componentes Principais
 
-### 🧠 Microcontrolador
+### Microcontrolador
 
 | Componente                                   | Quantidade | Dimensões Aproximadas | Observações                                   |
 |---------------------------------------------|------------|----------------------|-----------------------------------------------|
@@ -15,7 +15,7 @@ A lista a seguir reúne todos os elementos necessários para o desenvolvimento d
 
 ---
 
-### 👁️ Sensores
+### Sensores
 
 | Componente            | Quantidade | Dimensões Aproximadas | Observações                                   |
 |----------------------|------------|----------------------|-----------------------------------------------|
@@ -23,7 +23,7 @@ A lista a seguir reúne todos os elementos necessários para o desenvolvimento d
 
 ---
 
-### ⚙️ Motores
+### Motores
 
 | Componente                | Quantidade | Dimensões Aproximadas                          | Observações                          |
 |--------------------------|------------|-----------------------------------------------|--------------------------------------|
@@ -31,7 +31,7 @@ A lista a seguir reúne todos os elementos necessários para o desenvolvimento d
 
 ---
 
-### 🔋 Alimentação
+### Alimentação
 
 | Componente                         | Quantidade | Dimensões Aproximadas | Observações           |
 |----------------------------------|------------|----------------------|----------------------|
@@ -40,18 +40,38 @@ A lista a seguir reúne todos os elementos necessários para o desenvolvimento d
 
 ---
 
-### 🔄 Drivers
+### Drivers
 
 | Componente  | Quantidade | Dimensões Aproximadas | Observações             |
 |------------|------------|----------------------|------------------------|
-| TB6612FNG  | 1          | 18 x 21 x 1 mm       | Driver para motores DC |
+| TB6612FNG  | 1          | 20 x 18 x 3,6mm       | Driver para motores DC |
 
 ---
 
-## 🧩 Componentes Auxiliares
+## Componentes Auxiliares
 
 | Componente             | Quantidade | Dimensões Aproximadas | Observações    |
 |----------------------|------------|----------------------|----------------|
 | Protoboard 400 pontos | 2          | 8,3 x 5,5 x 1,0 cm   | Prototipagem   |
 
 ---
+
+# Links dos produtos
+
+- [1] ESP32 CP2102 CH340 ESP-32S – Disponível em: <https://pt.aliexpress.com/item/32790946216.html>
+
+- [2] Sensor ToF VL53L0X - Disponível em: <https://pt.aliexpress.com/item/1005009986621721.html>
+
+- [3] Motor GA12-N20-S0310D-E - Disponível em: <https://shopee.com.br/product/592592863/57402066299>
+
+- [4] Conversor DC-DC Buck (LM2596) - Disponível em: <https://pt.aliexpress.com/item/1005007979483973.html>
+
+- [5] TB6612FNG - Disponível em: <https://pt.aliexpress.com/item/1005008849179664.html>
+
+- [6] Protoboard 400 pontos - Disponível em: <https://www.eletrogate.com/protoboard-400-pontos>
+## Tabela de versionamento
+
+|Data      |Versão    |Descrição                                |Autores|
+|----------|----------|-----------------------------------------|-------|
+|06/05/2026|0.1       |Criação do documento    | Jose Vinicius |
+
