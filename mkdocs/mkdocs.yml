@@ -37,7 +37,6 @@ nav:
       - Visão Geral: index.md
       - Equipe: equipe.md 
       - Requisitos Gerais: requisitos_unificados.md
-  - Manual: manual.md
   - Eletronica:
       - Home: eletronica/index.md
       - Requisitos: eletronica/RequisitosEletronica.md
