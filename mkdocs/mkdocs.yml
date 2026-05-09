@@ -40,6 +40,7 @@ nav:
   - Eletronica:
       - Home: eletronica/index.md
       - Requisitos: eletronica/RequisitosEletronica.md
+      - Diagramas: eletronica/diagramas.md
       - Componentes:
           - Microcontrolador: eletronica/microcontrolador.md
           - Sensores: eletronica/analiseSensores.md
