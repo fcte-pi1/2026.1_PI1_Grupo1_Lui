@@ -10,6 +10,78 @@
 
 \textcolor{red}{Apresentar desenho em CAD, indicar dimensões por lado/aresta/cota, indicar materiais utilizados e explicar o desenho e as decisões de projeto.}
 
+\subsection{Condição de Não-Tombamento}
+
+\noindent
+\textbf{1. Objetivo e Fundamentação Teórica} \\
+O objetivo deste documento é determinar a altura máxima para o Centro de Gravidade, de forma a garantir que o veículo retorne ao seu estado inicial e não capote.
+
+\vspace{0.3cm}
+
+\noindent
+Na iminência de tombamento, a força Normal no eixo traseiro é nula, e todo o peso do sistema é transferido para o ponto de contato frontal. A estabilidade é mantida enquanto o torque restaurador for superior ao torque de tombamento.
+
+\vspace{0.3cm}
+\noindent
+\textbf{Torque Restaurador:} Gerado pela componente vertical do peso. \\
+\textbf{Torque de Tombamento:} Gerado pela força de inércia, resultante da frenagem.
+
+\vspace{0.5cm}
+
+\noindent
+\textbf{2. Desenvolvimento Matemático} \\
+Para a análise da estabilidade, considera-se o somatório de momentos em relação ao eixo frontal. A condição para que o veículo permaneça estável é:
+
+\begin{equation}
+    \tau_{\text{restaurador}} \ge \tau_{\text{tombamento}}
+\end{equation}
+
+\noindent
+Substituindo pelas forças atuantes e seus respectivos braços de alavanca:
+
+\begin{equation}
+    P \cdot x \ge F \cdot h_{\text{máx}}
+\end{equation}
+
+\noindent
+Onde:
+
+\begin{itemize}
+    \item $P$ é o peso total do protótipo;
+    \item $x$ é a distância horizontal do Centro de Gravidade (CG) até o eixo frontal;
+    \item $F$ é a força de inércia resultante da frenagem;
+    \item $h_{\text{máx}}$ é a altura máxima permitida do CG.
+\end{itemize}
+
+\noindent
+Na iminência de tombamento, ocorre a transferência total de carga para a dianteira ($N = P$). Considerando que a força máxima de desaceleração antes do deslizamento é ditada pelo atrito estático máximo temos que a força de inércia máxima atingível.
+
+\begin{equation}
+    P \cdot x \ge (P \cdot \mu_e) \cdot h_{\text{máx}}
+\end{equation}
+
+\begin{equation}
+    h_{\text{máx}} \le \frac{x}{\mu_e}
+\end{equation}
+
+\noindent
+Para a distribuição ideal ocorra, o CG deve ser posicionado exatamente no centro da base do robô. Então para $x = L/2$:
+
+\begin{equation}
+    h_{\text{máx}} \le \frac{L}{2 \cdot \mu_e}
+\end{equation}
+
+\noindent
+Tendo o coeficiente estático e $L$ como:
+\begin{itemize}
+    \item $\mu_e = 0.7$
+    \item $L = 0,1225\text{ m}$
+\end{itemize}
+
+\begin{equation}
+    h_{\text{máx}} \le 8,75\text{ cm}
+\end{equation}
+
 \section{Descrição de \textit{hardware}}
 
 \textcolor{red}{A descrição de \textit{hardware} no documento deve permitir que outras pessoas repliquem o produto proposto neste documento. Para isso, deve-se explicar de forma textual os principais sub-sistemas e as escolhas de projeto, além de indicar:}
