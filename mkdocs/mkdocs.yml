@@ -36,6 +36,7 @@ nav:
   - Home: 
       - Visão Geral: index.md
       - Equipe: equipe.md 
+      - Requisitos Gerais: requisitos.md
   - Manual: manual.md
   - Eletronica:
       - Home: eletronica/index.md
