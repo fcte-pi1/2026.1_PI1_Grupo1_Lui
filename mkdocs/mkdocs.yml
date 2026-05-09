@@ -36,8 +36,6 @@ nav:
   - Home: 
       - Visão Geral: index.md
       - Equipe: equipe.md 
-      - Requisitos Gerais: requisitos.md
-  - Manual: manual.md
   - Eletronica:
       - Home: eletronica/index.md
       - Requisitos: eletronica/RequisitosEletronica.md
@@ -58,3 +56,15 @@ nav:
       - Back-end: software/stackBackend.md
       - Banco de Dados: software/banco-de-dados.md
       - Backlog e Requisitos Declarados: software/requisitos-testes.md
+  - Manual Git/Github: 
+      - Objetivo: manual/index.md
+      - Markdown: manual/markdown.md
+      - Estratégia de Branches: manual/branches.md
+      - Commits: manual/commits.md
+      - Envio de Alterações: manual/envio-alteracoes.md
+      - Pull Request (PR): manual/pull-request.md
+      - Fluxo de Pull Request: manual/fluxo-pr.md
+      - Revisão e Merge: manual/revisao-merge.md
+      - Comandos Git: manual/comandos-git.md
+      - Boas Práticas: manual/boas-praticas.md
+      - Resumo: manual/resumo.md
