@@ -1,15 +1,20 @@
 \begin{landscape}
 
 \chapter{Cronograma} 
+\label{crono}
 
 \begin{table}[htpb]
+\footnotesize
+\centering
 \begin{center}
 \caption{Cronograma geral.}
 \begin{tabular}{|c|c|c|}
 \hline
-\textbf{Geral}          & \textbf{Previsto} & \textbf{Realizado} \\ \hline
-Início do projeto       & xx/xx/20xx        & xx/xx/20xx         \\ \hline
-Fim do projeto          & xx/xx/20xx        & xx/xx/20xx         \\ \hline
+\textbf{Geral} & \textbf{Previsto} & \textbf{Realizado} \\ \hline
+Início do projeto & 08/04/2026 & 08/04/2026 \\ \hline
+Entrega 1 (ED1)   & 11/05/2026 & 11/05/2026 \\ \hline
+Entrega 2 (ED2)   & 08/06/2026 & 08/06/2026 \\ \hline
+Apresentação Final& 08/07/2026 & 08/07/2026 \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
@@ -17,92 +22,52 @@ Fim do projeto          & xx/xx/20xx        & xx/xx/20xx         \\ \hline
 \begin{table}[htpb]
 \begin{center}
 \caption{Cronograma por atividade.}
-\begin{tabular}{|c|c|c|c|c|c|c|}
+
+\resizebox{\textwidth}{!}{
+\begin{tabular}{|l|c|c|c|c|c|c|}
 \hline
 & \textbf{Início} & \textbf{Início} & \textbf{Fim} & \textbf{Fim} & \textbf{Atividades} & \\
-\textbf{Atividade} & \textbf{Previsto} & \textbf{Realizado} & \textbf{Previsto} & \textbf{Realizado} & \textbf{Predecessoras} & \textbf{Responsáveis}\\ \hline
-1 - ABC                       & DD/MM/AAAA               & DD/MM/AAAA                & DD/MM/AAAA               & DD/MM/AAAA                & ---                               & Fulano \\ \hline
-2 - DEF                       & DD/MM/AAAA               & DD/MM/AAAA                & DD/MM/AAAA               & DD/MM/AAAA                & 1                                 & Fulano \\ \hline
-3 - GHI                       & DD/MM/AAAA               & DD/MM/AAAA                & DD/MM/AAAA               & DD/MM/AAAA                & 1, 2                              & Beltrano \\ \hline
-4 - JKL                       & DD/MM/AAAA               & DD/MM/AAAA                & DD/MM/AAAA               & DD/MM/AAAA                & 3                                 & Beltrano \\ \hline
-5 - MNO                       & DD/MM/AAAA               & DD/MM/AAAA                & DD/MM/AAAA               & DD/MM/AAAA                & 1, 3, 4                           & Ciclano \\ \hline
+\textbf{Atividade} & \textbf{Previsto} & \textbf{Realizado} & \textbf{Previsto} & \textbf{Realizado} & \textbf{Predecessoras} & \textbf{Responsáveis} \\ \hline
+
+1 - Definição do Tema e Objetivos & 08/04/2026 & 08/04/2026 & 10/04/2026 & 10/04/2026 & --- & Gerência \\ \hline
+2 - Levantamento de Requisitos (Geral) & 11/04/2026 & 11/04/2026 & 14/04/2026 & 16/04/2026 & 1 & Software / Gerência \\ \hline
+3 - Pesquisa e Definição de Hardware & 15/04/2026 & 15/04/2026 & 19/04/2026 & 23/04/2026 & 2 & Equipe de Hardware \\ \hline
+3 - Dimensionamento energético & 20/04/2026 & 21/04/2026 & 24/04/2026 & 24/04/2026 & 2 & Equipe de Hardware \\ \hline
+4 - Modelagem de Software (UML/DER) & 20/04/2026 & 20/04/2026 & 24/04/2026 & 24/04/2026 & 2 & Equipe de Software \\ \hline
+5 - Projeto Estrutural e CAD & 25/04/2026 & 25/04/2026 & 29/04/2026 & 29/04/2026 & 3 & Equipe de Estruturas \\ \hline
+6 - Estrutura Analítica do Projeto (EAP) & 30/04/2026 & 30/04/2026 & 02/05/2026 & 02/05/2026 & 1 & Gerência \\ \hline
+7 - Elaboração do Backlog (MoSCoW) & 03/05/2026 & 03/05/2026 & 05/05/2026 & 05/05/2026 & 4 & Equipe de Software \\ \hline
+8 - Orçamento Consolidado e BOM & 06/05/2026 & 06/05/2026 & 08/05/2026 & 08/05/2026 & 5 & Gerência / Todos \\ \hline
+9 - Consolidação e Diagramação LaTeX (ED1) & 09/05/2026 & 09/05/2026 & 10/05/2026 & 11/05/2026 & --- & Todos \\ \hline
+10 - Finalização Entrega 1 (ED1) & 11/05/2026 & 11/05/2026 & 11/05/2026 & 11/05/2026 & 1 a 9 & Gerência \\ \hline
+11 - Desenvolvimento de Firmware e Web & 12/05/2026 & 12/05/2026 & 20/05/2026 & xx/xx/xx & 7, 10 & Equipe de Software \\ \hline
+12 - Construção do Labirinto (Pista 4x4) & 21/05/2026 & 21/05/2026 & 25/05/2026 & xx/xx/xx & 8 & Equipe de Estruturas \\ \hline
+13 - Manufatura do Chassi e Eletrônica & 26/05/2026 & 26/05/2026 & 30/05/2026 & xx/xx/xx & 5, 10 & Equipe de Hardware \\ \hline
+14 - Testes de Integração e Validação (ED2) & 31/05/2026 & 31/05/2026 & 07/06/2026 & xx/xx/xx & 11, 13 & Equipe de Testes \\ \hline
+15 - Finalização Entrega 2 (ED2) & 08/06/2026 & 08/06/2026 & 08/06/2026 & xx/xx/xx & 14 & Todos \\ \hline
+16 - Refinamento do Relatório Final (v. 50 pág.) & 09/06/2026 & 09/06/2026 & 20/06/2026 & xx/xx/xx & 15 & Todos \\ \hline
+17 - Produção do Vídeo de Apresentação (15 min) & 21/06/2026 & 21/06/2026 & 30/06/2026 & xx/xx/xx & 15 & Todos \\ \hline
+18 - Otimização de Performance (Fast Run) & 01/07/2026 & 01/07/2026 & 05/07/2026 & xx/xx/xx & 14, 15 & Equipe de Software \\ \hline
+19 - Inspeção Prévia e Validação de Dados & 06/07/2026 & 06/07/2026 & 07/07/2026 & xx/xx/xx & 11, 13 & Equipe de Testes \\ \hline
+20 - Apresentação Final e Competição & 08/07/2026 & 08/07/2026 & 08/07/2026 & 08/07/2026 & 16 a 19 & Todos \\ \hline
+
 \end{tabular}
+}
+
 \end{center}
 \end{table}
-
-
 
 \begin{table}[htpb]
 \begin{center}
 \caption{Justificativas para atrasos ou não-conclusão de atividades.}
-\begin{tabular}{|c|c|} \hline
-\textbf{Atividade} & \textbf{Justificativa}  \\ \hline 
-    3 - GHI &
-    O material solicitado não foi entregue no prazo pelo fornecedor. \\ \hline
-    5 - MNO &
-    A equipe responsável pelo desenvolvimento não finalizou a atividade. \\ \hline
+
+\begin{tabular}{|p{4cm}|p{10cm}|}
+\hline
+\textbf{Atividade} & \textbf{Justificativa} \\ \hline
+3 - Pesquisa de Hardware & O período de análise foi estendido para garantir que os motores N20 com encoder fossem compatíveis com a lógica de odometria do ESP32. \\ \hline
+9 - Diagramação LaTeX & Curva de aprendizado inicial da equipe com as ferramentas de versionamento e compilação do relatório oficial.\\ \hline
 \end{tabular}
 \end{center}
 \end{table}
-
-
-
-%%% Exemplo de tabela que ocupa várias páginas
-% \begin{center}
-% \begin{longtable}{|l|l|l|}
-% \caption{A sample long table.} \label{tab:long} \\
-
-% \hline \multicolumn{1}{|c|}{\textbf{First column}} & \multicolumn{1}{c|}{\textbf{Second column}} & \multicolumn{1}{c|}{\textbf{Third column}} \\ \hline 
-% \endfirsthead
-
-% \multicolumn{3}{c}%
-% {{\bfseries \tablename\ \thetable{} -- continued from previous page}} \\
-% \hline \multicolumn{1}{|c|}{\textbf{First column}} & \multicolumn{1}{c|}{\textbf{Second column}} & \multicolumn{1}{c|}{\textbf{Third column}} \\ \hline 
-% \endhead
-
-% \hline \multicolumn{3}{|r|}{{Continued on next page}} \\ \hline
-% \endfoot
-
-% \hline \hline
-% \endlastfoot
-
-% One & abcdef ghjijklmn & 123.456778 \\
-% One & abcdef ghjijklmn & 123.456778 \\
-% One & abcdef ghjijklmn & 123.456778 \\
-% One & abcdef ghjijklmn & 123.456778 \\
-% One & abcdef ghjijklmn & 123.456778 \\
-% One & abcdef ghjijklmn & 123.456778 \\
-% One & abcdef ghjijklmn & 123.456778 \\
-% One & abcdef ghjijklmn & 123.456778 \\
-% One & abcdef ghjijklmn & 123.456778 \\
-% One & abcdef ghjijklmn & 123.456778 \\
-% One & abcdef ghjijklmn & 123.456778 \\
-% One & abcdef ghjijklmn & 123.456778 \\
-% One & abcdef ghjijklmn & 123.456778 \\
-% One & abcdef ghjijklmn & 123.456778 \\
-% One & abcdef ghjijklmn & 123.456778 \\
-% One & abcdef ghjijklmn & 123.456778 \\
-% One & abcdef ghjijklmn & 123.456778 \\
-% One & abcdef ghjijklmn & 123.456778 \\
-% One & abcdef ghjijklmn & 123.456778 \\
-% One & abcdef ghjijklmn & 123.456778 \\
-% One & abcdef ghjijklmn & 123.456778 \\
-% One & abcdef ghjijklmn & 123.456778 \\
-% One & abcdef ghjijklmn & 123.456778 \\
-% One & abcdef ghjijklmn & 123.456778 \\
-% One & abcdef ghjijklmn & 123.456778 \\
-% One & abcdef ghjijklmn & 123.456778 \\
-% One & abcdef ghjijklmn & 123.456778 \\
-% One & abcdef ghjijklmn & 123.456778 \\
-% One & abcdef ghjijklmn & 123.456778 \\
-% One & abcdef ghjijklmn & 123.456778 \\
-% One & abcdef ghjijklmn & 123.456778 \\
-% One & abcdef ghjijklmn & 123.456778 \\
-% One & abcdef ghjijklmn & 123.456778 \\
-% One & abcdef ghjijklmn & 123.456778 \\
-% One & abcdef ghjijklmn & 123.456778 \\
-% One & abcdef ghjijklmn & 123.456778 \\
-% \end{longtable}
-% \end{center}
 
 \end{landscape}
