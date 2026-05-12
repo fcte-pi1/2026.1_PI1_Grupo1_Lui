@@ -1,18 +1,19 @@
 \begin{landscape}
 
 \chapter{Orçamento}
+\label{orca}
 
 \begin{table}[htpb]
 \begin{center}
 \caption{Orçamento geral.}
-\begin{tabular}{|c|c|c|}
+\begin{tabular}{|l|c|c|}
 \hline
 \textbf{Geral}          & \textbf{Previsto (R\$)} & \textbf{Realizado (R\$)} \\ \hline
-Matéria-prima           & 1,00                    & 1,00                     \\ \hline
-Componentes eletrônicos & 2,00                    & 3,00                     \\ \hline
-Componentes elétricos   & 2,00                    & 2,50                     \\ \hline
-Ferramentas             & 3,00                    & 2,75                     \\ \hline
-Montagem                & 4,00                    & 2,00                     \\ \hline
+Matéria-prima           & 92,00                    & 92,00                     \\ \hline
+Componentes eletrônicos & 327,51                    & 308,54                     \\ \hline
+Componentes elétricos   & 225,63                  &  200,72                \\ \hline
+Ferramentas             & 0                    & 0                     \\ \hline
+Montagem                & 89,00                    & 89,00                     \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
@@ -20,31 +21,71 @@ Montagem                & 4,00                    & 2,00                     \\ 
 \begin{table}[htpb]
 \begin{center}
 \caption{Orçamento por aquisição.}
-\begin{tabular}{|c|c|c|c|c|}
+\begin{tabular}{|l|c|c|c|c|}
 \hline
 \textbf{Item ou serviço} & \textbf{Tipo} & \textbf{Previsto (R\$)} & \textbf{Realizado (R\$)} & \textbf{Responsável} \\ \hline
-Madeira      & Matéria-prima & 0,50   & 0,60 & Fulano                    \\ \hline
-Ferro        & Matéria-prima & 0,25   & 0,25 & Fulano                    \\ \hline
-Plástico ABS & Matéria-prima & 0,25   & 0,15 & Fulano                    \\ \hline
-Arduino      & Componente eletrônico & 2,00  & 3,00 & Beltrano                     \\ \hline
-Fonte DC     & Componente elétrico & 2,00   & 2,50 & Beltrano                     \\ \hline
-Martelo & Ferramentas & 3,00   & 2,75 & Fulano                     \\ \hline
-Impressão 3D & Montagem & 4,00   & 2,00 & Ciclano                   \\ \hline
+Pack de bateria Li-Ion 7,4V 2500mAh ( 1 unid.)
+& Componente elétrico & 95,22 & 67,51 & Ana Luiza \\ \hline
+
+Mini carregador para bateria de lítio 2S (1 unid.)
+& Componente elétrico & 65,23 & 46,24 & Ana Luiza \\ \hline
+
+Fonte chaveada 9V 1A ( 1 unid.)
+& Componente elétrico & 39,24 & 27,82 & Ana Luiza \\ \hline
+
+Conector JST RCY macho/fêmea com fio (1 unid.)
+& Componente elétrico & 17,99 & 17,99 & Ana Luiza \\ \hline
+
+Sensor de corrente DC INA219 I2C (1 unid.)
+& Componente eletrônico & 34,40 & 33,43 & Ana Luiza \\ \hline
+
+Motor GA12 N20 DC com Encoder (2 unid.)
+& Componente eletrônico & 104,10 & 104,10 & José Vinícius \\ \hline
+
+ESP32 DEVKit (1 unid.)
+& Componente eletrônico & 55,90 & 55,90 & Maurício Ferreira \\ \hline
+
+Protoboard 400 pontos (1 unid.)
+& Componente eletrônico & 36,90 & 36,90 & Maurício Ferreira \\ \hline
+
+Ponte H ( 1 unid.)
+& Componente eletrônico & 51,90 & 33,90 & Júlia Fortunato \\ \hline
+
+Bucks reguladores de tensão ( 2 unid.)
+& Componente eletrônico & 23,99 & 23,99 & Ana Luiza \\ \hline
+
+Sensor ToF ( 3 unid.)
+& Componente eletrônico & 20,32 & 20,32 & José Vinícius \\ \hline
+
+jumpers macho-macho (40 unid.)
+& Componente elétrico & 7,95 & 7,73 & Ana Luiza \\ \hline
+
+MDF de 15 mm de espessura (1 unid. de 720x720mm) & Matéria-prima & 70,00 & 36,00 & Bianca Zero \\ \hline
+
+EVA alta densidade (40 unid. de 180 x 50 x 12 mm) & Matéria-prima & 56,00 & 56,00 & Bianca Zero \\ \hline
+
+Palitos de picolé com borda quadrada (80 unid.) & Montagem & 18,00 & 18,00 & Bianca Zero \\ \hline
+
+Suporte em L (160 unid.) & Montagem & 46,00 & 46,00 & Bianca Zero \\ \hline
+
+Impressão 3D do chassi, laterais, rodas e engrenagens & Montagem & 25,00 & 25,00 & Bianca Zero \\ \hline
+
+
 \end{tabular}
 \end{center}
 \end{table}
 
-\begin{table}[htpb]
-\begin{center}
-\caption{Justificativas para itens ou serviços trocados após a aquisição.}
-\begin{tabular}{|c|c|} \hline
-\textbf{Item ou serviço} & \textbf{Justificativa}  \\ \hline 
-    Martelo &
-    O material solicitado não foi entregue no prazo pelo fornecedor. \\ \hline
-    Ferro &
-    Erro no dimensionamento do primeiro material. \\ \hline
-\end{tabular}
-\end{center}
-\end{table}
+%\begin{table}[htpb]
+%\begin{center}
+%\caption{Justificativas para itens ou serviços trocados após a aquisição.}
+%\begin{tabular}{|c|c|} \hline
+%\textbf{Item ou serviço} & \textbf{Justificativa}  \\ \hline 
+%    Martelo &
+%    O material solicitado não foi entregue no prazo pelo fornecedor. \\ \hline
+%    Ferro &
+%    Erro no dimensionamento do primeiro material. \\ \hline
+%\end{tabular}
+%\end{center}
+%\end{table}
 
 \end{landscape}

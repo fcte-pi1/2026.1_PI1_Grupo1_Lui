@@ -1,44 +1,76 @@
 \chapter{Termo de Abertura do Projeto}
-
-\textcolor{red}{Termo de abertura do projeto / Project Charter. Um documento publicado pelo iniciador ou patrocinador do projeto que autoriza formalmente a existência de um projeto e fornece ao gerente do projeto a autoridade para aplicar os recursos organizacionais nas atividades do projeto.}
+\label{termo}
 
 \section{Dados do projeto}
 \begin{description}
-    \item [Nome do Projeto:] TÍTULO
-    \item [Data de abertura:] DD/MM/AAAA
+    \item [Nome do Projeto:] Micromouse
+    \item [Data de abertura:] 05/05/2026
     \item [Código:] 1-A
     \item [Patrocinador:] Universidade de Brasília
     % \item [Responsável:] ???
-    \item [Gerente:] NOME/MATRÍCULA/E-MAIL/TELEFONE
+    \item [Gerente:] Ian Costa Guimarães/222014859/iancostag@gmail.com/6199299-8915
 \end{description}
 
 \section{Objetivos}
-\textcolor{red}{O que a empresa pretende obter com a realização do projeto. Descrever o que se pretende realizar para resolver o problema central ou explorar a oportunidade identificada. Para a correta definição do objetivo siga a regra "SMART":
+O objetivo central é projetar, construir e programar um robô móvel autônomo capaz de mapear e resolver labirintos de 4x4, 8x8 e 16x16 células, integrando-o a uma plataforma web para telemtria. Seguindo a regra SMART:
 \begin{description}
-    \item [\textit{Specific} (específico):] Deve ser redigido de forma clara, concisa e compreensiva;
-    \item [\textit{Measurable} (mensurável):] O objetivo específico deve ser mensurável, ou seja, 
-possível de ser medido por meio de um ou mais indicadores;
-    \item [\textit{Agreed} (acordado):] Deve ser acordado com as partes interessadas, ou seja, as áreas envolvidas na empresa: P\&D, Produção, Comercial, Marketing, Financeira, Jurídica, Manutenção, ambiental, entre outras;
-    \item [\textit{Realistic} (realista):] Deve estar centrado na realidade, no que é possível de ser feito considerando as premissas e restrições existentes, como: orçamento e tempo;
-    \item [\textit{Time Bound} (Limitado no tempo):] Deve ter um prazo determinado para sua finalização.
+    \item [\textit{Specific} (específico):] Desenvolver um robô físico (Micromouse) que resolva 3 labirintos distintos de forma autônoma e um sistema web para visualização de telemetria (trajeto, velocidade e bateria) em tempo real.
+    \item [\textit{Measurable} (mensurável):] O sucesso será medido pela conclusão dos labirintos de até 16x16 células e pela recepção de pacotes de dados via UDP/WebSockets com latência inferior a 50ms.
+    \item [\textit{Agreed} (acordado):] O projeto foi validado pelos líderes das quatro áreas (Software, Eletrônica, Energia e Estruturas) e pelo gerente geral, garantindo a integração dos subsistemas.
+    \item [\textit{Realistic} (realista):] O projeto utiliza tecnologias acessíveis e consolidadas (ESP32, Motores N20, Sensores ToF) compatíveis com o orçamento e o laboratório de eletrônica da FGA.
+    \item [\textit{Time Bound} (limitado no tempo):] A entrega final do protótipo funcional e do relatório técnico completo (ED1) está definida para 11 de maio de 2026.
 \end{description}
-}
 
 \section{Mercado-alvo}
 
-\textcolor{red}{Pessoas, empresas, instituições etc. que usufruirão dos produtos, serviços e resultados gerados pelo projeto, cujos requisitos (tópico abaixo) devem atender as suas necessidades. Podem ser internas ou externas à organização, mas, merecem destaque especial, pois, o projeto está sendo feito para atendê-los de forma direta ou indireta.}
+O projeto destina-se a instituições acadêmicas e de pesquisa em robótica móvel, além de competições tecnológicas promovidas pelo IEEE. Internamente, atende aos requisitos pedagógicos da disciplina de Projeto Integrador de Engenharia 1 da Faculdade de Ciências e Tecnologias em Engenharia (FCTE-UnB), servindo como plataforma de estudo para estudantes de Engenharia de Software, Eletrônica, Energia, Aeroespacial e Automotiva, promovendo entendimento holístico de um projeto de engenharia muldisciplinar real.
 
 \section{Requisitos}
 
-\textcolor{red}{Listar os fatos que são essenciais para o consumidor adquirir o produto, exemplo: cor, tamanho, material, tempo de vida-útil, dispositivo de segurança \textbf{x}, entre outros.}
+Os requisitos essenciais para a viabilidade do produto incluem:
+\begin{itemize}
+    \item \textbf{Dimensões Operacionais:} O robô deve possuir largura entre 7cm e 10cm para navegar livremente em corredores de 16,8cm.
+    \item \textbf{Processamento:} Utilização de microcontrolador dual-core (ESP32) para processamento paralelo de controle e telemetria.
+    \item \textbf{Navegação:} Sensores de distância do tipo Time-of-Flight (VL53L0X) para mapeamento preciso e independente da cor das superfícies.
+    \item \textbf{Monitoramento:} Dashboard web responsivo que exiba a posição do robô em tempo real via Wi-Fi.
+    \item \textbf{Autonomia:} Sistema de energia capaz de alimentar motores e comunicação sem fio durante o ciclo completo de resolução de 3 labirintos.
+\end{itemize}
 
 \section{Justificativa}
 
-\textcolor{red}{Informar o problema ou a oportunidade (necessidade) que justifica o porquê de o projeto ser realizado. Por exemplo: atende uma demanda específica do consumidor final; supre uma necessidade do mercado comercializador; é um diferencial X para o órgão regulamentador.}
+ O desenvolvimento do projeto Micromouse é justificado pela necessidade de integrar, em um único sistema, conhecimentos multidisciplinares das diferentes engenharias da Faculdade de Ciências e Tecnologias em Engenharia (FCTE-UnB). O projeto permite aplicar conceitos de sistemas embarcados, eletrônica, controle, programação, mecânica, banco de dados e desenvolvimento web em um contexto prático e competitivo, aproximando os estudantes de problemas reais de engenharia.
+
+Além do caráter acadêmico, o projeto atende à crescente demanda por soluções autônomas capazes de realizar navegação inteligente em ambientes desconhecidos. Tecnologias semelhantes às utilizadas em competições Micromouse também estão presentes em aplicações industriais, robótica móvel, logística automatizada e veículos autônomos, tornando o projeto relevante como ferramenta de capacitação técnica e desenvolvimento profissional.
+
+Outro fator que justifica o projeto é a oportunidade de desenvolver uma plataforma de monitoramento em tempo real integrada ao robô, que permite acompanhar métricas de desempenho, telemetria e comportamento do sistema durante a execução das tarefas. Essa funcionalidade amplia o potencial educacional do projeto, possibilitando análises posteriores, validação experimental e apoio ao processo de tomada de decisão durante os testes.
+
+No contexto da disciplina de Projeto Integrador de Engenharia 1, o Micromouse também contribui para o desenvolvimento de competências relacionadas à gestão de projetos, trabalho em equipe, rastreabilidade de atividades, documentação técnica e integração entre áreas, competências fundamentais para a formação de engenheiros.
 
 \section{Indicadores}
 
-\textcolor{red}{Listar até 10 indicadores que determinam o mercado consumidor do produto desenvolvido: exemplo: 1) n\textdegree de alunos da FGA que utilizam ônibus às 18:00; 2) n\textdegree de usuários do restaurante universitários, 3) número de idosos classificados como público-alvo no DF e no estado de Goiás, 4) n\textdegree de empresas de segurança registradas no DF etc.}
+Os indicadores definidos para o projeto têm como objetivo medir o desempenho técnico do sistema desenvolvido, bem como avaliar sua aderência aos requisitos estabelecidos para a competição e para a disciplina. Os principais indicadores considerados são:
+
+\begin{itemize}
+    \item Taxa de sucesso na resolução dos labirintos de 4x4, 8x8 e 16x16 células;
+    
+    \item Tempo médio necessário para completar o percurso até a região objetivo;
+    
+    \item Latência média da transmissão de telemetria entre o robô e o dashboard web;
+    
+    \item Precisão do mapeamento do labirinto realizado pelo algoritmo de navegação;
+    
+    \item Número de colisões ou falhas de navegação durante os testes;
+    
+    \item Autonomia energética do sistema durante as execuções consecutivas;
+    
+    \item Taxa de perda de pacotes de telemetria durante a comunicação Wi-Fi;
+    
+    \item Velocidade média de deslocamento do robô durante a exploração;
+    
+    \item Quantidade de requisitos funcionais implementados e validados nos testes;
+    
+    \item Percentual de atividades concluídas dentro do prazo planejado no GitHub Projects.
+\end{itemize}
 % \section{Aprovações}
 
 % \begin{tabular}{ l l }
