@@ -37,6 +37,7 @@ nav:
       - Visão Geral: index.md
       - Equipe: equipe.md 
       - Requisitos Gerais: requisitos_unificados.md
+      - Cronograma de Execução: cronograma.md
   - Manual Git/Github: 
       - Objetivo: manual/index.md
       - Markdown: manual/markdown.md
