@@ -1,4 +1,4 @@
-import { FSMStatus } from './app/components/FSMSStatus';
+import { FSMStatus } from './app/components/FSMStatus';
 import { RobotMap } from './app/components/MapaTempoReal';
 
 function App() {
