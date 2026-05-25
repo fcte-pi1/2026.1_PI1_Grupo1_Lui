@@ -1,4 +1,3 @@
-// src/app/components/RobotMap.tsx
 import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
@@ -13,7 +12,6 @@ interface RobotTelemetry {
   orientacao: string;
 }
 
-// Mock stream conforme formato da issue (atualização a cada 150ms)
 const mockTelemetryStream: RobotTelemetry[] = [
   { timestamp: 1715456789, estado_fsm: "MAPPING", bateria_v: 7.4, posicao_x: 0, posicao_y: 0, orientacao: "NORTE" },
   { timestamp: 1715456790, estado_fsm: "MAPPING", bateria_v: 7.4, posicao_x: 0, posicao_y: 1, orientacao: "NORTE" },
@@ -54,7 +52,6 @@ export function RobotMap() {
     setIsPlaying(true);
   };
 
-  // Simulação automática com intervalo de 150ms
   useEffect(() => {
     if (isPlaying) {
       intervalRef.current = setInterval(() => {
@@ -102,7 +99,6 @@ export function RobotMap() {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Painel de controle para testes manuais */}
         <div className="flex gap-2 justify-center">
           <button onClick={() => setIsPlaying(!isPlaying)} className="px-3 py-1 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700">
             {isPlaying ? 'Pausar' : 'Continuar'}
@@ -115,7 +111,6 @@ export function RobotMap() {
           </button>
         </div>
 
-        {/* Dados atuais em texto para validação */}
         <div className="grid grid-cols-3 gap-2 text-sm text-white bg-slate-900/50 p-2 rounded">
           <div>Posição: ({telemetry.posicao_x}, {telemetry.posicao_y})</div>
           <div>Orientação: {telemetry.orientacao}</div>
@@ -124,7 +119,6 @@ export function RobotMap() {
           <div>Progresso: {currentIndex+1}/{mockTelemetryStream.length}</div>
         </div>
 
-        {/* Mapa 16x16 */}
         <div className="relative border-2 border-slate-600 bg-[#070b19] p-1 rounded">
           <div
             className="grid gap-[1px]"
@@ -159,7 +153,6 @@ export function RobotMap() {
             ))}
           </div>
 
-          {/* Badge flutuante de status */}
           <div className="absolute bottom-3 left-3 flex items-center gap-2 px-3 py-1.5 bg-[#0f172a]/90 backdrop-blur-sm border border-slate-700 rounded-lg shadow-lg">
             {telemetry.estado_fsm === 'GOAL_REACHED' ? (
               <>
@@ -175,7 +168,6 @@ export function RobotMap() {
           </div>
         </div>
 
-        {/* Legenda */}
         <div className="flex gap-4 text-xs text-slate-300 justify-center">
           <div className="flex items-center gap-1"><div className="w-3 h-3 bg-[#1a2b4c] border border-slate-600"></div><span>Visitado</span></div>
           <div className="flex items-center gap-1"><div className="w-3 h-3 bg-transparent border border-slate-600"></div><span>Não visitado</span></div>

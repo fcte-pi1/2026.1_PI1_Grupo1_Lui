@@ -3,7 +3,6 @@ import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
 import { Activity } from 'lucide-react';
 
-// Formato baseado no JSON da Issue
 interface RobotTelemetry {
   timestamp: number;
   estado_fsm: string;
@@ -25,7 +24,6 @@ const mockData: RobotTelemetry = {
 export function FSMStatus() {
   const [telemetry] = useState<RobotTelemetry>(mockData);
 
-  // Verificação para aplicar o destaque em vermelho
   const isError = telemetry.estado_fsm === 'ERROR';
 
   return (
@@ -40,7 +38,6 @@ export function FSMStatus() {
       <CardContent className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <span className="font-semibold text-foreground/80">Estado Operacional:</span>
-          {/* Badge exibindo o valor exato, ficando vermelho em caso de erro */}
           <Badge variant={isError ? "destructive" : "default"} className="text-sm px-3 py-1">
             {telemetry.estado_fsm}
           </Badge>
