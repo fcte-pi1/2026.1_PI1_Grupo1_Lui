@@ -7,10 +7,12 @@ vector<vector<Celula>> labirinto;
 vector<vector<int>> distancia;
 vector<pair<int,int>> objetivo;
 
+// checa se a coordenada (X, Y) está dentro dos limites do labirinto
 bool dentro_limite(int x, int y){
     return x >= 0 && x < largura && y >= 0 && y < altura;
 }
 
+// checa se tem uma parede no norte da celulda (X, Y)
 bool passavel(int x, int y, Direcao dir){
     if(dir == NORTE) return !labirinto[x][y].parede_norte;
     if(dir == LESTE) return !labirinto[x][y].parede_leste;
@@ -20,6 +22,7 @@ bool passavel(int x, int y, Direcao dir){
     return false;
 }
 
+// distribui valor para cada célula
 void propagar_bfs(){
     queue<pair<int,int>> fila;
 
@@ -47,6 +50,7 @@ void propagar_bfs(){
     }
 }
 
+// cria o labirinto, cria matriz de distâncias, define objetivos, cria paredes externas, calcula o flood fill inicial (primeira distribuição de valores)
 void ff_inicializar(int larg, int alt, vector<pair<int,int>> meta){
     largura = larg;
     altura = alt;
@@ -68,6 +72,7 @@ void ff_inicializar(int larg, int alt, vector<pair<int,int>> meta){
     propagar_bfs();
 }
 
+// atualiza o mapa com novas paredes
 void ff_parede(int x, int y, Direcao dir){
     if(dir == NORTE) labirinto[x][y].parede_norte = true;
     if(dir == LESTE) labirinto[x][y].parede_leste = true;
@@ -86,9 +91,10 @@ void ff_parede(int x, int y, Direcao dir){
 
 }
 
+// recalcula o flood fill tendo em vista as novas descobertas
 void ff_recalcular(){
     for(int x = 0; x < largura; x++){
-        for(int y = 0; y< altura; y ++){
+        for(int y = 0; y < altura; y ++){
             distancia[x][y] = DISTANCIA_INFINITA;
         }
     }
@@ -96,6 +102,7 @@ void ff_recalcular(){
     propagar_bfs();
 }
 
+// marca a célula (X, Y) como já visitada
 void ff_visitado(int x, int y){
     labirinto[x][y].visitada = true;
 }
