@@ -71,5 +71,6 @@ nav:
       - Algoritmos de Solução: software/algoritmos_solucao.md
       - Front-end: software/avaliacao-tecnologias-frontend.md
       - Back-end: software/stackBackend.md
+      - Guia Arquitetural: software/guia_arquitetural.md
       - Banco de Dados: software/banco-de-dados.md
 
