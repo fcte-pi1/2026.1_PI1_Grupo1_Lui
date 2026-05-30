@@ -69,10 +69,10 @@ function sendTelemetry() {
     objetivo: stepData.estado_fsm === "GOAL_REACHED" ? "S" : "N",
     dist_esq: 85 + Math.floor(Math.sin(currentStepIndex) * 5),
     dist_dir: 85 - Math.floor(Math.sin(currentStepIndex) * 5),
-    // Simula motores mais rápidos e estáveis no FAST_RUN
     pwm_esq: isFastRun ? 210 : 120 + Math.floor(Math.random() * 8),
     pwm_dir: isFastRun ? 212 : 120 + Math.floor(Math.random() * 8),
-    velocidade_media: isFastRun ? 0.85 + (Math.random() * 0.05) : 0.35 + (Math.random() * 0.03)
+    velocidade_media: isFastRun ? 0.85 + (Math.random() * 0.05) : 0.35 + (Math.random() * 0.03),
+    paredes: (currentStepIndex % 3 === 0) ? [{x: stepData.posicao_x || 0, y: (stepData.posicao_y || 0) + 1, dir: 'OESTE'}] : []
   };
 
   // Codifica em MsgPack

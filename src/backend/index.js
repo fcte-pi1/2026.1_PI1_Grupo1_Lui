@@ -2,6 +2,7 @@ import dgram from 'node:dgram';
 import { decode } from '@msgpack/msgpack';
 import { InfluxDB, Point } from '@influxdata/influxdb-client';
 import dotenv from 'dotenv';
+import { mazeState } from './mazeState.js';
 
 dotenv.config();
 
@@ -99,6 +100,11 @@ server.on('message', (msg, rinfo) => {
       point.timestamp(new Date(tsMs));
     } else {
       point.timestamp(new Date()); // Se não tiver, usa hora atual do servidor
+    }
+
+    mazeState.processTelemetry(data);
+    if (estado_robo === 'GOAL_REACHED' || estado_robo === 'ERROR') {
+      mazeState.saveToJson();
     }
 
     // Grava ponto no InfluxDB
