@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
-import { Badge } from './ui/badge';
 import { cn } from '../lib/utils';
 
 interface RobotTelemetry {
@@ -62,14 +61,11 @@ export function RobotMap() {
     orientacao: "NORTE"
   });
   
-  // Efeito simulador (O Mock stream)
   useEffect(() => {
     let currentStep = 0;
     
-    // Reseta grid para testar 8x8 no mock se quiser, mas deixamos 16x16 padrão
-    const activeSize = 16;
-    setMazeSize(activeSize);
-    setGrid(createEmptyGrid(activeSize));
+    setGrid(createEmptyGrid(mazeSize));
+    setTelemetry(prev => ({ ...prev, estado_fsm: "MAPPING" }));
 
     const interval = setInterval(() => {
       if (currentStep >= MOCK_RUN.length) {
@@ -79,6 +75,11 @@ export function RobotMap() {
       }
 
       const step = MOCK_RUN[currentStep];
+      // Ignora passos fora dos limites do grid menor simulado
+      if (step.x >= mazeSize || step.y >= mazeSize) {
+        currentStep++;
+        return;
+      }
       
       setTelemetry({
         timestamp: Math.floor(Date.now() / 1000),
@@ -90,17 +91,16 @@ export function RobotMap() {
 
       setGrid(prevGrid => {
         const newGrid = [...prevGrid];
-        // Marca como visitada
         newGrid[step.x][step.y] = { ...newGrid[step.x][step.y], visitada: true };
         
-        // Aplica paredes descobertas
         step.paredes.forEach(p => {
-          newGrid[p.x][p.y] = { ...newGrid[p.x][p.y], [p.dir.toLowerCase()]: true };
-          // Aplica no vizinho
-          if (p.dir === 'NORTE' && p.y + 1 < activeSize) newGrid[p.x][p.y + 1].sul = true;
-          if (p.dir === 'SUL' && p.y - 1 >= 0) newGrid[p.x][p.y - 1].norte = true;
-          if (p.dir === 'LESTE' && p.x + 1 < activeSize) newGrid[p.x + 1][p.y].oeste = true;
-          if (p.dir === 'OESTE' && p.x - 1 >= 0) newGrid[p.x - 1][p.y].leste = true;
+          if (p.x < mazeSize && p.y < mazeSize) {
+            newGrid[p.x][p.y] = { ...newGrid[p.x][p.y], [p.dir.toLowerCase()]: true };
+            if (p.dir === 'NORTE' && p.y + 1 < mazeSize) newGrid[p.x][p.y + 1].sul = true;
+            if (p.dir === 'SUL' && p.y - 1 >= 0) newGrid[p.x][p.y - 1].norte = true;
+            if (p.dir === 'LESTE' && p.x + 1 < mazeSize) newGrid[p.x + 1][p.y].oeste = true;
+            if (p.dir === 'OESTE' && p.x - 1 >= 0) newGrid[p.x - 1][p.y].leste = true;
+          }
         });
         return newGrid;
       });
@@ -109,7 +109,7 @@ export function RobotMap() {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [mazeSize]);
 
   const getRotation = (orientacao: string): string => {
     switch (orientacao) {
@@ -127,9 +127,14 @@ export function RobotMap() {
   return (
     <Card className="w-fit bg-[#0a1128] border-slate-700">
       <CardHeader>
-        <CardTitle className="text-white flex items-center justify-between">
-          <span>Mapa em Tempo Real ({mazeSize}x{mazeSize})</span>
-          <Badge variant="outline" className="text-white border-slate-500">Ao Vivo</Badge>
+        <CardTitle className="text-white flex items-center justify-between gap-4">
+          <span>Mapa Dinâmico Ao Vivo ({mazeSize}x{mazeSize})</span>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-slate-400">Tamanho da Simulação:</span>
+            <button onClick={() => setMazeSize(4)} className={cn("px-2 py-1 text-xs rounded", mazeSize === 4 ? "bg-blue-600 text-white" : "bg-slate-800 text-slate-300 hover:bg-slate-700")}>4x4</button>
+            <button onClick={() => setMazeSize(8)} className={cn("px-2 py-1 text-xs rounded", mazeSize === 8 ? "bg-blue-600 text-white" : "bg-slate-800 text-slate-300 hover:bg-slate-700")}>8x8</button>
+            <button onClick={() => setMazeSize(16)} className={cn("px-2 py-1 text-xs rounded", mazeSize === 16 ? "bg-blue-600 text-white" : "bg-slate-800 text-slate-300 hover:bg-slate-700")}>16x16</button>
+          </div>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -141,14 +146,15 @@ export function RobotMap() {
           <div>Timestamp: {telemetry.timestamp}</div>
         </div>
 
-        <div className="relative border-4 border-slate-500 bg-[#070b19] p-1 rounded">
-          <div
-            className="grid gap-0"
-            style={{
-              gridTemplateColumns: `repeat(${mazeSize}, minmax(20px, 30px))`,
-              gridTemplateRows: `repeat(${mazeSize}, minmax(20px, 30px))`
-            }}
-          >
+        <div className="flex justify-center">
+          <div className="relative border-4 border-slate-500 bg-[#070b19] p-1 rounded w-fit">
+            <div
+              className="grid gap-0"
+              style={{
+                gridTemplateColumns: `repeat(${mazeSize}, minmax(24px, 36px))`,
+                gridTemplateRows: `repeat(${mazeSize}, minmax(24px, 36px))`
+              }}
+            >
             {rows.map((y) => (
               cols.map((x) => {
                 const cell = grid[x][y];
@@ -192,6 +198,7 @@ export function RobotMap() {
                 <span className="text-white text-sm font-medium">Explorando...</span>
               </>
             )}
+          </div>
           </div>
         </div>
 
