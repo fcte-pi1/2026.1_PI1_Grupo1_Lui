@@ -61,7 +61,7 @@ void ff_inicializar(int larg, int alt, vector<pair<int,int>> meta){
 
     for(int i = 0; i < larg; i++){
         labirinto[i][0].parede_sul = true;
-        labirinto[larg - 1][i].parede_norte = true;
+        labirinto[i][alt - 1].parede_norte = true;
     }
 
     for(int i = 0; i < alt; i++){
@@ -105,4 +105,31 @@ void ff_recalcular(){
 // marca a célula (X, Y) como já visitada
 void ff_visitado(int x, int y){
     labirinto[x][y].visitada = true;
+}
+
+// escolhe a melhor direção para mover (menor distância, desempata pela direção atual)
+Direcao ff_melhor_movimento(int x, int y, Direcao direcao_atual){
+    int melhor_val = DISTANCIA_INFINITA + 1;
+    Direcao melhor_dir = direcao_atual;
+
+    // Ordem de prioridade: frente, direita, esquerda, trás
+    int prioridade[4] = {0, 1, 3, 2}; // offsets relativos à direção atual
+
+    for(int i = 0; i < 4; i++){
+        Direcao d = (Direcao)((direcao_atual + prioridade[i]) % 4);
+
+        if(!passavel(x, y, d)) continue;
+
+        int nx = x + DX[d];
+        int ny = y + DY[d];
+
+        if(!dentro_limite(nx, ny)) continue;
+
+        if(distancia[nx][ny] < melhor_val){
+            melhor_val = distancia[nx][ny];
+            melhor_dir = d;
+        }
+    }
+
+    return melhor_dir;
 }
