@@ -27,53 +27,12 @@ const MAZE_SIZE = 16;
 
 export function RobotMap() {
   const [telemetry, setTelemetry] = useState<RobotTelemetry>(mockTelemetryStream[0]);
-  const [visitedCells, setVisitedCells] = useState<Set<string>>(new Set([`${mockTelemetryStream[0].posicao_x}-${mockTelemetryStream[0].posicao_y}`]));
-  const [isPlaying, setIsPlaying] = useState(true);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  // Avança um passo manualmente
-  const nextStep = () => {
-    if (currentIndex < mockTelemetryStream.length - 1) {
-      const next = currentIndex + 1;
-      const newData = mockTelemetryStream[next];
-      setTelemetry(newData);
-      setVisitedCells(prev => new Set(prev).add(`${newData.posicao_x}-${newData.posicao_y}`));
-      setCurrentIndex(next);
-    } else {
-      setIsPlaying(false);
-    }
-  };
-
-  const resetSimulation = () => {
-    setCurrentIndex(0);
-    setTelemetry(mockTelemetryStream[0]);
-    setVisitedCells(new Set([`${mockTelemetryStream[0].posicao_x}-${mockTelemetryStream[0].posicao_y}`]));
-    setIsPlaying(true);
-  };
+  const [visitedCells] = useState<Set<string>>(new Set([`${mockTelemetryStream[0].posicao_x}-${mockTelemetryStream[0].posicao_y}`]));
 
   useEffect(() => {
-    if (isPlaying) {
-      intervalRef.current = setInterval(() => {
-        setCurrentIndex(prev => {
-          if (prev >= mockTelemetryStream.length - 1) {
-            setIsPlaying(false);
-            return prev;
-          }
-          const next = prev + 1;
-          const newData = mockTelemetryStream[next];
-          setTelemetry(newData);
-          setVisitedCells(prevSet => new Set(prevSet).add(`${newData.posicao_x}-${newData.posicao_y}`));
-          return next;
-        });
-      }, 150);
-    } else {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    }
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
-  }, [isPlaying]);
+    // Simulação será reimplementada depois com WebSockets
+    // Por enquanto apenas exibe o primeiro dado estático para a UI
+  }, []);
 
   const getRotation = (orientacao: string): string => {
     switch (orientacao) {
@@ -99,24 +58,13 @@ export function RobotMap() {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="flex gap-2 justify-center">
-          <button onClick={() => setIsPlaying(!isPlaying)} className="px-3 py-1 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700">
-            {isPlaying ? 'Pausar' : 'Continuar'}
-          </button>
-          <button onClick={nextStep} className="px-3 py-1 bg-gray-600 text-white rounded-md text-sm hover:bg-gray-700">
-            Passo a passo
-          </button>
-          <button onClick={resetSimulation} className="px-3 py-1 bg-red-600 text-white rounded-md text-sm hover:bg-red-700">
-            Reiniciar
-          </button>
-        </div>
 
-        <div className="grid grid-cols-3 gap-2 text-sm text-white bg-slate-900/50 p-2 rounded">
+
+        <div className="grid grid-cols-2 gap-2 text-sm text-white bg-slate-900/50 p-2 rounded">
           <div>Posição: ({telemetry.posicao_x}, {telemetry.posicao_y})</div>
           <div>Orientação: {telemetry.orientacao}</div>
           <div>Status: {telemetry.estado_fsm}</div>
           <div>Timestamp: {telemetry.timestamp}</div>
-          <div>Progresso: {currentIndex+1}/{mockTelemetryStream.length}</div>
         </div>
 
         <div className="relative border-2 border-slate-600 bg-[#070b19] p-1 rounded">
