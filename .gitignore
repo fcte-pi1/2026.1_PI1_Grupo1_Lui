@@ -334,3 +334,6 @@ venv/
 .env/
 env/
 .venv/
+
+#não salvar as corridas no github
+maze_runs/
