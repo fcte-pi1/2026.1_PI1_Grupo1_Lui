@@ -334,3 +334,10 @@ venv/
 .env/
 env/
 .venv/
+
+# ESP-IDF
+src/firmware/build/
+src/firmware/managed_components/
+src/firmware/sdkconfig
+src/firmware/sdkconfig.old
+src/firmware/dependencies.lock

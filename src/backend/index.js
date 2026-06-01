@@ -115,6 +115,7 @@ server.on('message', (msg, rinfo) => {
 
   } catch (err) {
     console.error('[UDP] Erro ao processar mensagem ou decodificar MsgPack:', err.message);
+    console.log('[UDP] Pacote bruto recebido (String):', msg.toString());
   }
 });
 
