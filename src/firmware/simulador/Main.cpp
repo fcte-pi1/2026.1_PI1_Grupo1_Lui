@@ -2,8 +2,20 @@
 #include "API.h"
 #include <string>
 #include <vector>
+#include <fstream>
+#include <sstream>
 
 using namespace std;
+
+string direcao_para_string(Direcao dir) {
+    switch(dir) {
+        case NORTE: return "NORTE";
+        case LESTE: return "LESTE";
+        case SUL: return "SUL";
+        case OESTE: return "OESTE";
+        default: return "NORTE";
+    }
+}
 
 Direcao direcao_relativa(Direcao atual, int offset) {
     return (Direcao)((atual + offset + 4) % 4);
@@ -45,9 +57,23 @@ int main() {
     Direcao direcao_atual = NORTE;
 
     while (distancia[x][y] != 0) {
-        if (paredeFrente())   ff_parede(x, y, direcao_atual);
-        if (paredeDireita())  ff_parede(x, y, direcao_relativa(direcao_atual, 1));
-        if (paredeEsquerda()) ff_parede(x, y, direcao_relativa(direcao_atual, 3));
+        // Coleta as paredes descobertas neste passo
+        vector<pair<pair<int,int>, string>> paredes_descobertas;
+        
+        if (paredeFrente()) {
+            ff_parede(x, y, direcao_atual);
+            paredes_descobertas.push_back({{x, y}, direcao_para_string(direcao_atual)});
+        }
+        if (paredeDireita()) {
+            Direcao dir_direita = direcao_relativa(direcao_atual, 1);
+            ff_parede(x, y, dir_direita);
+            paredes_descobertas.push_back({{x, y}, direcao_para_string(dir_direita)});
+        }
+        if (paredeEsquerda()) {
+            Direcao dir_esquerda = direcao_relativa(direcao_atual, 3);
+            ff_parede(x, y, dir_esquerda);
+            paredes_descobertas.push_back({{x, y}, direcao_para_string(dir_esquerda)});
+        }
 
         ff_visitado(x, y);
         ff_recalcular();
@@ -60,6 +86,14 @@ int main() {
 
         definirCor(x, y, 'c');
         definirTexto(x, y, to_string(distancia[x][y]));
+        
+        // Registra este passo no histórico
+        PassoExplorador passo;
+        passo.x = x;
+        passo.y = y;
+        passo.orientacao = direcao_para_string(direcao_atual);
+        passo.paredes = paredes_descobertas;
+        historico_exploracao.push_back(passo);
 
         Direcao proxima = ff_melhor_movimento(x, y, direcao_atual);
         girar_para(direcao_atual, proxima);
@@ -77,6 +111,51 @@ int main() {
 
     registrarLog("Objetivo atingido em (" + to_string(x) + "," + to_string(y) + ")");
     definirCor(x, y, 'Y');
+    
+    salva_json();
 
     return 0;
+}
+
+
+// Algoritmo pra salvar o json das paredes
+void salva_json(){
+    ofstream arquivo("mapa_exploracao.json");
+    if (!arquivo.is_open()) {
+        registrarLog("ERRO: Não foi possível abrir 'mapa_exploracao.json' para escrita");
+        return;
+    }
+
+    arquivo << "[\n";
+    
+    for (size_t i = 0; i < historico_exploracao.size(); i++) {
+        const auto& passo = historico_exploracao[i];
+        
+        arquivo << "  {\n";
+        arquivo << "    \"x\": " << passo.x << ",\n";
+        arquivo << "    \"y\": " << passo.y << ",\n";
+        arquivo << "    \"orientacao\": \"" << passo.orientacao << "\",\n";
+        arquivo << "    \"paredes\": [\n";
+        
+        for (size_t j = 0; j < passo.paredes.size(); j++) {
+            const auto& [coords, direcao] = passo.paredes[j];
+            arquivo << "      {\n";
+            arquivo << "        \"x\": " << coords.first << ",\n";
+            arquivo << "        \"y\": " << coords.second << ",\n";
+            arquivo << "        \"dir\": \"" << direcao << "\"\n";
+            arquivo << "      }";
+            if (j < passo.paredes.size() - 1) arquivo << ",";
+            arquivo << "\n";
+        }
+        
+        arquivo << "    ]\n";
+        arquivo << "  }";
+        if (i < historico_exploracao.size() - 1) arquivo << ",";
+        arquivo << "\n";
+    }
+    
+    arquivo << "]\n";
+    arquivo.close();
+    
+    registrarLog("Mapa salvo em 'mapa_exploracao.json'");
 }
