@@ -4,8 +4,20 @@
 #include <vector>
 #include <fstream>
 #include <sstream>
+#include <chrono>
+#include <sys/stat.h>
 
 using namespace std;
+
+// ID único para esta corrida (timestamp em millisegundos)
+string id_corrida = "";
+
+// apenas para testes já que não está conectando com o banco
+string gerar_id_corrida() {
+    auto agora = chrono::system_clock::now();
+    auto tempo = chrono::duration_cast<chrono::milliseconds>(agora.time_since_epoch());
+    return to_string(tempo.count());
+}
 
 string direcao_para_string(Direcao dir) {
     switch(dir) {
@@ -35,6 +47,10 @@ void girar_para(Direcao& atual, Direcao alvo) {
 }
 
 int main() {
+    // gera ID unico para esta corrida
+    id_corrida = gerar_id_corrida();
+    registrarLog("ID da corrida: " + id_corrida);
+    
     int larg = larguraLabirinto();
     int alt  = alturaLabirinto();
 
@@ -120,42 +136,55 @@ int main() {
 
 // Algoritmo pra salvar o json das paredes
 void salva_json(){
-    ofstream arquivo("mapa_exploracao.json");
+    // Cria diretório se nao existir (relativo a src/)
+    string diretorio = "../../maze_runs";
+    
+    #ifdef _WIN32
+        system(("if not exist " + diretorio + " mkdir " + diretorio).c_str());
+    #else
+        mkdir(diretorio.c_str(), 0755);
+    #endif
+    
+    string caminho = diretorio + "/corrida_" + id_corrida + ".json";
+    ofstream arquivo(caminho);
     if (!arquivo.is_open()) {
-        registrarLog("ERRO: Não foi possível abrir 'mapa_exploracao.json' para escrita");
+        registrarLog("ERRO: Não foi possível abrir '" + caminho + "' para escrita");
         return;
     }
 
-    arquivo << "[\n";
+    arquivo << "{\n";
+    arquivo << "  \"id_corrida\": \"" << id_corrida << "\",\n";
+    arquivo << "  \"historico\": [\n";
     
     for (size_t i = 0; i < historico_exploracao.size(); i++) {
         const auto& passo = historico_exploracao[i];
         
-        arquivo << "  {\n";
-        arquivo << "    \"x\": " << passo.x << ",\n";
-        arquivo << "    \"y\": " << passo.y << ",\n";
-        arquivo << "    \"orientacao\": \"" << passo.orientacao << "\",\n";
-        arquivo << "    \"paredes\": [\n";
+        arquivo << "    {\n";
+        arquivo << "      \"x\": " << passo.x << ",\n";
+        arquivo << "      \"y\": " << passo.y << ",\n";
+        arquivo << "      \"orientacao\": \"" << passo.orientacao << "\",\n";
+        arquivo << "      \"paredes\": [\n";
         
         for (size_t j = 0; j < passo.paredes.size(); j++) {
             const auto& [coords, direcao] = passo.paredes[j];
-            arquivo << "      {\n";
-            arquivo << "        \"x\": " << coords.first << ",\n";
-            arquivo << "        \"y\": " << coords.second << ",\n";
-            arquivo << "        \"dir\": \"" << direcao << "\"\n";
-            arquivo << "      }";
+            arquivo << "        {\n";
+            arquivo << "          \"x\": " << coords.first << ",\n";
+            arquivo << "          \"y\": " << coords.second << ",\n";
+            arquivo << "          \"dir\": \"" << direcao << "\"\n";
+            arquivo << "        }";
             if (j < passo.paredes.size() - 1) arquivo << ",";
             arquivo << "\n";
         }
         
-        arquivo << "    ]\n";
-        arquivo << "  }";
+        arquivo << "      ]\n";
+        arquivo << "    }";
         if (i < historico_exploracao.size() - 1) arquivo << ",";
         arquivo << "\n";
     }
     
-    arquivo << "]\n";
+    arquivo << "  ]\n";
+    arquivo << "}\n";
     arquivo.close();
     
-    registrarLog("Mapa salvo em 'mapa_exploracao.json'");
+    registrarLog("Mapa salvo em '" + caminho + "'");
 }
