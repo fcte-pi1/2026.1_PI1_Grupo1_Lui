@@ -1,13 +1,16 @@
 #include "flood_fill.h"
 
+// COMENTARIOS SEM ACENTO
+
 int largura = 0;
 int altura = 0;
 
 vector<vector<Celula>> labirinto;
 vector<vector<int>> distancia;
 vector<pair<int,int>> objetivo;
+vector<PassoExplorador> historico_exploracao;
 
-// checa se a coordenada (X, Y) está dentro dos limites do labirinto
+// checa se a coordenada (X, Y) esta dentro dos limites do labirinto
 bool dentro_limite(int x, int y){
     return x >= 0 && x < largura && y >= 0 && y < altura;
 }
@@ -22,7 +25,7 @@ bool passavel(int x, int y, Direcao dir){
     return false;
 }
 
-// distribui valor para cada célula
+// distribui valor para cada celula
 void propagar_bfs(){
     queue<pair<int,int>> fila;
 
@@ -50,7 +53,7 @@ void propagar_bfs(){
     }
 }
 
-// cria o labirinto, cria matriz de distâncias, define objetivos, cria paredes externas, calcula o flood fill inicial (primeira distribuição de valores)
+// cria o labirinto, cria matriz de distancias, define objetivos, cria paredes externas, calcula o flood fill inicial (primeira distribuicao de valores)
 void ff_inicializar(int larg, int alt, vector<pair<int,int>> meta){
     largura = larg;
     altura = alt;
@@ -102,18 +105,18 @@ void ff_recalcular(){
     propagar_bfs();
 }
 
-// marca a célula (X, Y) como já visitada
+// marca a celula (X, Y) como ja visitada
 void ff_visitado(int x, int y){
     labirinto[x][y].visitada = true;
 }
 
-// escolhe a melhor direção para mover (menor distância, desempata pela direção atual)
+// escolhe a melhor direcao para mover (menor distancia, desempata pela direcao atual)
 Direcao ff_melhor_movimento(int x, int y, Direcao direcao_atual){
     int melhor_val = DISTANCIA_INFINITA + 1;
     Direcao melhor_dir = direcao_atual;
 
-    // Ordem de prioridade: frente, direita, esquerda, trás
-    int prioridade[4] = {0, 1, 3, 2}; // offsets relativos à direção atual
+    // Ordem de prioridade: frente, direita, esquerda, tras
+    int prioridade[4] = {0, 1, 3, 2}; // offsets relativos a direcao atual
 
     for(int i = 0; i < 4; i++){
         Direcao d = (Direcao)((direcao_atual + prioridade[i]) % 4);
