@@ -341,4 +341,3 @@ src/firmware/managed_components/
 src/firmware/sdkconfig
 src/firmware/sdkconfig.old
 src/firmware/dependencies.lock
-.clangd

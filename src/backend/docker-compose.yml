@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   influxdb:
     image: influxdb:2.7
@@ -7,7 +9,7 @@ services:
     environment:
       - DOCKER_INFLUXDB_INIT_MODE=setup
       - DOCKER_INFLUXDB_INIT_USERNAME=admin
-      - DOCKER_INFLUXDB_INIT_PASSWORD=senha123456
+      - DOCKER_INFLUXDB_INIT_PASSWORD=123
       - DOCKER_INFLUXDB_INIT_ORG=micromouse
       - DOCKER_INFLUXDB_INIT_BUCKET=micromouse_telemetria
       - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=micromouse-token-12345
@@ -56,4 +58,3 @@ services:
 volumes:
   influxdb-data:
   influxdb-config:
-  grafana-data:
