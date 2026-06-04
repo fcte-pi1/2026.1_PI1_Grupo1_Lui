@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   influxdb:
     image: influxdb:2.7
@@ -7,7 +9,7 @@ services:
     environment:
       - DOCKER_INFLUXDB_INIT_MODE=setup
       - DOCKER_INFLUXDB_INIT_USERNAME=admin
-      - DOCKER_INFLUXDB_INIT_PASSWORD=senha123456
+      - DOCKER_INFLUXDB_INIT_PASSWORD=123
       - DOCKER_INFLUXDB_INIT_ORG=micromouse
       - DOCKER_INFLUXDB_INIT_BUCKET=micromouse_telemetria
       - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=micromouse-token-12345
@@ -38,21 +40,6 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
-  grafana:
-    image: grafana/grafana:latest
-    container_name: micromouse_grafana
-    ports:
-      - "3000:3000"
-    environment:
-      - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=micromouse_123
-    volumes:
-      - grafana-data:/var/lib/grafana
-    depends_on:
-      influxdb:
-        condition: service_healthy
-
 volumes:
   influxdb-data:
   influxdb-config:
-  grafana-data:
