@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import {
   BatteryFull, BatteryMedium, BatteryLow,
-  Gauge, Clock, Target, MapPin, Wifi, AlertTriangle, ShieldAlert, Trophy, Sliders, Zap
+  Gauge, Clock, Target, MapPin, Wifi, AlertTriangle, ShieldAlert, Trophy, Zap
 } from "lucide-react";
 import { RobotMap } from "./MapaTempoReal";
 
@@ -78,40 +78,48 @@ interface PropriedadesCartao {
   value: React.ReactNode;
   sub?: string;
   icon: React.ReactNode;
-  iconBg: string;
+  iconBg?: string;
   highlight?: boolean;
   critical?: boolean;
   progressPercent?: number;
 }
 
-function CartaoEstatistica({ label, value, sub, icon, iconBg, highlight, critical, progressPercent }: PropriedadesCartao) {
+function CartaoEstatistica({ label, value, sub, icon, highlight, critical, progressPercent }: PropriedadesCartao) {
+  const textLength = typeof value === 'string' ? value.length : 0;
+  const valueSizeClass = textLength > 12 
+    ? "text-lg md:text-xl" 
+    : textLength > 8 
+      ? "text-xl md:text-2xl" 
+      : "text-2xl md:text-3xl";
+
   return (
     <div
       style={critical ? { animation: "blink-critical-card 1.2s infinite alternate" } : undefined}
-      className={`rounded-2xl border shadow-md flex flex-col gap-4 p-5 transition-all ${critical
+      className={`rounded-2xl border shadow-sm flex flex-col justify-between p-5 min-h-[145px] transition-all bg-white ${critical
           ? "border-red-500 text-white shadow-red-100"
           : highlight
-            ? "bg-white border-red-400 shadow-red-100"
-            : "bg-white border-slate-100"
+            ? "border-blue-400 shadow-blue-100"
+            : "border-slate-100"
         }`}
     >
-      <div className="flex items-center justify-between border-b border-slate-50/80 pb-2 mb-1">
-        <p className={`uppercase tracking-wider text-[0.68rem] font-black ${critical ? "text-red-200" : "text-slate-400"}`}>
+      <div className="flex items-center gap-1.5 pb-2">
+        <span className={`uppercase tracking-wider text-[0.68rem] font-black ${critical ? "text-red-200" : "text-slate-400"}`}>
           {label}
-        </p>
-        <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${critical ? "bg-red-800/60" : iconBg}`}>
+        </span>
+        <span className="shrink-0">
           {icon}
-        </div>
+        </span>
       </div>
-      <div>
-        <div className={`tabular-nums text-3xl font-black tracking-tight ${critical ? "text-white" : "text-slate-800"}`}>
+
+      <div className="flex-1 flex flex-col justify-center my-1">
+        <div className={`tabular-nums font-black tracking-tight ${valueSizeClass} ${critical ? "text-white" : "text-slate-800"}`}>
           {value}
         </div>
-        {sub && <p className={`mt-1 text-xs font-medium ${critical ? "text-red-200" : "text-slate-400"}`}>{sub}</p>}
+        {sub && <p className={`mt-0.5 text-xs font-semibold ${critical ? "text-red-200" : "text-slate-400"}`}>{sub}</p>}
       </div>
 
       {progressPercent !== undefined && (
-        <div className="w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden mt-1">
+        <div className="w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden mt-2">
           <div
             className={`h-full rounded-full transition-all duration-500 ${
               critical
@@ -133,15 +141,6 @@ function CartaoEstatistica({ label, value, sub, icon, iconBg, highlight, critica
 export function Dashboard() {
   const [indiceAtual, setIndiceAtual] = useState(0);
 
-  // Estados para Simulação Manual (Modo Desenvolvedor)
-  const [isSimulacaoManual, setIsSimulacaoManual] = useState(false);
-  const [manualEstado, setManualEstado] = useState("MAPPING");
-  const [manualBateria, setManualBateria] = useState(7.4);
-  const [manualPosX, setManualPosX] = useState(0);
-  const [manualPosY, setManualPosY] = useState(7);
-  const [manualOrientacao, setManualOrientacao] = useState<'NORTE' | 'SUL' | 'LESTE' | 'OESTE'>("NORTE");
-  const [mostrarPainelSimulacao, setMostrarPainelSimulacao] = useState(false);
-
   // Estados de Telemetria Dinâmicos
   const [celulasExploradas, setCelulasExploradas] = useState<Record<string, CelulaMapa>>({});
   const [historicoErros, setHistoricoErros] = useState<RegistoErro[]>([]);
@@ -154,19 +153,7 @@ export function Dashboard() {
   const tempoInicialRef = useRef<number | null>(null);
 
   // Determinar qual telemetria usar
-  const telemetriaAtual: DadosTelemetria = isSimulacaoManual ? {
-    timestamp: Math.floor(Date.now() / 1000),
-    estado_fsm: manualEstado,
-    bateria_v: manualBateria,
-    posicao_x: manualPosX,
-    posicao_y: manualPosY,
-    orientacao: manualOrientacao,
-    tamanho_grade: 8,
-    paredes_atuais: { norte: manualPosY === 0, sul: manualPosY === 7, leste: manualPosX === 7, oeste: manualPosX === 0 },
-    causa_erro: manualEstado === 'ERROR' ? "Falha de Hardware Simulada (Pico de corrente >2A)." : undefined,
-    erro_pid: manualEstado === 'FAST_RUN' ? 0.015 - (Math.random() * 0.03) : 0,
-    velocidade_media: manualEstado === 'FAST_RUN' ? 1.84 : 0.35
-  } : FLUXO_MOCK_TELEMETRIA[indiceAtual];
+  const telemetriaAtual: DadosTelemetria = FLUXO_MOCK_TELEMETRIA[indiceAtual];
 
   // Limiar de Segurança para a Bateria
   const LIMIAR_BATERIA_SEGURANCA = 6.8;
@@ -174,10 +161,8 @@ export function Dashboard() {
   const possuiErroCritico = telemetriaAtual.estado_fsm === 'ERROR';
   const isFastRun = telemetriaAtual.estado_fsm === 'FAST_RUN';
 
-  // Loop de Simulação Automática (se manual estiver desligado)
+  // Loop de Simulação Automática
   useEffect(() => {
-    if (isSimulacaoManual) return;
-
     const intervalo = setInterval(() => {
       setIndiceAtual((ant) => {
         const proximo = ant < FLUXO_MOCK_TELEMETRIA.length - 1 ? ant + 1 : 0;
@@ -213,22 +198,7 @@ export function Dashboard() {
       });
     }, 1500);
     return () => clearInterval(intervalo);
-  }, [isSimulacaoManual]);
-
-  // Efeito para registrar células exploradas no modo manual
-  useEffect(() => {
-    if (isSimulacaoManual) {
-      const chaveMapa = `${telemetriaAtual.posicao_x}-${telemetriaAtual.posicao_y}`;
-      setCelulasExploradas(prev => prev[chaveMapa] ? prev : {
-        ...prev,
-        [chaveMapa]: {
-          x: telemetriaAtual.posicao_x,
-          y: telemetriaAtual.posicao_y,
-          paredes: telemetriaAtual.paredes_atuais
-        }
-      });
-    }
-  }, [isSimulacaoManual, telemetriaAtual.posicao_x, telemetriaAtual.posicao_y]);
+  }, []);
 
   // Efeito do Cronômetro de Corrida de Alta Performance (FAST_RUN)
   useEffect(() => {
@@ -330,8 +300,7 @@ export function Dashboard() {
       {/* Banner de Bateria Baixa/Crítica Intermitente */}
       <div
         style={bateriaCritica ? { animation: "blink-critical-banner 1s infinite" } : undefined}
-        className={`absolute left-0 w-full z-45 transition-all duration-500 ease-in-out ${bateriaCritica && !possuiErroCritico ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
-          }`}
+        className={`absolute left-0 w-full z-45 transition-all duration-500 ease-in-out ${bateriaCritica && !possuiErroCritico ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'}`}
       >
         <div className="text-white px-8 py-3 flex items-center justify-center gap-4 shadow-xl">
           <Zap className="w-6 h-6 animate-bounce" />
@@ -342,12 +311,11 @@ export function Dashboard() {
       </div>
 
       {/* Ajusta margem superior se houver notificações ativas */}
-      <div className={`px-8 py-5 flex items-center justify-between shrink-0 bg-white border-b border-slate-200 shadow-sm z-10 transition-all duration-300 ${possuiErroCritico || bateriaCritica ? 'mt-12' : 'mt-0'
-        }`}>
+      <div className={`px-8 py-5 flex items-center justify-between shrink-0 bg-white border-b border-slate-200 shadow-sm z-10 transition-all duration-300 ${possuiErroCritico || bateriaCritica ? 'mt-12' : 'mt-0'}`}>
         <div>
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-black text-slate-800 tracking-tight">Dashboard</h1>
-            <div className="flex items-center gap-1.5 bg-[#ECFDF5] border border-[#10B981]/25 text-[#10B981] px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 shrink-0">
+            <div className="flex items-center gap-1.5 bg-[#ECFDF5] border border-[#10B981]/25 text-[#10B981] px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider flex items-center shrink-0">
               <span className="w-1.5 h-1.5 bg-[#10B981] rounded-full animate-pulse" />
               AO VIVO
             </div>
@@ -357,152 +325,14 @@ export function Dashboard() {
           </p>
         </div>
 
-        <div className="flex items-center gap-4">
-          {/* Botão de Painel de Simulação do Desenvolvedor */}
-          <button
-            onClick={() => setMostrarPainelSimulacao(!mostrarPainelSimulacao)}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-semibold tracking-wide transition-all ${isSimulacaoManual
-                ? "bg-amber-500/10 border-amber-500/30 text-amber-500 hover:bg-amber-500/20"
-                : "bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200"
-              }`}
-          >
-            <Sliders className="w-3.5 h-3.5" />
-            <span>Simulador {isSimulacaoManual ? "(Manual)" : ""}</span>
-          </button>
-
-          <div className="flex flex-col items-end gap-1">
-            <div className="flex items-center gap-2">
-              <Wifi className={`w-3.5 h-3.5 animate-pulse ${possuiErroCritico ? 'text-red-500' : 'text-emerald-400'}`} />
-              <span className="text-xs text-slate-400 uppercase tracking-wider font-medium">Último Pacote:</span>
-              <span className="font-mono text-sm text-slate-500 font-medium">{telemetriaAtual.timestamp}</span>
-            </div>
+        <div className="flex flex-col items-end gap-1">
+          <div className="flex items-center gap-2">
+            <Wifi className={`w-3.5 h-3.5 animate-pulse ${possuiErroCritico ? 'text-red-500' : 'text-emerald-400'}`} />
+            <span className="text-xs text-slate-400 uppercase tracking-wider font-medium">Último Pacote:</span>
+            <span className="font-mono text-sm text-slate-500 font-medium">{telemetriaAtual.timestamp}</span>
           </div>
         </div>
       </div>
-
-      {/* Painel do Simulador do Desenvolvedor (Expansível) */}
-      {mostrarPainelSimulacao && (
-        <div className="mx-8 mt-4 p-4 bg-slate-900 border border-slate-800 rounded-xl flex flex-col gap-4 text-slate-200 shadow-md">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-2">
-            <span className="font-extrabold text-xs tracking-wider uppercase text-amber-500 flex items-center gap-1.5">
-              <Sliders className="w-4 h-4 text-amber-500" />
-              Controles do Simulador
-            </span>
-            <div className="flex items-center gap-3">
-              <label className="flex items-center gap-2 text-xs font-semibold cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={isSimulacaoManual}
-                  onChange={(e) => {
-                    setIsSimulacaoManual(e.target.checked);
-                    if (e.target.checked) {
-                      setManualEstado(telemetriaAtual.estado_fsm);
-                      setManualBateria(telemetriaAtual.bateria_v);
-                      setManualPosX(telemetriaAtual.posicao_x);
-                      setManualPosY(telemetriaAtual.posicao_y);
-                      setManualOrientacao(telemetriaAtual.orientacao);
-                    }
-                  }}
-                  className="rounded border-slate-700 bg-slate-850 text-amber-500 focus:ring-amber-500"
-                />
-                Ativar Controle Manual
-              </label>
-            </div>
-          </div>
-
-          {isSimulacaoManual ? (
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-              {/* Select Estado FSM */}
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[10px] uppercase font-bold text-slate-400">Estado FSM (estado_robo)</label>
-                <select
-                  value={manualEstado}
-                  onChange={(e) => setManualEstado(e.target.value)}
-                  className="bg-slate-850 border border-slate-750 text-xs font-bold text-slate-100 rounded px-2.5 py-1.5 focus:border-amber-500 focus:outline-none"
-                >
-                  <option value="CALIBRATING">CALIBRATING</option>
-                  <option value="MAPPING">MAPPING</option>
-                  <option value="GOAL_REACHED">GOAL_REACHED</option>
-                  <option value="FAST_RUN">FAST_RUN (Alta Perf.)</option>
-                  <option value="ERROR">ERROR (Falha Crit.)</option>
-                </select>
-              </div>
-
-              {/* Slider Bateria */}
-              <div className="flex flex-col gap-1.5">
-                <div className="flex justify-between items-center">
-                  <label className="text-[10px] uppercase font-bold text-slate-400">Bateria (Volts)</label>
-                  <span className={`font-mono text-xs font-bold ${manualBateria < 6.8 ? 'text-red-400' : 'text-emerald-400'}`}>
-                    {manualBateria.toFixed(2)}V
-                  </span>
-                </div>
-                <input
-                  type="range"
-                  min="5.5"
-                  max="8.4"
-                  step="0.05"
-                  value={manualBateria}
-                  onChange={(e) => setManualBateria(parseFloat(e.target.value))}
-                  className="w-full h-1 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-amber-500"
-                />
-              </div>
-
-              {/* Pos X */}
-              <div className="flex flex-col gap-1.5">
-                <div className="flex justify-between items-center">
-                  <label className="text-[10px] uppercase font-bold text-slate-400">Posição X</label>
-                  <span className="font-mono text-xs font-bold text-slate-300">{manualPosX}</span>
-                </div>
-                <input
-                  type="range"
-                  min="0"
-                  max="7"
-                  step="1"
-                  value={manualPosX}
-                  onChange={(e) => setManualPosX(parseInt(e.target.value))}
-                  className="w-full h-1 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-amber-500"
-                />
-              </div>
-
-              {/* Pos Y */}
-              <div className="flex flex-col gap-1.5">
-                <div className="flex justify-between items-center">
-                  <label className="text-[10px] uppercase font-bold text-slate-400">Posição Y</label>
-                  <span className="font-mono text-xs font-bold text-slate-300">{manualPosY}</span>
-                </div>
-                <input
-                  type="range"
-                  min="0"
-                  max="7"
-                  step="1"
-                  value={manualPosY}
-                  onChange={(e) => setManualPosY(parseInt(e.target.value))}
-                  className="w-full h-1 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-amber-500"
-                />
-              </div>
-
-              {/* Orientação */}
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[10px] uppercase font-bold text-slate-400">Orientação</label>
-                <select
-                  value={manualOrientacao}
-                  onChange={(e) => setManualOrientacao(e.target.value as any)}
-                  className="bg-slate-850 border border-slate-750 text-xs font-bold text-slate-100 rounded px-2.5 py-1.5 focus:border-amber-500 focus:outline-none"
-                >
-                  <option value="NORTE">NORTE</option>
-                  <option value="SUL">SUL</option>
-                  <option value="LESTE">LESTE</option>
-                  <option value="OESTE">OESTE</option>
-                </select>
-              </div>
-            </div>
-          ) : (
-            <div className="text-xs text-slate-400 py-1 font-medium">
-              Simulação automática em andamento. Ative "Controle Manual" para simular percursos específicos ou acionar alarmes críticos interativamente.
-            </div>
-          )}
-        </div>
-      )}
 
       {/* Grid de Cartões Estatísticos adaptável */}
       <div className="px-8 pt-6 pb-4 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 shrink-0">
@@ -525,7 +355,7 @@ export function Dashboard() {
         />
 
         <CartaoEstatistica
-          label="Cronómetro"
+          label="Cronômetro"
           value={isFastRun ? formatarTempo(tempoVoltaAtual) : "- - : - - . - -"}
           sub={isFastRun ? "tempo de volta ativo" : "aguardando largada"}
           iconBg="bg-violet-50"
@@ -577,7 +407,7 @@ export function Dashboard() {
 
           {/* Botão de logs flutuante, visível apenas fora do modo de alta performance */}
           {!isFastRun && (
-            <div className="absolute top-6 right-6 bottom-6 z-30 flex flex-col items-end gap-3 pointer-events-none">
+            <div className="absolute bottom-6 right-6 z-30 flex flex-col items-end gap-3 pointer-events-none">
 
               {/* Botão de Controlo (Alternar) */}
               <button
@@ -601,39 +431,39 @@ export function Dashboard() {
 
         {/* Lado Direito: Painel de Performance (FAST_RUN) ou Gaveta de Logs (Outros modos) */}
         {isFastRun ? (
-          <div className="w-96 shrink-0 bg-[#0b1329] border border-cyan-500/30 rounded-2xl p-5 flex flex-col gap-5 shadow-2xl text-slate-100 animate-in fade-in slide-in-from-right-5 duration-350">
+          <div className="w-96 shrink-0 bg-white border border-slate-200 shadow-lg rounded-2xl p-5 flex flex-col gap-5 text-slate-800 animate-in fade-in slide-in-from-right-5 duration-355">
             {/* Cabeçalho de Alta Performance */}
-            <div className="flex items-center justify-between border-b border-slate-850 pb-3 shrink-0">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3 shrink-0">
               <div className="flex items-center gap-2">
                 <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
                 </span>
-                <span className="font-extrabold text-[10px] uppercase tracking-widest text-cyan-400">MODO ALTA PERFORMANCE</span>
+                <span className="font-extrabold text-[10px] uppercase tracking-widest text-blue-600">MODO ALTA PERFORMANCE</span>
               </div>
-              <span className="text-[9px] bg-cyan-500/10 text-cyan-400 font-bold px-2.5 py-0.5 rounded-full border border-cyan-500/20">FAST_RUN</span>
+              <span className="text-[9px] bg-blue-50 text-blue-600 font-bold px-2.5 py-0.5 rounded-full border border-blue-100">FAST_RUN</span>
             </div>
 
             {/* Cronômetro Principal da Volta */}
-            <div className="bg-slate-900/60 border border-slate-800/80 rounded-xl p-4 flex flex-col items-center justify-center gap-1.5 shadow-inner">
-              <span className="text-slate-400 text-[10px] font-bold uppercase tracking-wider">Tempo da Volta Atual</span>
-              <span className="font-mono text-4xl font-extrabold tracking-wider text-cyan-400 drop-shadow-[0_0_10px_rgba(34,211,238,0.4)]">
+            <div className="bg-blue-50/50 border border-blue-100/80 rounded-xl p-4 flex flex-col items-center justify-center gap-1.5 shadow-sm">
+              <span className="text-slate-500 text-[10px] font-bold uppercase tracking-wider">Tempo da Volta Atual</span>
+              <span className="font-mono text-4xl font-extrabold tracking-wider text-blue-600">
                 {formatarTempo(tempoVoltaAtual)}
               </span>
             </div>
 
             {/* Sub-estatísticas de Tempo */}
             <div className="grid grid-cols-2 gap-3 shrink-0">
-              <div className="bg-slate-900/40 border border-slate-800/80 rounded-xl p-3 flex flex-col gap-1">
+              <div className="bg-slate-50 border border-slate-100 rounded-xl p-3 flex flex-col gap-1">
                 <span className="text-slate-500 text-[9px] font-bold uppercase tracking-wider">Recorde da Corrida</span>
-                <span className="font-mono text-base font-bold text-emerald-400 flex items-center gap-1.5">
+                <span className="font-mono text-base font-bold text-emerald-600 flex items-center gap-1.5">
                   <Trophy className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
                   {melhorTempo ? formatarTempo(melhorTempo) : "--:--.--"}
                 </span>
               </div>
-              <div className="bg-slate-900/40 border border-slate-800/80 rounded-xl p-3 flex flex-col gap-1">
+              <div className="bg-slate-50 border border-slate-100 rounded-xl p-3 flex flex-col gap-1">
                 <span className="text-slate-500 text-[9px] font-bold uppercase tracking-wider">Velocidade Corrida</span>
-                <span className="font-mono text-base font-bold text-blue-400">
+                <span className="font-mono text-base font-bold text-blue-600">
                   {telemetriaAtual.velocidade_media ? `${telemetriaAtual.velocidade_media.toFixed(2)} m/s` : "1.84 m/s"}
                 </span>
               </div>
@@ -642,44 +472,44 @@ export function Dashboard() {
             {/* Seção Principal de Métricas do Motor & PID */}
             <div className="flex-1 flex flex-col gap-4 min-h-0 overflow-y-auto pr-1">
               <div>
-                <span className="text-slate-400 text-[10px] font-extrabold uppercase tracking-wider block mb-2">Tração dos Motores</span>
-                <div className="bg-slate-900/30 border border-slate-850 rounded-xl p-3 flex flex-col gap-3">
+                <span className="text-slate-500 text-[10px] font-extrabold uppercase tracking-wider block mb-2">Tração dos Motores</span>
+                <div className="bg-slate-50 border border-slate-100 rounded-xl p-3 flex flex-col gap-3">
                   <div>
                     <div className="flex justify-between items-center text-[11px] mb-1 font-medium">
-                      <span className="text-slate-400">PWM Motor Esquerdo</span>
-                      <span className="font-mono text-slate-200">{telemetriaAtual.pwm_esq !== undefined ? telemetriaAtual.pwm_esq : 210} / 255</span>
+                      <span className="text-slate-500">PWM Motor Esquerdo</span>
+                      <span className="font-mono text-slate-700">{telemetriaAtual.pwm_esq !== undefined ? telemetriaAtual.pwm_esq : 210} / 255</span>
                     </div>
-                    <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
-                      <div className="bg-cyan-500 h-full rounded-full transition-all duration-300" style={{ width: `${((telemetriaAtual.pwm_esq || 210) / 255) * 100}%` }} />
+                    <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
+                      <div className="bg-blue-600 h-full rounded-full transition-all duration-300" style={{ width: `${((telemetriaAtual.pwm_esq || 210) / 255) * 100}%` }} />
                     </div>
                   </div>
                   <div>
                     <div className="flex justify-between items-center text-[11px] mb-1 font-medium">
-                      <span className="text-slate-400">PWM Motor Direito</span>
-                      <span className="font-mono text-slate-200">{telemetriaAtual.pwm_dir !== undefined ? telemetriaAtual.pwm_dir : 212} / 255</span>
+                      <span className="text-slate-500">PWM Motor Direito</span>
+                      <span className="font-mono text-slate-700">{telemetriaAtual.pwm_dir !== undefined ? telemetriaAtual.pwm_dir : 212} / 255</span>
                     </div>
-                    <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
-                      <div className="bg-cyan-500 h-full rounded-full transition-all duration-300" style={{ width: `${((telemetriaAtual.pwm_dir || 212) / 255) * 100}%` }} />
+                    <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
+                      <div className="bg-blue-600 h-full rounded-full transition-all duration-300" style={{ width: `${((telemetriaAtual.pwm_dir || 212) / 255) * 100}%` }} />
                     </div>
                   </div>
                 </div>
               </div>
 
               <div>
-                <span className="text-slate-400 text-[10px] font-extrabold uppercase tracking-wider block mb-2">Controle de Alinhamento (PID)</span>
-                <div className="bg-slate-900/30 border border-slate-850 rounded-xl p-3 flex flex-col gap-2.5">
+                <span className="text-slate-500 text-[10px] font-extrabold uppercase tracking-wider block mb-2">Controle de Alinhamento (PID)</span>
+                <div className="bg-slate-50 border border-slate-100 rounded-xl p-3 flex flex-col gap-2.5">
                   <div className="flex justify-between items-center text-[11px]">
-                    <span className="text-slate-400">Erro Lateral instantâneo</span>
-                    <span className={`font-mono font-bold ${Math.abs(telemetriaAtual.erro_pid || 0) < 0.03 ? 'text-emerald-400' : 'text-amber-400'}`}>
+                    <span className="text-slate-500">Erro Lateral instantâneo</span>
+                    <span className={`font-mono font-bold ${Math.abs(telemetriaAtual.erro_pid || 0) < 0.03 ? 'text-emerald-600' : 'text-amber-600'}`}>
                       {telemetriaAtual.erro_pid !== undefined ? (telemetriaAtual.erro_pid > 0 ? `+${telemetriaAtual.erro_pid.toFixed(3)}` : telemetriaAtual.erro_pid.toFixed(3)) : "0.000"}
                     </span>
                   </div>
 
                   {/* Régua de erro visual */}
-                  <div className="relative w-full h-2.5 bg-slate-800 rounded-full flex items-center justify-center">
-                    <div className="absolute w-0.5 h-3.5 bg-slate-600 left-1/2 -translate-x-1/2" />
+                  <div className="relative w-full h-2.5 bg-slate-200 rounded-full flex items-center justify-center">
+                    <div className="absolute w-0.5 h-3.5 bg-slate-400 left-1/2 -translate-x-1/2" />
                     <div
-                      className="absolute h-full w-2.5 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.8)] transition-all duration-300"
+                      className="absolute h-full w-2.5 rounded-full bg-blue-600 shadow-sm transition-all duration-300"
                       style={{
                         left: `calc(50% + ${(telemetriaAtual.erro_pid || 0) * 100}%)`,
                         transform: 'translateX(-50%)'
@@ -691,41 +521,41 @@ export function Dashboard() {
             </div>
 
             {/* Painel do Fim da Corrida */}
-            <div className="bg-cyan-950/20 border border-cyan-500/15 rounded-xl p-3 flex items-center justify-between text-xs shrink-0">
-              <span className="text-slate-400 font-medium">Posição do Robô:</span>
-              <span className="font-mono font-bold text-cyan-400">({telemetriaAtual.posicao_x}, {telemetriaAtual.posicao_y})</span>
+            <div className="bg-slate-50 border border-slate-100 rounded-xl p-3 flex items-center justify-between text-xs shrink-0">
+              <span className="text-slate-500 font-medium">Posição do Robô:</span>
+              <span className="font-mono font-bold text-blue-600">({telemetriaAtual.posicao_x}, {telemetriaAtual.posicao_y})</span>
             </div>
           </div>
         ) : (
           isLogAberto && (
-            <div className="w-96 shrink-0 bg-slate-900/95 border border-slate-850 rounded-2xl flex flex-col shadow-2xl text-slate-100 animate-in fade-in slide-in-from-right-5 duration-300">
+            <div className="w-96 shrink-0 bg-white border border-slate-200 rounded-2xl flex flex-col shadow-lg text-slate-800 animate-in fade-in slide-in-from-right-5 duration-300">
               {/* Cabeçalho da Gaveta de Logs */}
-              <div className="p-4 border-b border-slate-800 bg-slate-950/60 flex items-center justify-between rounded-t-2xl">
-                <span className="font-bold text-slate-300 text-xs uppercase tracking-wider">Histórico Crítico</span>
-                <span className="bg-slate-800 text-sky-400 text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-sky-500/10">
+              <div className="p-4 border-b border-slate-100 bg-slate-50 flex items-center justify-between rounded-t-2xl">
+                <span className="font-bold text-slate-700 text-xs uppercase tracking-wider">Histórico Crítico</span>
+                <span className="bg-slate-200 text-slate-700 text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-slate-300">
                   {historicoErros.length} EVENTOS
                 </span>
               </div>
 
               {/* Corpo da Gaveta de Logs */}
-              <div className="overflow-y-auto p-4 flex flex-col gap-3 flex-1 scrollbar-thin scrollbar-thumb-slate-700">
+              <div className="overflow-y-auto p-4 flex flex-col gap-3 flex-1 scrollbar-thin scrollbar-thumb-slate-200">
                 {historicoErros.length === 0 ? (
                   <div className="py-12 text-center flex flex-col items-center gap-3 opacity-60">
-                    <ShieldAlert className="w-8 h-8 text-slate-500 animate-pulse" />
-                    <p className="text-sm text-slate-400 font-medium font-sans">Nenhum evento crítico registado.</p>
+                    <ShieldAlert className="w-8 h-8 text-slate-400 animate-pulse" />
+                    <p className="text-sm text-slate-500 font-medium font-sans">Nenhum evento crítico registado.</p>
                   </div>
                 ) : (
                   historicoErros.map((erro) => (
-                    <div key={erro.id} className="p-3 bg-slate-950/40 border border-slate-800 rounded-xl flex flex-col gap-1.5 animate-in slide-in-from-right-2 shadow-sm">
+                    <div key={erro.id} className="p-3 bg-slate-50 border border-slate-100 rounded-xl flex flex-col gap-1.5 animate-in slide-in-from-right-2 shadow-sm">
                       <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-bold text-red-400 uppercase tracking-wider">Falha de Hardware</span>
-                        <span className="text-[10px] font-mono text-slate-500">{erro.timestamp}</span>
+                        <span className="text-[10px] font-bold text-red-600 uppercase tracking-wider">Falha de Hardware</span>
+                        <span className="text-[10px] font-mono text-slate-400">{erro.timestamp}</span>
                       </div>
-                      <p className="text-sm text-slate-200 font-medium leading-snug">
+                      <p className="text-sm text-slate-700 font-medium leading-snug">
                         {erro.causa}
                       </p>
-                      <div className="mt-1 flex items-center gap-1.5 text-xs text-sky-400/90 font-medium">
-                        <MapPin className="w-3.5 h-3.5 text-sky-500" />
+                      <div className="mt-1 flex items-center gap-1.5 text-xs text-blue-600/90 font-medium">
+                        <MapPin className="w-3.5 h-3.5 text-blue-500" />
                         Ocorrência na célula: ({erro.posicao_x}, {erro.posicao_y})
                       </div>
                     </div>
