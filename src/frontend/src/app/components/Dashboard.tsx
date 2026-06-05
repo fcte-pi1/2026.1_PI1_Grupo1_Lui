@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   BatteryFull, BatteryMedium, BatteryLow,
-  Gauge, Clock, Target, MapPin, Activity, Wifi, AlertTriangle, ShieldAlert
+  Gauge, Clock, Target, MapPin, Wifi, AlertTriangle, ShieldAlert, Trophy, Sliders, Zap
 } from "lucide-react";
 import { RobotMap } from "./MapaTempoReal";
 
@@ -21,6 +21,10 @@ export interface DadosTelemetria {
   tamanho_grade: number;
   paredes_atuais: { norte: boolean; sul: boolean; leste: boolean; oeste: boolean };
   causa_erro?: string;
+  erro_pid?: number;
+  pwm_esq?: number;
+  pwm_dir?: number;
+  velocidade_media?: number;
 }
 
 export interface RegistoErro {
@@ -32,14 +36,41 @@ export interface RegistoErro {
 }
 
 const FLUXO_MOCK_TELEMETRIA: DadosTelemetria[] = [
-  { timestamp: 1715456789, estado_fsm: "CALIBRATING", bateria_v: 7.4, posicao_x: 0, posicao_y: 7, orientacao: "NORTE", tamanho_grade: 8, paredes_atuais: { norte: false, sul: true, leste: true, oeste: true } },
-  { timestamp: 1715456790, estado_fsm: "MAPPING", bateria_v: 7.4, posicao_x: 0, posicao_y: 6, orientacao: "NORTE", tamanho_grade: 8, paredes_atuais: { norte: false, sul: false, leste: true, oeste: true } },
-  { timestamp: 1715456791, estado_fsm: "MAPPING", bateria_v: 7.3, posicao_x: 0, posicao_y: 5, orientacao: "LESTE", tamanho_grade: 8, paredes_atuais: { norte: true, sul: false, leste: false, oeste: true } },
-  { timestamp: 1715456792, estado_fsm: "MAPPING", bateria_v: 7.3, posicao_x: 1, posicao_y: 5, orientacao: "LESTE", tamanho_grade: 8, paredes_atuais: { norte: true, sul: true, leste: false, oeste: false } },
-  { timestamp: 1715456793, estado_fsm: "MAPPING", bateria_v: 7.2, posicao_x: 2, posicao_y: 5, orientacao: "NORTE", tamanho_grade: 8, paredes_atuais: { norte: false, sul: true, leste: true, oeste: false } },
-  { timestamp: 1715456794, estado_fsm: "MAPPING", bateria_v: 7.2, posicao_x: 2, posicao_y: 4, orientacao: "NORTE", tamanho_grade: 8, paredes_atuais: { norte: false, sul: false, leste: true, oeste: true } },
-  { timestamp: 1715456795, estado_fsm: "ERROR", bateria_v: 6.5, posicao_x: 2, posicao_y: 4, orientacao: "NORTE", tamanho_grade: 8, paredes_atuais: { norte: false, sul: false, leste: true, oeste: true }, causa_erro: "Tração bloqueada: Pico de corrente no motor esquerdo (>2A)." },
-  { timestamp: 1715456796, estado_fsm: "ERROR", bateria_v: 6.5, posicao_x: 2, posicao_y: 4, orientacao: "NORTE", tamanho_grade: 8, paredes_atuais: { norte: false, sul: false, leste: true, oeste: true }, causa_erro: "Tração bloqueada: Pico de corrente no motor esquerdo (>2A)." }
+  // FASE DE CALIBRAÇÃO (Bateria boa)
+  { timestamp: 1715456780, estado_fsm: "CALIBRATING", bateria_v: 7.42, posicao_x: 0, posicao_y: 7, orientacao: "NORTE", tamanho_grade: 8, paredes_atuais: { norte: false, sul: true, leste: true, oeste: true }, erro_pid: 0 },
+
+  // FASE DE MAPEAMENTO (Bateria decaindo, mapeando células)
+  { timestamp: 1715456781, estado_fsm: "MAPPING", bateria_v: 7.38, posicao_x: 0, posicao_y: 6, orientacao: "NORTE", tamanho_grade: 8, paredes_atuais: { norte: false, sul: false, leste: true, oeste: true }, erro_pid: 0.02 },
+  { timestamp: 1715456782, estado_fsm: "MAPPING", bateria_v: 7.33, posicao_x: 0, posicao_y: 5, orientacao: "LESTE", tamanho_grade: 8, paredes_atuais: { norte: true, sul: false, leste: false, oeste: true }, erro_pid: -0.01 },
+  { timestamp: 1715456783, estado_fsm: "MAPPING", bateria_v: 7.28, posicao_x: 1, posicao_y: 5, orientacao: "LESTE", tamanho_grade: 8, paredes_atuais: { norte: true, sul: true, leste: false, oeste: false }, erro_pid: 0.04 },
+  { timestamp: 1715456784, estado_fsm: "MAPPING", bateria_v: 7.21, posicao_x: 2, posicao_y: 5, orientacao: "NORTE", tamanho_grade: 8, paredes_atuais: { norte: false, sul: true, leste: true, oeste: false }, erro_pid: 0.01 },
+  { timestamp: 1715456785, estado_fsm: "MAPPING", bateria_v: 7.15, posicao_x: 2, posicao_y: 4, orientacao: "NORTE", tamanho_grade: 8, paredes_atuais: { norte: false, sul: false, leste: true, oeste: true }, erro_pid: -0.02 },
+
+  // ALERTA DE BATERIA CRÍTICA DURANTE MAPEAMENTO (< 6.8V)
+  { timestamp: 1715456786, estado_fsm: "MAPPING", bateria_v: 6.78, posicao_x: 2, posicao_y: 3, orientacao: "NORTE", tamanho_grade: 8, paredes_atuais: { norte: false, sul: false, leste: true, oeste: true }, erro_pid: 0.03 },
+  { timestamp: 1715456787, estado_fsm: "MAPPING", bateria_v: 6.72, posicao_x: 3, posicao_y: 3, orientacao: "LESTE", tamanho_grade: 8, paredes_atuais: { norte: true, sul: true, leste: false, oeste: false }, erro_pid: 0.01 },
+  { timestamp: 1715456788, estado_fsm: "MAPPING", bateria_v: 6.65, posicao_x: 4, posicao_y: 3, orientacao: "LESTE", tamanho_grade: 8, paredes_atuais: { norte: true, sul: false, leste: false, oeste: false }, erro_pid: -0.04 },
+
+  // META ALCANÇADA
+  { timestamp: 1715456789, estado_fsm: "GOAL_REACHED", bateria_v: 7.30, posicao_x: 5, posicao_y: 3, orientacao: "NORTE", tamanho_grade: 8, paredes_atuais: { norte: false, sul: true, leste: true, oeste: false }, erro_pid: 0 },
+
+  // FASE DE ALTA PERFORMANCE (FAST_RUN)
+  { timestamp: 1715456790, estado_fsm: "FAST_RUN", bateria_v: 7.30, posicao_x: 0, posicao_y: 7, orientacao: "NORTE", tamanho_grade: 8, paredes_atuais: { norte: false, sul: true, leste: true, oeste: true }, erro_pid: 0.01, velocidade_media: 1.62, pwm_esq: 210, pwm_dir: 212 },
+  { timestamp: 1715456791, estado_fsm: "FAST_RUN", bateria_v: 7.28, posicao_x: 0, posicao_y: 6, orientacao: "NORTE", tamanho_grade: 8, paredes_atuais: { norte: false, sul: false, leste: true, oeste: true }, erro_pid: 0.02, velocidade_media: 1.65, pwm_esq: 212, pwm_dir: 214 },
+  { timestamp: 1715456792, estado_fsm: "FAST_RUN", bateria_v: 7.25, posicao_x: 0, posicao_y: 5, orientacao: "NORTE", tamanho_grade: 8, paredes_atuais: { norte: true, sul: false, leste: false, oeste: true }, erro_pid: -0.01, velocidade_media: 1.70, pwm_esq: 220, pwm_dir: 218 },
+  { timestamp: 1715456793, estado_fsm: "FAST_RUN", bateria_v: 7.22, posicao_x: 1, posicao_y: 5, orientacao: "LESTE", tamanho_grade: 8, paredes_atuais: { norte: true, sul: true, leste: false, oeste: false }, erro_pid: 0.03, velocidade_media: 1.75, pwm_esq: 224, pwm_dir: 224 },
+  { timestamp: 1715456794, estado_fsm: "FAST_RUN", bateria_v: 7.18, posicao_x: 2, posicao_y: 5, orientacao: "LESTE", tamanho_grade: 8, paredes_atuais: { norte: false, sul: true, leste: true, oeste: false }, erro_pid: -0.02, velocidade_media: 1.80, pwm_esq: 230, pwm_dir: 228 },
+  { timestamp: 1715456795, estado_fsm: "FAST_RUN", bateria_v: 7.15, posicao_x: 2, posicao_y: 4, orientacao: "NORTE", tamanho_grade: 8, paredes_atuais: { norte: false, sul: false, leste: true, oeste: true }, erro_pid: 0.01, velocidade_media: 1.82, pwm_esq: 232, pwm_dir: 234 },
+  { timestamp: 1715456796, estado_fsm: "FAST_RUN", bateria_v: 7.11, posicao_x: 2, posicao_y: 3, orientacao: "NORTE", tamanho_grade: 8, paredes_atuais: { norte: false, sul: false, leste: true, oeste: true }, erro_pid: 0.02, velocidade_media: 1.85, pwm_esq: 235, pwm_dir: 235 },
+  { timestamp: 1715456797, estado_fsm: "FAST_RUN", bateria_v: 7.08, posicao_x: 3, posicao_y: 3, orientacao: "LESTE", tamanho_grade: 8, paredes_atuais: { norte: true, sul: true, leste: false, oeste: false }, erro_pid: -0.01, velocidade_media: 1.88, pwm_esq: 238, pwm_dir: 236 },
+  { timestamp: 1715456798, estado_fsm: "FAST_RUN", bateria_v: 7.04, posicao_x: 4, posicao_y: 3, orientacao: "LESTE", tamanho_grade: 8, paredes_atuais: { norte: true, sul: false, leste: false, oeste: false }, erro_pid: 0.03, velocidade_media: 1.90, pwm_esq: 240, pwm_dir: 242 },
+
+  // META DE CORRIDA ATINGIDA
+  { timestamp: 1715456799, estado_fsm: "GOAL_REACHED", bateria_v: 7.01, posicao_x: 5, posicao_y: 3, orientacao: "NORTE", tamanho_grade: 8, paredes_atuais: { norte: false, sul: true, leste: true, oeste: false }, erro_pid: 0, velocidade_media: 0 },
+
+  // ERRO DE CORRENTE APÓS CHEGADA (Para demonstrar tela de erro)
+  { timestamp: 1715456800, estado_fsm: "ERROR", bateria_v: 6.95, posicao_x: 5, posicao_y: 3, orientacao: "NORTE", tamanho_grade: 8, paredes_atuais: { norte: false, sul: true, leste: true, oeste: false }, erro_pid: 0, causa_erro: "Tração bloqueada: Pico de corrente no motor esquerdo (>2A)." },
+  { timestamp: 1715456801, estado_fsm: "ERROR", bateria_v: 6.95, posicao_x: 5, posicao_y: 3, orientacao: "NORTE", tamanho_grade: 8, paredes_atuais: { norte: false, sul: true, leste: true, oeste: false }, erro_pid: 0, causa_erro: "Tração bloqueada: Pico de corrente no motor esquerdo (>2A)." }
 ];
 
 interface PropriedadesCartao {
@@ -49,42 +80,104 @@ interface PropriedadesCartao {
   icon: React.ReactNode;
   iconBg: string;
   highlight?: boolean;
+  critical?: boolean;
+  progressPercent?: number;
 }
 
-function CartaoEstatistica({ label, value, sub, icon, iconBg, highlight }: PropriedadesCartao) {
+function CartaoEstatistica({ label, value, sub, icon, iconBg, highlight, critical, progressPercent }: PropriedadesCartao) {
   return (
-    <div className={`bg-white rounded-xl border shadow-sm flex flex-col gap-3 p-4 transition-all ${
-        highlight ? "border-red-400 shadow-red-100" : "border-slate-200"
-      }`}
+    <div
+      style={critical ? { animation: "blink-critical-card 1.2s infinite alternate" } : undefined}
+      className={`rounded-2xl border shadow-md flex flex-col gap-4 p-5 transition-all ${critical
+          ? "border-red-500 text-white shadow-red-100"
+          : highlight
+            ? "bg-white border-red-400 shadow-red-100"
+            : "bg-white border-slate-100"
+        }`}
     >
-      <div className="flex items-center justify-between">
-        <p className="text-slate-500 uppercase tracking-widest text-[0.68rem] font-bold">
+      <div className="flex items-center justify-between border-b border-slate-50/80 pb-2 mb-1">
+        <p className={`uppercase tracking-wider text-[0.68rem] font-black ${critical ? "text-red-200" : "text-slate-400"}`}>
           {label}
         </p>
-        <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${iconBg}`}>
+        <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${critical ? "bg-red-800/60" : iconBg}`}>
           {icon}
         </div>
       </div>
       <div>
-        <div className="text-slate-900 tabular-nums text-2xl font-bold leading-none">
+        <div className={`tabular-nums text-3xl font-black tracking-tight ${critical ? "text-white" : "text-slate-800"}`}>
           {value}
         </div>
-        {sub && <p className="text-slate-400 mt-1 text-xs font-medium">{sub}</p>}
+        {sub && <p className={`mt-1 text-xs font-medium ${critical ? "text-red-200" : "text-slate-400"}`}>{sub}</p>}
       </div>
+
+      {progressPercent !== undefined && (
+        <div className="w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden mt-1">
+          <div
+            className={`h-full rounded-full transition-all duration-500 ${
+              critical
+                ? "bg-red-400"
+                : progressPercent < 30
+                  ? "bg-red-500"
+                  : progressPercent < 70
+                    ? "bg-amber-500"
+                    : "bg-emerald-500"
+            }`}
+            style={{ width: `${progressPercent}%` }}
+          />
+        </div>
+      )}
     </div>
   );
 }
 
 export function Dashboard() {
   const [indiceAtual, setIndiceAtual] = useState(0);
-  const telemetriaAtual = FLUXO_MOCK_TELEMETRIA[indiceAtual];
 
+  // Estados para Simulação Manual (Modo Desenvolvedor)
+  const [isSimulacaoManual, setIsSimulacaoManual] = useState(false);
+  const [manualEstado, setManualEstado] = useState("MAPPING");
+  const [manualBateria, setManualBateria] = useState(7.4);
+  const [manualPosX, setManualPosX] = useState(0);
+  const [manualPosY, setManualPosY] = useState(7);
+  const [manualOrientacao, setManualOrientacao] = useState<'NORTE' | 'SUL' | 'LESTE' | 'OESTE'>("NORTE");
+  const [mostrarPainelSimulacao, setMostrarPainelSimulacao] = useState(false);
+
+  // Estados de Telemetria Dinâmicos
   const [celulasExploradas, setCelulasExploradas] = useState<Record<string, CelulaMapa>>({});
   const [historicoErros, setHistoricoErros] = useState<RegistoErro[]>([]);
-  
   const [isLogAberto, setIsLogAberto] = useState(false);
 
+  // Estados do Cronômetro & Trajeto Rápido
+  const [tempoVoltaAtual, setTempoVoltaAtual] = useState(0);
+  const [melhorTempo, setMelhorTempo] = useState<number | null>(null);
+  const [trajetoRapido, setTrajetoRapido] = useState<Array<{ x: number, y: number }>>([]);
+  const tempoInicialRef = useRef<number | null>(null);
+
+  // Determinar qual telemetria usar
+  const telemetriaAtual: DadosTelemetria = isSimulacaoManual ? {
+    timestamp: Math.floor(Date.now() / 1000),
+    estado_fsm: manualEstado,
+    bateria_v: manualBateria,
+    posicao_x: manualPosX,
+    posicao_y: manualPosY,
+    orientacao: manualOrientacao,
+    tamanho_grade: 8,
+    paredes_atuais: { norte: manualPosY === 0, sul: manualPosY === 7, leste: manualPosX === 7, oeste: manualPosX === 0 },
+    causa_erro: manualEstado === 'ERROR' ? "Falha de Hardware Simulada (Pico de corrente >2A)." : undefined,
+    erro_pid: manualEstado === 'FAST_RUN' ? 0.015 - (Math.random() * 0.03) : 0,
+    velocidade_media: manualEstado === 'FAST_RUN' ? 1.84 : 0.35
+  } : FLUXO_MOCK_TELEMETRIA[indiceAtual];
+
+  // Limiar de Segurança para a Bateria
+  const LIMIAR_BATERIA_SEGURANCA = 6.8;
+  const bateriaCritica = telemetriaAtual.bateria_v < LIMIAR_BATERIA_SEGURANCA;
+  const possuiErroCritico = telemetriaAtual.estado_fsm === 'ERROR';
+  const isFastRun = telemetriaAtual.estado_fsm === 'FAST_RUN';
+
+  // Loop de Simulação Automática (se manual estiver desligado)
   useEffect(() => {
+    if (isSimulacaoManual) return;
+
     const intervalo = setInterval(() => {
       setIndiceAtual((ant) => {
         const proximo = ant < FLUXO_MOCK_TELEMETRIA.length - 1 ? ant + 1 : 0;
@@ -94,6 +187,7 @@ export function Dashboard() {
           setCelulasExploradas({});
           setHistoricoErros([]);
           setIsLogAberto(false);
+          setTrajetoRapido([]);
         } else {
           const chaveMapa = `${novaTelemetria.posicao_x}-${novaTelemetria.posicao_y}`;
           setCelulasExploradas(prev => prev[chaveMapa] ? prev : {
@@ -119,14 +213,81 @@ export function Dashboard() {
       });
     }, 1500);
     return () => clearInterval(intervalo);
-  }, []);
+  }, [isSimulacaoManual]);
 
+  // Efeito para registrar células exploradas no modo manual
+  useEffect(() => {
+    if (isSimulacaoManual) {
+      const chaveMapa = `${telemetriaAtual.posicao_x}-${telemetriaAtual.posicao_y}`;
+      setCelulasExploradas(prev => prev[chaveMapa] ? prev : {
+        ...prev,
+        [chaveMapa]: {
+          x: telemetriaAtual.posicao_x,
+          y: telemetriaAtual.posicao_y,
+          paredes: telemetriaAtual.paredes_atuais
+        }
+      });
+    }
+  }, [isSimulacaoManual, telemetriaAtual.posicao_x, telemetriaAtual.posicao_y]);
+
+  // Efeito do Cronômetro de Corrida de Alta Performance (FAST_RUN)
+  useEffect(() => {
+    let animationFrameId: number;
+
+    if (isFastRun) {
+      if (tempoInicialRef.current === null) {
+        tempoInicialRef.current = Date.now() - tempoVoltaAtual;
+      }
+
+      const tick = () => {
+        if (tempoInicialRef.current !== null) {
+          setTempoVoltaAtual(Date.now() - tempoInicialRef.current);
+        }
+        animationFrameId = requestAnimationFrame(tick);
+      };
+
+      animationFrameId = requestAnimationFrame(tick);
+    } else {
+      if (tempoInicialRef.current !== null) {
+        // Registra melhor tempo se a corrida terminar com sucesso
+        const tempoFinal = Date.now() - tempoInicialRef.current;
+        if (tempoFinal > 500) {
+          setMelhorTempo(prev => (prev === null || tempoFinal < prev) ? tempoFinal : prev);
+        }
+        tempoInicialRef.current = null;
+      }
+    }
+
+    return () => cancelAnimationFrame(animationFrameId);
+  }, [isFastRun]);
+
+  // Reset do cronômetro da volta se iniciar uma nova corrida
+  useEffect(() => {
+    if (!isFastRun) {
+      setTempoVoltaAtual(0);
+    }
+  }, [isFastRun]);
+
+  // Efeito para Rastrear Trajeto Rápido
+  useEffect(() => {
+    if (isFastRun) {
+      setTrajetoRapido(prev => {
+        const ultimo = prev[prev.length - 1];
+        if (!ultimo || ultimo.x !== telemetriaAtual.posicao_x || ultimo.y !== telemetriaAtual.posicao_y) {
+          return [...prev, { x: telemetriaAtual.posicao_x, y: telemetriaAtual.posicao_y }];
+        }
+        return prev;
+      });
+    } else {
+      setTrajetoRapido([]);
+    }
+  }, [isFastRun, telemetriaAtual.posicao_x, telemetriaAtual.posicao_y]);
+
+  const pctBateria = Math.max(0, Math.min(100, Math.round(((telemetriaAtual.bateria_v - 6.8) / (8.4 - 6.8)) * 100)));
   const qtdExploradas = Object.keys(celulasExploradas).length;
   const totalCelulas = telemetriaAtual.tamanho_grade * telemetriaAtual.tamanho_grade;
   const percentual = Math.round((qtdExploradas / totalCelulas) * 100) || 0;
 
-  const possuiErroCritico = telemetriaAtual.estado_fsm === 'ERROR';
-  
   const obterCorBateria = (tensao: number) => {
     if (tensao > 7.2) return { icone: BatteryFull, corTexto: "text-emerald-500", corFundo: "bg-emerald-50" };
     if (tensao > 6.8) return { icone: BatteryMedium, corTexto: "text-amber-500", corFundo: "bg-amber-50" };
@@ -134,9 +295,29 @@ export function Dashboard() {
   };
   const estiloBateria = obterCorBateria(telemetriaAtual.bateria_v);
 
+  const formatarTempo = (ms: number) => {
+    const minutos = Math.floor(ms / 60000);
+    const segundos = Math.floor((ms % 60000) / 1000);
+    const centesimos = Math.floor((ms % 1000) / 10);
+    return `${minutos.toString().padStart(2, '0')}:${segundos.toString().padStart(2, '0')}.${centesimos.toString().padStart(2, '0')}`;
+  };
+
   return (
     <div className="h-full flex flex-col bg-[#F8FAFC] font-sans relative overflow-hidden">
-      
+
+      {/* Estilos inline para keyframe animado das notificações críticas e bordas */}
+      <style>{`
+        @keyframes blink-critical-banner {
+          0%, 100% { background-color: #dc2626; box-shadow: 0 4px 20px rgba(220, 38, 38, 0.4); }
+          50% { background-color: #991b1b; box-shadow: 0 4px 6px rgba(153, 27, 27, 0.2); }
+        }
+        @keyframes blink-critical-card {
+          0%, 100% { background-color: #dc2626; border-color: #f87171; box-shadow: 0 0 15px rgba(220, 38, 38, 0.4); }
+          50% { background-color: #7f1d1d; border-color: #dc2626; box-shadow: 0 0 5px rgba(127, 29, 29, 0.1); }
+        }
+      `}</style>
+
+      {/* Banner de Erro de Hardware */}
       <div className={`absolute top-0 left-0 w-full z-50 transition-all duration-500 ease-in-out ${possuiErroCritico ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'}`}>
         <div className="bg-red-600 text-white px-8 py-3 flex items-center justify-center gap-4 shadow-xl shadow-red-600/30">
           <AlertTriangle className="w-7 h-7 animate-pulse" />
@@ -146,85 +327,392 @@ export function Dashboard() {
         </div>
       </div>
 
-      <div className={`px-8 py-5 flex items-center justify-between shrink-0 bg-white border-b border-slate-200 shadow-sm z-10 transition-all duration-300 ${possuiErroCritico ? 'mt-12' : 'mt-0'}`}>
-        <div>
-          <h1 className="text-2xl font-black text-slate-800 tracking-tight">Dashboard</h1>
-          <p className="text-slate-400 font-medium text-sm mt-0.5">Monitoramento Analítico</p>
+      {/* Banner de Bateria Baixa/Crítica Intermitente */}
+      <div
+        style={bateriaCritica ? { animation: "blink-critical-banner 1s infinite" } : undefined}
+        className={`absolute left-0 w-full z-45 transition-all duration-500 ease-in-out ${bateriaCritica && !possuiErroCritico ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
+          }`}
+      >
+        <div className="text-white px-8 py-3 flex items-center justify-center gap-4 shadow-xl">
+          <Zap className="w-6 h-6 animate-bounce" />
+          <span className="font-extrabold text-sm tracking-wider uppercase flex items-center gap-2">
+            Alerta Crítico de Energia: <span className="font-medium">Tensão sob limite de segurança ({telemetriaAtual.bateria_v.toFixed(2)}V). Risco de desligamento abrupto!</span>
+          </span>
         </div>
-        
-        <div className="flex flex-col items-end gap-1">
-          <div className="flex items-center gap-2">
-            <Wifi className={`w-3.5 h-3.5 animate-pulse ${possuiErroCritico ? 'text-red-500' : 'text-emerald-400'}`} />
-            <span className="text-xs text-slate-400 uppercase tracking-wider font-medium">Último Pacote:</span>
-            <span className="font-mono text-sm text-slate-500 font-medium">{telemetriaAtual.timestamp}</span>
+      </div>
+
+      {/* Ajusta margem superior se houver notificações ativas */}
+      <div className={`px-8 py-5 flex items-center justify-between shrink-0 bg-white border-b border-slate-200 shadow-sm z-10 transition-all duration-300 ${possuiErroCritico || bateriaCritica ? 'mt-12' : 'mt-0'
+        }`}>
+        <div>
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-black text-slate-800 tracking-tight">Dashboard</h1>
+            <div className="flex items-center gap-1.5 bg-[#ECFDF5] border border-[#10B981]/25 text-[#10B981] px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 shrink-0">
+              <span className="w-1.5 h-1.5 bg-[#10B981] rounded-full animate-pulse" />
+              AO VIVO
+            </div>
           </div>
-          <div className="flex items-center gap-1.5 text-xs text-slate-400 font-medium">
-            <span>Grade detetada: {telemetriaAtual.tamanho_grade}x{telemetriaAtual.tamanho_grade}</span>
-            <span className="text-slate-300">•</span>
-            <span>{qtdExploradas} de {totalCelulas} células ({percentual}%)</span>
+          <p className="text-slate-400 font-medium text-xs mt-1">
+            Telemetria ao vivo · {telemetriaAtual.tamanho_grade}x{telemetriaAtual.tamanho_grade} · {qtdExploradas}/{totalCelulas} células ({percentual}%)
+          </p>
+        </div>
+
+        <div className="flex items-center gap-4">
+          {/* Botão de Painel de Simulação do Desenvolvedor */}
+          <button
+            onClick={() => setMostrarPainelSimulacao(!mostrarPainelSimulacao)}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-semibold tracking-wide transition-all ${isSimulacaoManual
+                ? "bg-amber-500/10 border-amber-500/30 text-amber-500 hover:bg-amber-500/20"
+                : "bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200"
+              }`}
+          >
+            <Sliders className="w-3.5 h-3.5" />
+            <span>Simulador {isSimulacaoManual ? "(Manual)" : ""}</span>
+          </button>
+
+          <div className="flex flex-col items-end gap-1">
+            <div className="flex items-center gap-2">
+              <Wifi className={`w-3.5 h-3.5 animate-pulse ${possuiErroCritico ? 'text-red-500' : 'text-emerald-400'}`} />
+              <span className="text-xs text-slate-400 uppercase tracking-wider font-medium">Último Pacote:</span>
+              <span className="font-mono text-sm text-slate-500 font-medium">{telemetriaAtual.timestamp}</span>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="px-8 pt-6 pb-4 grid grid-cols-2 xl:grid-cols-6 gap-4 shrink-0">
-        <CartaoEstatistica label="Bateria" value={`${telemetriaAtual.bateria_v.toFixed(1)}V`} sub="Tensão instantânea" iconBg={estiloBateria.corFundo} icon={<estiloBateria.icone className={`w-5 h-5 ${estiloBateria.corTexto}`} strokeWidth={2} />} />
-        <CartaoEstatistica label="Velocidade" value="0.890" sub="m/s · atual" iconBg="bg-blue-50" icon={<Gauge className="w-5 h-5 text-blue-500" strokeWidth={2} />} />
-        <CartaoEstatistica label="Cronómetro" value="00:12.4" sub="Tempo de percurso" iconBg="bg-violet-50" icon={<Clock className="w-5 h-5 text-violet-500" strokeWidth={2} />} />
-        <CartaoEstatistica label="Objetivo" value="Explorando" sub="Mapeando labirinto" iconBg="bg-slate-100" icon={<Target className="w-5 h-5 text-slate-400" strokeWidth={2} />} />
-        <CartaoEstatistica label="Posição Atual" value={`(${telemetriaAtual.posicao_x}, ${telemetriaAtual.posicao_y})`} sub="Ponto no labirinto" iconBg="bg-indigo-50" icon={<MapPin className="w-5 h-5 text-indigo-500" strokeWidth={2} />} />
-        <CartaoEstatistica 
-          label="Estado do Robô" 
-          value={telemetriaAtual.estado_fsm} 
-          sub={possuiErroCritico ? "Intervenção necessária!" : "Operação Autónoma"} 
-          iconBg={possuiErroCritico ? "bg-red-100" : "bg-emerald-50"} 
-          icon={<Activity className={`w-5 h-5 ${possuiErroCritico ? "text-red-500" : "text-emerald-500"}`} strokeWidth={2} />} 
-          highlight={possuiErroCritico} 
+      {/* Painel do Simulador do Desenvolvedor (Expansível) */}
+      {mostrarPainelSimulacao && (
+        <div className="mx-8 mt-4 p-4 bg-slate-900 border border-slate-800 rounded-xl flex flex-col gap-4 text-slate-200 shadow-md">
+          <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+            <span className="font-extrabold text-xs tracking-wider uppercase text-amber-500 flex items-center gap-1.5">
+              <Sliders className="w-4 h-4 text-amber-500" />
+              Controles do Simulador
+            </span>
+            <div className="flex items-center gap-3">
+              <label className="flex items-center gap-2 text-xs font-semibold cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={isSimulacaoManual}
+                  onChange={(e) => {
+                    setIsSimulacaoManual(e.target.checked);
+                    if (e.target.checked) {
+                      setManualEstado(telemetriaAtual.estado_fsm);
+                      setManualBateria(telemetriaAtual.bateria_v);
+                      setManualPosX(telemetriaAtual.posicao_x);
+                      setManualPosY(telemetriaAtual.posicao_y);
+                      setManualOrientacao(telemetriaAtual.orientacao);
+                    }
+                  }}
+                  className="rounded border-slate-700 bg-slate-850 text-amber-500 focus:ring-amber-500"
+                />
+                Ativar Controle Manual
+              </label>
+            </div>
+          </div>
+
+          {isSimulacaoManual ? (
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+              {/* Select Estado FSM */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[10px] uppercase font-bold text-slate-400">Estado FSM (estado_robo)</label>
+                <select
+                  value={manualEstado}
+                  onChange={(e) => setManualEstado(e.target.value)}
+                  className="bg-slate-850 border border-slate-750 text-xs font-bold text-slate-100 rounded px-2.5 py-1.5 focus:border-amber-500 focus:outline-none"
+                >
+                  <option value="CALIBRATING">CALIBRATING</option>
+                  <option value="MAPPING">MAPPING</option>
+                  <option value="GOAL_REACHED">GOAL_REACHED</option>
+                  <option value="FAST_RUN">FAST_RUN (Alta Perf.)</option>
+                  <option value="ERROR">ERROR (Falha Crit.)</option>
+                </select>
+              </div>
+
+              {/* Slider Bateria */}
+              <div className="flex flex-col gap-1.5">
+                <div className="flex justify-between items-center">
+                  <label className="text-[10px] uppercase font-bold text-slate-400">Bateria (Volts)</label>
+                  <span className={`font-mono text-xs font-bold ${manualBateria < 6.8 ? 'text-red-400' : 'text-emerald-400'}`}>
+                    {manualBateria.toFixed(2)}V
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min="5.5"
+                  max="8.4"
+                  step="0.05"
+                  value={manualBateria}
+                  onChange={(e) => setManualBateria(parseFloat(e.target.value))}
+                  className="w-full h-1 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-amber-500"
+                />
+              </div>
+
+              {/* Pos X */}
+              <div className="flex flex-col gap-1.5">
+                <div className="flex justify-between items-center">
+                  <label className="text-[10px] uppercase font-bold text-slate-400">Posição X</label>
+                  <span className="font-mono text-xs font-bold text-slate-300">{manualPosX}</span>
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max="7"
+                  step="1"
+                  value={manualPosX}
+                  onChange={(e) => setManualPosX(parseInt(e.target.value))}
+                  className="w-full h-1 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-amber-500"
+                />
+              </div>
+
+              {/* Pos Y */}
+              <div className="flex flex-col gap-1.5">
+                <div className="flex justify-between items-center">
+                  <label className="text-[10px] uppercase font-bold text-slate-400">Posição Y</label>
+                  <span className="font-mono text-xs font-bold text-slate-300">{manualPosY}</span>
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max="7"
+                  step="1"
+                  value={manualPosY}
+                  onChange={(e) => setManualPosY(parseInt(e.target.value))}
+                  className="w-full h-1 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-amber-500"
+                />
+              </div>
+
+              {/* Orientação */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[10px] uppercase font-bold text-slate-400">Orientação</label>
+                <select
+                  value={manualOrientacao}
+                  onChange={(e) => setManualOrientacao(e.target.value as any)}
+                  className="bg-slate-850 border border-slate-750 text-xs font-bold text-slate-100 rounded px-2.5 py-1.5 focus:border-amber-500 focus:outline-none"
+                >
+                  <option value="NORTE">NORTE</option>
+                  <option value="SUL">SUL</option>
+                  <option value="LESTE">LESTE</option>
+                  <option value="OESTE">OESTE</option>
+                </select>
+              </div>
+            </div>
+          ) : (
+            <div className="text-xs text-slate-400 py-1 font-medium">
+              Simulação automática em andamento. Ative "Controle Manual" para simular percursos específicos ou acionar alarmes críticos interativamente.
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Grid de Cartões Estatísticos adaptável */}
+      <div className="px-8 pt-6 pb-4 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 shrink-0">
+        <CartaoEstatistica
+          label="Bateria"
+          value={`${telemetriaAtual.bateria_v.toFixed(1)}V`}
+          sub={bateriaCritica ? "TENSÃO CRÍTICA!" : `${pctBateria}% de carga`}
+          iconBg={estiloBateria.corFundo}
+          icon={<estiloBateria.icone className={`w-3.5 h-3.5 ${bateriaCritica ? "text-red-100 animate-pulse" : estiloBateria.corTexto}`} strokeWidth={2} />}
+          critical={bateriaCritica}
+          progressPercent={pctBateria}
+        />
+
+        <CartaoEstatistica
+          label="Velocidade"
+          value={isFastRun && telemetriaAtual.velocidade_media ? telemetriaAtual.velocidade_media.toFixed(3) : "0.238"}
+          sub="m/s · velocidade atual"
+          iconBg="bg-blue-50"
+          icon={<Gauge className="w-3.5 h-3.5 text-blue-500" strokeWidth={2} />}
+        />
+
+        <CartaoEstatistica
+          label="Cronómetro"
+          value={isFastRun ? formatarTempo(tempoVoltaAtual) : "- - : - - . - -"}
+          sub={isFastRun ? "tempo de volta ativo" : "aguardando largada"}
+          iconBg="bg-violet-50"
+          icon={<Clock className={`w-3.5 h-3.5 text-violet-500 ${isFastRun ? 'animate-spin' : ''}`} strokeWidth={2} />}
+        />
+
+        <CartaoEstatistica
+          label="Objetivo"
+          value={isFastRun ? "Alta Performance" : "Explorando"}
+          sub={isFastRun ? "Corrida rápida" : "Mapeando labirinto"}
+          iconBg="bg-slate-100"
+          icon={isFastRun ? <Trophy className="w-3.5 h-3.5 text-amber-500" /> : <Target className="w-3.5 h-3.5 text-slate-400" strokeWidth={2} />}
         />
       </div>
 
-      <div className="flex-1 px-8 pb-8 flex min-h-0 relative">
-        
-        <div className={`w-full h-full rounded-2xl overflow-hidden border shadow-2xl relative transition-colors duration-500 ${possuiErroCritico ? 'border-red-500/50 shadow-red-500/20 bg-[#1A0B0B]' : 'border-slate-800 bg-[#0B1120]'}`}>
-          <RobotMap telemetria={telemetriaAtual} celulasExploradas={celulasExploradas} />
+      <div className="flex-1 px-8 pb-8 flex gap-6 min-h-0 relative">
 
-          <div className="absolute top-6 right-6 bottom-6 z-30 flex flex-col items-end gap-3 pointer-events-none">
-            
-            {/* Botão de Controlo (Alternar) */}
-            <button 
-              onClick={() => setIsLogAberto(!isLogAberto)}
-              className={`pointer-events-auto flex items-center gap-2 px-4 py-3 rounded-full shadow-xl border transition-all duration-300 ${
-                isLogAberto 
-                  ? 'bg-slate-950 border-slate-800 text-sky-400 hover:bg-slate-900' 
-                  : 'bg-slate-900/95 backdrop-blur-sm border-slate-800 text-slate-200 hover:bg-slate-850'
-              }`}
-            >
-              <ShieldAlert className={`w-5 h-5 ${historicoErros.length > 0 && !isLogAberto ? 'text-red-400 animate-pulse' : 'text-sky-400'}`} />
-              <span className="font-bold text-sm tracking-wide">
-                {isLogAberto ? 'Ocultar Logs' : 'Logs de Interrupção'}
+        {/* Lado Esquerdo: Mapa em Tempo Real */}
+        <div className={`flex-1 rounded-2xl overflow-hidden border shadow-2xl relative flex flex-col transition-colors duration-500 ${possuiErroCritico
+            ? 'border-red-500/50 shadow-red-500/20 bg-[#1A0B0B]'
+            : isFastRun
+              ? 'border-cyan-500/40 shadow-cyan-950/20 bg-[#070b14]'
+              : 'border-slate-800 bg-[#0B1120]'
+          }`}>
+          <RobotMap
+            telemetria={telemetriaAtual}
+            celulasExploradas={celulasExploradas}
+            trajetoRapido={trajetoRapido}
+          />
+
+          {/* FSM state badge overlay matching mockup */}
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 pointer-events-none">
+            <div className="bg-[#0f172a]/95 border border-slate-800/80 backdrop-blur-sm px-4 py-1.5 rounded-full flex items-center gap-2 shadow-xl">
+              <span className={`w-2 h-2 rounded-full ${possuiErroCritico
+                  ? "bg-red-500 animate-pulse"
+                  : isFastRun
+                    ? "bg-cyan-400 animate-ping"
+                    : "bg-emerald-500"
+                }`} />
+              <span className="text-xs font-bold text-slate-200 tracking-wide">
+                {telemetriaAtual.estado_fsm === 'CALIBRATING' && "Calibrando"}
+                {telemetriaAtual.estado_fsm === 'MAPPING' && "Explorando"}
+                {telemetriaAtual.estado_fsm === 'GOAL_REACHED' && "Meta Alcançada"}
+                {telemetriaAtual.estado_fsm === 'FAST_RUN' && "Alta Performance"}
+                {telemetriaAtual.estado_fsm === 'ERROR' && "Falha de Hardware"}
               </span>
-              {!isLogAberto && historicoErros.length > 0 && (
-                <span className="ml-1 bg-red-500 text-white text-xs font-bold px-2.5 py-0.5 rounded-full">
-                  {historicoErros.length}
-                </span>
-              )}
-            </button>
+            </div>
+          </div>
 
-            {/* Gaveta de Conteúdo Expansível */}
-            <div 
-              className={`pointer-events-auto bg-slate-900/95 backdrop-blur-md rounded-2xl shadow-2xl border border-slate-800/80 flex flex-col transition-all duration-500 ease-out origin-top-right ${isLogAberto ? 'w-80 opacity-100 scale-100 max-h-full' : 'w-80 opacity-0 scale-95 max-h-0'}`}
-            >
-              {/* Cabeçalho da Gaveta */}
+          {/* Botão de logs flutuante, visível apenas fora do modo de alta performance */}
+          {!isFastRun && (
+            <div className="absolute top-6 right-6 bottom-6 z-30 flex flex-col items-end gap-3 pointer-events-none">
+
+              {/* Botão de Controlo (Alternar) */}
+              <button
+                onClick={() => setIsLogAberto(!isLogAberto)}
+                className="pointer-events-auto flex items-center gap-2 px-4 py-3 rounded-full shadow-xl border bg-slate-900/95 backdrop-blur-sm border-slate-800 text-slate-200 hover:bg-slate-850 transition-all duration-300"
+              >
+                <ShieldAlert className={`w-5 h-5 ${historicoErros.length > 0 && !isLogAberto ? 'text-red-400 animate-pulse' : 'text-sky-400'}`} />
+                <span className="font-bold text-sm tracking-wide">
+                  {isLogAberto ? 'Ocultar Logs' : 'Logs de Interrupção'}
+                </span>
+                {!isLogAberto && historicoErros.length > 0 && (
+                  <span className="ml-1 bg-red-500 text-white text-xs font-bold px-2.5 py-0.5 rounded-full">
+                    {historicoErros.length}
+                  </span>
+                )}
+              </button>
+
+            </div>
+          )}
+        </div>
+
+        {/* Lado Direito: Painel de Performance (FAST_RUN) ou Gaveta de Logs (Outros modos) */}
+        {isFastRun ? (
+          <div className="w-96 shrink-0 bg-[#0b1329] border border-cyan-500/30 rounded-2xl p-5 flex flex-col gap-5 shadow-2xl text-slate-100 animate-in fade-in slide-in-from-right-5 duration-350">
+            {/* Cabeçalho de Alta Performance */}
+            <div className="flex items-center justify-between border-b border-slate-850 pb-3 shrink-0">
+              <div className="flex items-center gap-2">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
+                </span>
+                <span className="font-extrabold text-[10px] uppercase tracking-widest text-cyan-400">MODO ALTA PERFORMANCE</span>
+              </div>
+              <span className="text-[9px] bg-cyan-500/10 text-cyan-400 font-bold px-2.5 py-0.5 rounded-full border border-cyan-500/20">FAST_RUN</span>
+            </div>
+
+            {/* Cronômetro Principal da Volta */}
+            <div className="bg-slate-900/60 border border-slate-800/80 rounded-xl p-4 flex flex-col items-center justify-center gap-1.5 shadow-inner">
+              <span className="text-slate-400 text-[10px] font-bold uppercase tracking-wider">Tempo da Volta Atual</span>
+              <span className="font-mono text-4xl font-extrabold tracking-wider text-cyan-400 drop-shadow-[0_0_10px_rgba(34,211,238,0.4)]">
+                {formatarTempo(tempoVoltaAtual)}
+              </span>
+            </div>
+
+            {/* Sub-estatísticas de Tempo */}
+            <div className="grid grid-cols-2 gap-3 shrink-0">
+              <div className="bg-slate-900/40 border border-slate-800/80 rounded-xl p-3 flex flex-col gap-1">
+                <span className="text-slate-500 text-[9px] font-bold uppercase tracking-wider">Recorde da Corrida</span>
+                <span className="font-mono text-base font-bold text-emerald-400 flex items-center gap-1.5">
+                  <Trophy className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                  {melhorTempo ? formatarTempo(melhorTempo) : "--:--.--"}
+                </span>
+              </div>
+              <div className="bg-slate-900/40 border border-slate-800/80 rounded-xl p-3 flex flex-col gap-1">
+                <span className="text-slate-500 text-[9px] font-bold uppercase tracking-wider">Velocidade Corrida</span>
+                <span className="font-mono text-base font-bold text-blue-400">
+                  {telemetriaAtual.velocidade_media ? `${telemetriaAtual.velocidade_media.toFixed(2)} m/s` : "1.84 m/s"}
+                </span>
+              </div>
+            </div>
+
+            {/* Seção Principal de Métricas do Motor & PID */}
+            <div className="flex-1 flex flex-col gap-4 min-h-0 overflow-y-auto pr-1">
+              <div>
+                <span className="text-slate-400 text-[10px] font-extrabold uppercase tracking-wider block mb-2">Tração dos Motores</span>
+                <div className="bg-slate-900/30 border border-slate-850 rounded-xl p-3 flex flex-col gap-3">
+                  <div>
+                    <div className="flex justify-between items-center text-[11px] mb-1 font-medium">
+                      <span className="text-slate-400">PWM Motor Esquerdo</span>
+                      <span className="font-mono text-slate-200">{telemetriaAtual.pwm_esq !== undefined ? telemetriaAtual.pwm_esq : 210} / 255</span>
+                    </div>
+                    <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                      <div className="bg-cyan-500 h-full rounded-full transition-all duration-300" style={{ width: `${((telemetriaAtual.pwm_esq || 210) / 255) * 100}%` }} />
+                    </div>
+                  </div>
+                  <div>
+                    <div className="flex justify-between items-center text-[11px] mb-1 font-medium">
+                      <span className="text-slate-400">PWM Motor Direito</span>
+                      <span className="font-mono text-slate-200">{telemetriaAtual.pwm_dir !== undefined ? telemetriaAtual.pwm_dir : 212} / 255</span>
+                    </div>
+                    <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                      <div className="bg-cyan-500 h-full rounded-full transition-all duration-300" style={{ width: `${((telemetriaAtual.pwm_dir || 212) / 255) * 100}%` }} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <span className="text-slate-400 text-[10px] font-extrabold uppercase tracking-wider block mb-2">Controle de Alinhamento (PID)</span>
+                <div className="bg-slate-900/30 border border-slate-850 rounded-xl p-3 flex flex-col gap-2.5">
+                  <div className="flex justify-between items-center text-[11px]">
+                    <span className="text-slate-400">Erro Lateral instantâneo</span>
+                    <span className={`font-mono font-bold ${Math.abs(telemetriaAtual.erro_pid || 0) < 0.03 ? 'text-emerald-400' : 'text-amber-400'}`}>
+                      {telemetriaAtual.erro_pid !== undefined ? (telemetriaAtual.erro_pid > 0 ? `+${telemetriaAtual.erro_pid.toFixed(3)}` : telemetriaAtual.erro_pid.toFixed(3)) : "0.000"}
+                    </span>
+                  </div>
+
+                  {/* Régua de erro visual */}
+                  <div className="relative w-full h-2.5 bg-slate-800 rounded-full flex items-center justify-center">
+                    <div className="absolute w-0.5 h-3.5 bg-slate-600 left-1/2 -translate-x-1/2" />
+                    <div
+                      className="absolute h-full w-2.5 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.8)] transition-all duration-300"
+                      style={{
+                        left: `calc(50% + ${(telemetriaAtual.erro_pid || 0) * 100}%)`,
+                        transform: 'translateX(-50%)'
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Painel do Fim da Corrida */}
+            <div className="bg-cyan-950/20 border border-cyan-500/15 rounded-xl p-3 flex items-center justify-between text-xs shrink-0">
+              <span className="text-slate-400 font-medium">Posição do Robô:</span>
+              <span className="font-mono font-bold text-cyan-400">({telemetriaAtual.posicao_x}, {telemetriaAtual.posicao_y})</span>
+            </div>
+          </div>
+        ) : (
+          isLogAberto && (
+            <div className="w-96 shrink-0 bg-slate-900/95 border border-slate-850 rounded-2xl flex flex-col shadow-2xl text-slate-100 animate-in fade-in slide-in-from-right-5 duration-300">
+              {/* Cabeçalho da Gaveta de Logs */}
               <div className="p-4 border-b border-slate-800 bg-slate-950/60 flex items-center justify-between rounded-t-2xl">
                 <span className="font-bold text-slate-300 text-xs uppercase tracking-wider">Histórico Crítico</span>
-                <span className="bg-slate-800 text-sky-400 text-[10px] font-bold px-2 py-0.5 rounded-full">{historicoErros.length} EVENTOS</span>
+                <span className="bg-slate-800 text-sky-400 text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-sky-500/10">
+                  {historicoErros.length} EVENTOS
+                </span>
               </div>
-              
-              {/* Corpo da Gaveta */}
-              <div className="overflow-y-auto p-4 flex flex-col gap-3 max-h-[50vh] scrollbar-thin scrollbar-thumb-slate-700">
+
+              {/* Corpo da Gaveta de Logs */}
+              <div className="overflow-y-auto p-4 flex flex-col gap-3 flex-1 scrollbar-thin scrollbar-thumb-slate-700">
                 {historicoErros.length === 0 ? (
-                  <div className="py-8 text-center flex flex-col items-center gap-2 opacity-60">
-                    <ShieldAlert className="w-8 h-8 text-slate-500" />
-                    <p className="text-sm text-slate-400 font-medium">Nenhum evento crítico registado.</p>
+                  <div className="py-12 text-center flex flex-col items-center gap-3 opacity-60">
+                    <ShieldAlert className="w-8 h-8 text-slate-500 animate-pulse" />
+                    <p className="text-sm text-slate-400 font-medium font-sans">Nenhum evento crítico registado.</p>
                   </div>
                 ) : (
                   historicoErros.map((erro) => (
@@ -245,10 +733,9 @@ export function Dashboard() {
                 )}
               </div>
             </div>
+          )
+        )}
 
-          </div>
-
-        </div>
       </div>
     </div>
   );

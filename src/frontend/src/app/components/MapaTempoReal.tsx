@@ -3,9 +3,10 @@ import type{ DadosTelemetria, CelulaMapa } from './Dashboard';
 interface PropriedadesMapa {
   telemetria: DadosTelemetria;
   celulasExploradas: Record<string, CelulaMapa>;
+  trajetoRapido?: Array<{x: number, y: number}>;
 }
 
-export function RobotMap({ telemetria, celulasExploradas }: PropriedadesMapa) {
+export function RobotMap({ telemetria, celulasExploradas, trajetoRapido = [] }: PropriedadesMapa) {
   const tamanho = telemetria.tamanho_grade;
 
   const obterRotacaoRobo = (orientacao: string) => {
@@ -18,17 +19,60 @@ export function RobotMap({ telemetria, celulasExploradas }: PropriedadesMapa) {
     }
   };
 
+  const pontosSvg = trajetoRapido
+    .map(p => `${((p.x + 0.5) / tamanho) * 100},${((p.y + 0.5) / tamanho) * 100}`)
+    .join(' ');
+
   return (
     <div className="relative w-full h-full flex flex-col">
       
       <div className="absolute inset-4 md:inset-8 flex items-center justify-center">
         <div 
-          className="aspect-square h-full max-w-full max-h-full grid bg-[#0f172a] rounded-xl shadow-[inset_0_0_30px_rgba(0,0,0,0.6)] border border-slate-700/60"
+          className="aspect-square h-full max-w-full max-h-full grid relative bg-[#0f172a] rounded-xl shadow-[inset_0_0_30px_rgba(0,0,0,0.6)] border border-slate-700/60 overflow-hidden"
           style={{ 
             gridTemplateColumns: `repeat(${tamanho}, minmax(0, 1fr))`,
             gridTemplateRows: `repeat(${tamanho}, minmax(0, 1fr))` 
           }}
         >
+          {/* Neon path for FAST_RUN trajectory */}
+          {trajetoRapido && trajetoRapido.length > 1 && (
+            <svg 
+              className="absolute inset-0 w-full h-full pointer-events-none z-20" 
+              viewBox="0 0 100 100" 
+              preserveAspectRatio="none"
+            >
+              <defs>
+                <filter id="neon-glow" x="-20%" y="-20%" width="140%" height="140%">
+                  <feGaussianBlur stdDeviation="1.5" result="blur" />
+                  <feMerge>
+                    <feMergeNode in="blur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+              </defs>
+              {/* Glow line */}
+              <polyline
+                points={pontosSvg}
+                fill="none"
+                stroke="#06b6d4"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                filter="url(#neon-glow)"
+                className="opacity-75"
+              />
+              {/* Foreground line */}
+              <polyline
+                points={pontosSvg}
+                fill="none"
+                stroke="#22d3ee"
+                strokeWidth="1"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="opacity-100 animate-pulse"
+              />
+            </svg>
+          )}
           {Array.from({ length: tamanho }).map((_, y) => (
             Array.from({ length: tamanho }).map((_, x) => {
               

@@ -18,10 +18,9 @@ function NavItem({
       to={to}
       end={end}
       className={({ isActive }) =>
-        `flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-sm ${
-          isActive
-            ? "bg-blue-500/20 text-blue-400"
-            : "text-slate-400 hover:bg-white/5 hover:text-slate-200"
+        `flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-sm ${isActive
+          ? "bg-blue-500/20 text-blue-400"
+          : "text-slate-400 hover:bg-white/5 hover:text-slate-200"
         }`
       }
       style={{ fontWeight: 500 }}
