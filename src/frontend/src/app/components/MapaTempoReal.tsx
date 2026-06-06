@@ -1,13 +1,15 @@
 import type{ DadosTelemetria, CelulaMapa } from './Dashboard';
-
+ 
 interface PropriedadesMapa {
   telemetria: DadosTelemetria;
   celulasExploradas: Record<string, CelulaMapa>;
+  trajetoRapido?: { x: number; y: number }[];
+  mostrarTrajetoRapido: boolean;
 }
-
-export function RobotMap({ telemetria, celulasExploradas }: PropriedadesMapa) {
+ 
+export function RobotMap({ telemetria, celulasExploradas, trajetoRapido, mostrarTrajetoRapido }: PropriedadesMapa) {
   const tamanho = telemetria.tamanho_grade;
-
+ 
   const obterRotacaoRobo = (orientacao: string) => {
     switch (orientacao) {
       case 'NORTE': return '0deg';
@@ -17,7 +19,7 @@ export function RobotMap({ telemetria, celulasExploradas }: PropriedadesMapa) {
       default: return '0deg';
     }
   };
-
+ 
   return (
     <div className="relative w-full h-full flex flex-col">
       
@@ -35,10 +37,11 @@ export function RobotMap({ telemetria, celulasExploradas }: PropriedadesMapa) {
               const chave = `${x}-${y}`;
               const celula = celulasExploradas[chave];
               const isRoboAqui = telemetria.posicao_x === x && telemetria.posicao_y === y;
-
+              const isCaminhoRapido = trajetoRapido?.some(p => p.x === x && p.y === y);
+ 
               let classesParedes = "border-slate-800/40 border border-dashed"; 
               let corFundo = "bg-transparent";
-
+ 
               if (celula) {
                 corFundo = "bg-[#1e293b]"; 
                 classesParedes = `
@@ -48,9 +51,13 @@ export function RobotMap({ telemetria, celulasExploradas }: PropriedadesMapa) {
                   ${celula.paredes.oeste ? 'border-l-[3px] border-l-red-500' : 'border-l border-l-slate-700/50'}
                 `;
               }
-
-              if (isRoboAqui) corFundo = "bg-blue-500/20";
-
+ 
+              if (isRoboAqui) {
+                corFundo = "bg-blue-500/20";
+              } else if (isCaminhoRapido && mostrarTrajetoRapido) {
+                corFundo = "bg-emerald-950/20";
+              }
+ 
               return (
                 <div key={chave} className={`relative flex items-center justify-center transition-all duration-300 ${classesParedes} ${corFundo}`}>
                   {isRoboAqui && (
@@ -62,6 +69,9 @@ export function RobotMap({ telemetria, celulasExploradas }: PropriedadesMapa) {
                         <path d="M12 2L22 20L12 16L2 20L12 2Z" fill="currentColor" />
                       </svg>
                     </div>
+                  )}
+                  {isCaminhoRapido && mostrarTrajetoRapido && !isRoboAqui && (
+                    <div className="absolute w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399] animate-pulse z-10" />
                   )}
                 </div>
               );
