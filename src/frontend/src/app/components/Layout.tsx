@@ -1,5 +1,5 @@
 import { NavLink, Outlet } from "react-router";
-import { LayoutDashboard, Cpu, Wifi, WifiOff } from "lucide-react";
+import { LayoutDashboard, History, Cpu, Wifi, WifiOff } from "lucide-react";
 import { useState } from "react";
 
 function NavItem({
@@ -57,6 +57,7 @@ export function Layout() {
             Menu
           </p>
           <NavItem to="/" icon={LayoutDashboard} label="Dashboard" end />
+          <NavItem to="/historico" icon={History} label="Histórico" />
         </nav>
 
         <div className="px-4 py-4 border-t border-white/10 space-y-3">
@@ -92,7 +93,7 @@ export function Layout() {
         </div>
       </aside>
 
-      <main className="flex-1 overflow-auto">
+      <main className="flex-1 overflow-hidden">
         <Outlet />
       </main>
     </div>

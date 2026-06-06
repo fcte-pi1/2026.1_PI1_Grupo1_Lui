@@ -1,7 +1,7 @@
-import { RouterProvider } from "react-router";
-import { createBrowserRouter } from "react-router";
+import { RouterProvider, createBrowserRouter } from "react-router";
 import { Layout } from "./app/components/Layout";
 import { Dashboard } from "./app/components/Dashboard";
+import { HistoryPage } from './app/components/HistoryPage';
 
 const router = createBrowserRouter([
   {
@@ -9,6 +9,7 @@ const router = createBrowserRouter([
     Component: Layout,
     children: [
       { index: true, Component: Dashboard },
+      { path: "historico", Component: HistoryPage },
     ],
   },
 ]);

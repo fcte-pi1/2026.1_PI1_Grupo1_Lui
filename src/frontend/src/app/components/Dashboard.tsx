@@ -1,27 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useCallback } from "react";
 import {
   BatteryFull, BatteryMedium, BatteryLow,
   Gauge, Clock, Target, MapPin, Activity, Wifi, AlertTriangle, ShieldAlert
 } from "lucide-react";
 import { RobotMap } from "./MapaTempoReal";
+import type { RobotTelemetry } from "./MapaTempoReal";
 
-export interface CelulaMapa {
-  x: number;
-  y: number;
-  paredes: { norte: boolean; sul: boolean; leste: boolean; oeste: boolean };
-}
-
-export interface DadosTelemetria {
-  timestamp: number;
-  estado_fsm: string;
-  bateria_v: number;
-  posicao_x: number;
-  posicao_y: number;
-  orientacao: 'NORTE' | 'SUL' | 'LESTE' | 'OESTE';
-  tamanho_grade: number;
-  paredes_atuais: { norte: boolean; sul: boolean; leste: boolean; oeste: boolean };
-  causa_erro?: string;
-}
+// Tipos re-exportados para compatibilidade com outros componentes
+export type { RobotTelemetry as DadosTelemetria };
 
 export interface RegistoErro {
   id: string;
@@ -30,17 +16,6 @@ export interface RegistoErro {
   posicao_x: number;
   posicao_y: number;
 }
-
-const FLUXO_MOCK_TELEMETRIA: DadosTelemetria[] = [
-  { timestamp: 1715456789, estado_fsm: "CALIBRATING", bateria_v: 7.4, posicao_x: 0, posicao_y: 7, orientacao: "NORTE", tamanho_grade: 8, paredes_atuais: { norte: false, sul: true, leste: true, oeste: true } },
-  { timestamp: 1715456790, estado_fsm: "MAPPING", bateria_v: 7.4, posicao_x: 0, posicao_y: 6, orientacao: "NORTE", tamanho_grade: 8, paredes_atuais: { norte: false, sul: false, leste: true, oeste: true } },
-  { timestamp: 1715456791, estado_fsm: "MAPPING", bateria_v: 7.3, posicao_x: 0, posicao_y: 5, orientacao: "LESTE", tamanho_grade: 8, paredes_atuais: { norte: true, sul: false, leste: false, oeste: true } },
-  { timestamp: 1715456792, estado_fsm: "MAPPING", bateria_v: 7.3, posicao_x: 1, posicao_y: 5, orientacao: "LESTE", tamanho_grade: 8, paredes_atuais: { norte: true, sul: true, leste: false, oeste: false } },
-  { timestamp: 1715456793, estado_fsm: "MAPPING", bateria_v: 7.2, posicao_x: 2, posicao_y: 5, orientacao: "NORTE", tamanho_grade: 8, paredes_atuais: { norte: false, sul: true, leste: true, oeste: false } },
-  { timestamp: 1715456794, estado_fsm: "MAPPING", bateria_v: 7.2, posicao_x: 2, posicao_y: 4, orientacao: "NORTE", tamanho_grade: 8, paredes_atuais: { norte: false, sul: false, leste: true, oeste: true } },
-  { timestamp: 1715456795, estado_fsm: "ERROR", bateria_v: 6.5, posicao_x: 2, posicao_y: 4, orientacao: "NORTE", tamanho_grade: 8, paredes_atuais: { norte: false, sul: false, leste: true, oeste: true }, causa_erro: "Tração bloqueada: Pico de corrente no motor esquerdo (>2A)." },
-  { timestamp: 1715456796, estado_fsm: "ERROR", bateria_v: 6.5, posicao_x: 2, posicao_y: 4, orientacao: "NORTE", tamanho_grade: 8, paredes_atuais: { norte: false, sul: false, leste: true, oeste: true }, causa_erro: "Tração bloqueada: Pico de corrente no motor esquerdo (>2A)." }
-];
 
 interface PropriedadesCartao {
   label: string;
@@ -76,54 +51,23 @@ function CartaoEstatistica({ label, value, sub, icon, iconBg, highlight }: Propr
 }
 
 export function Dashboard() {
-  const [indiceAtual, setIndiceAtual] = useState(0);
-  const telemetriaAtual = FLUXO_MOCK_TELEMETRIA[indiceAtual];
+  // Telemetria vem do RobotMap via callback — fonte única de verdade
+  const [telemetriaAtual, setTelemetriaAtual] = useState<RobotTelemetry>({
+    timestamp: Math.floor(Date.now() / 1000),
+    estado_fsm: 'MAPPING',
+    posicao_x: 0,
+    posicao_y: 0,
+    orientacao: 'NORTE',
+  });
 
-  const [celulasExploradas, setCelulasExploradas] = useState<Record<string, CelulaMapa>>({});
   const [historicoErros, setHistoricoErros] = useState<RegistoErro[]>([]);
-  
   const [isLogAberto, setIsLogAberto] = useState(false);
 
-  useEffect(() => {
-    const intervalo = setInterval(() => {
-      setIndiceAtual((ant) => {
-        const proximo = ant < FLUXO_MOCK_TELEMETRIA.length - 1 ? ant + 1 : 0;
-        const novaTelemetria = FLUXO_MOCK_TELEMETRIA[proximo];
-
-        if (proximo === 0) {
-          setCelulasExploradas({});
-          setHistoricoErros([]);
-          setIsLogAberto(false);
-        } else {
-          const chaveMapa = `${novaTelemetria.posicao_x}-${novaTelemetria.posicao_y}`;
-          setCelulasExploradas(prev => prev[chaveMapa] ? prev : {
-            ...prev,
-            [chaveMapa]: { x: novaTelemetria.posicao_x, y: novaTelemetria.posicao_y, paredes: novaTelemetria.paredes_atuais }
-          });
-
-          if (novaTelemetria.estado_fsm === 'ERROR') {
-            setHistoricoErros(prev => {
-              if (prev.some(erro => erro.timestamp === novaTelemetria.timestamp)) return prev;
-              setIsLogAberto(true);
-              return [{
-                id: `${novaTelemetria.timestamp}-${Math.random()}`,
-                timestamp: novaTelemetria.timestamp,
-                causa: novaTelemetria.causa_erro || "Causa desconhecida.",
-                posicao_x: novaTelemetria.posicao_x,
-                posicao_y: novaTelemetria.posicao_y
-              }, ...prev];
-            });
-          }
-        }
-        return proximo;
-      });
-    }, 1500);
-    return () => clearInterval(intervalo);
+  // Callback estável para receber atualizações do RobotMap
+  const handleTelemetryUpdate = useCallback((t: RobotTelemetry) => {
+    setTelemetriaAtual(t);
   }, []);
 
-  const qtdExploradas = Object.keys(celulasExploradas).length;
-  const totalCelulas = telemetriaAtual.tamanho_grade * telemetriaAtual.tamanho_grade;
-  const percentual = Math.round((qtdExploradas / totalCelulas) * 100) || 0;
 
   const possuiErroCritico = telemetriaAtual.estado_fsm === 'ERROR';
   
@@ -132,7 +76,8 @@ export function Dashboard() {
     if (tensao > 6.8) return { icone: BatteryMedium, corTexto: "text-amber-500", corFundo: "bg-amber-50" };
     return { icone: BatteryLow, corTexto: "text-red-500", corFundo: "bg-red-50" };
   };
-  const estiloBateria = obterCorBateria(telemetriaAtual.bateria_v);
+  const estiloBateria = obterCorBateria(7.4); // placeholder — virá do mock_sender futuramente
+
 
   return (
     <div className="h-full flex flex-col bg-[#F8FAFC] font-sans relative overflow-hidden">
@@ -141,7 +86,7 @@ export function Dashboard() {
         <div className="bg-red-600 text-white px-8 py-3 flex items-center justify-center gap-4 shadow-xl shadow-red-600/30">
           <AlertTriangle className="w-7 h-7 animate-pulse" />
           <span className="font-bold text-lg tracking-wider uppercase">
-            Alarme Crítico de Hardware: <span className="font-medium text-red-100">{telemetriaAtual.causa_erro}</span>
+            Alarme Crítico de Hardware
           </span>
         </div>
       </div>
@@ -159,15 +104,13 @@ export function Dashboard() {
             <span className="font-mono text-sm text-slate-500 font-medium">{telemetriaAtual.timestamp}</span>
           </div>
           <div className="flex items-center gap-1.5 text-xs text-slate-400 font-medium">
-            <span>Grade detetada: {telemetriaAtual.tamanho_grade}x{telemetriaAtual.tamanho_grade}</span>
-            <span className="text-slate-300">•</span>
-            <span>{qtdExploradas} de {totalCelulas} células ({percentual}%)</span>
+            <span>({telemetriaAtual.posicao_x}, {telemetriaAtual.posicao_y}) · {telemetriaAtual.orientacao}</span>
           </div>
         </div>
       </div>
 
       <div className="px-8 pt-6 pb-4 grid grid-cols-2 xl:grid-cols-6 gap-4 shrink-0">
-        <CartaoEstatistica label="Bateria" value={`${telemetriaAtual.bateria_v.toFixed(1)}V`} sub="Tensão instantânea" iconBg={estiloBateria.corFundo} icon={<estiloBateria.icone className={`w-5 h-5 ${estiloBateria.corTexto}`} strokeWidth={2} />} />
+        <CartaoEstatistica label="Bateria" value="7.4V" sub="Simulado" iconBg={estiloBateria.corFundo} icon={<estiloBateria.icone className={`w-5 h-5 ${estiloBateria.corTexto}`} strokeWidth={2} />} />
         <CartaoEstatistica label="Velocidade" value="0.890" sub="m/s · atual" iconBg="bg-blue-50" icon={<Gauge className="w-5 h-5 text-blue-500" strokeWidth={2} />} />
         <CartaoEstatistica label="Cronómetro" value="00:12.4" sub="Tempo de percurso" iconBg="bg-violet-50" icon={<Clock className="w-5 h-5 text-violet-500" strokeWidth={2} />} />
         <CartaoEstatistica label="Objetivo" value="Explorando" sub="Mapeando labirinto" iconBg="bg-slate-100" icon={<Target className="w-5 h-5 text-slate-400" strokeWidth={2} />} />
@@ -182,12 +125,12 @@ export function Dashboard() {
         />
       </div>
 
-      <div className="flex-1 px-8 pb-8 flex min-h-0 relative">
+      <div className="flex-1 px-8 pb-8 flex items-center justify-center min-h-0 relative">
         
-        <div className={`w-full h-full rounded-2xl overflow-hidden border shadow-2xl relative transition-colors duration-500 ${possuiErroCritico ? 'border-red-500/50 shadow-red-500/20 bg-[#1A0B0B]' : 'border-slate-800 bg-[#0B1120]'}`}>
-          <RobotMap telemetria={telemetriaAtual} celulasExploradas={celulasExploradas} />
+        <div className={`w-full h-full rounded-2xl overflow-hidden border shadow-2xl relative transition-colors duration-500 flex items-center justify-center ${possuiErroCritico ? 'border-red-500/50 shadow-red-500/20 bg-[#1A0B0B]' : 'border-slate-800 bg-[#0B1120]'}`}>
+          <RobotMap onTelemetryUpdate={handleTelemetryUpdate} />
 
-          <div className="absolute top-6 right-6 bottom-6 z-30 flex flex-col items-end gap-3 pointer-events-none">
+          <div className="absolute top-20 right-6 bottom-6 z-30 flex flex-col items-end gap-3 pointer-events-none">
             
             {/* Botão de Controlo (Alternar) */}
             <button 
