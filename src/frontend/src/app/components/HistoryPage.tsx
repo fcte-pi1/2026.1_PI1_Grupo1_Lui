@@ -278,7 +278,7 @@ export function HistoryPage() {
   };
 
   return (
-    <div className="flex flex-col gap-6 items-center">
+    <div className="flex flex-col gap-6 items-center p-6">
       {/* ─── Painel de seleção ─── */}
       <Card className="w-full max-w-3xl bg-[#0a1128] border-slate-700">
         <CardHeader>
