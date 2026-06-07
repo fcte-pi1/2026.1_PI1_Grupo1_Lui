@@ -6,7 +6,9 @@
   "type": "module",
   "scripts": {
     "start": "node index.js",
-    "mock": "node mock_sender.js"
+    "mock": "node mock_sender.js",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand",
+    "test:integration": "node --experimental-vm-modules node_modules/jest/bin/jest.js __tests__/integration.test.js --runInBand"
   },
   "dependencies": {
     "@influxdata/influxdb-client": "^1.35.0",
@@ -14,5 +16,9 @@
     "cors": "^2.8.6",
     "dotenv": "^16.4.5",
     "socket.io": "^4.8.3"
+  },
+  "devDependencies": {
+    "@jest/globals": "^30.4.1",
+    "jest": "^30.4.2"
   }
 }

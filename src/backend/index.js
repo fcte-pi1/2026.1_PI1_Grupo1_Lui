@@ -26,12 +26,12 @@ console.log(`InfluxDB Bucket: ${INFLUX_BUCKET}`);
 console.log('--------------------------------');
 
 // Inicializa cliente InfluxDB
-const influxDB = new InfluxDB({ url: INFLUX_URL, token: INFLUX_TOKEN });
-const writeApi = influxDB.getWriteApi(INFLUX_ORG, INFLUX_BUCKET, 'ns');
+export const influxDB = new InfluxDB({ url: INFLUX_URL, token: INFLUX_TOKEN });
+export const writeApi = influxDB.getWriteApi(INFLUX_ORG, INFLUX_BUCKET, 'ns');
 
 // Cria servidor HTTP e WebSocket
-const httpServer = createServer();
-const io = new Server(httpServer, {
+export const httpServer = createServer();
+export const io = new Server(httpServer, {
   cors: {
     origin: "*",
     methods: ["GET", "POST"]
@@ -45,12 +45,8 @@ io.on('connection', (socket) => {
   });
 });
 
-httpServer.listen(WS_PORT, () => {
-  console.log(`[WS] Servidor WebSocket escutando na porta ${WS_PORT}`);
-});
-
 // Cria servidor UDP
-const server = dgram.createSocket('udp4');
+export const server = dgram.createSocket('udp4');
 
 server.on('listening', () => {
   const address = server.address();
@@ -151,24 +147,37 @@ server.on('error', (err) => {
   server.close();
 });
 
-// Inicia escuta
-server.bind(UDP_PORT, UDP_HOST);
+export function startServer(overrideUdpPort = UDP_PORT, overrideWsPort = WS_PORT) {
+  httpServer.listen(overrideWsPort, () => {
+    console.log(`[WS] Servidor WebSocket escutando na porta ${overrideWsPort}`);
+  });
+  server.bind(overrideUdpPort, UDP_HOST);
+}
+
+// Inicia escuta automaticamente se não estiver em ambiente de teste
+if (process.env.NODE_ENV !== 'test') {
+  startServer();
+}
 
 // Encerramento limpo
-const shutdown = () => {
-  console.log('Encerrando servidor...');
-  io.close();
-  httpServer.close();
-  server.close(() => {
-    writeApi.close()
-      .then(() => {
-        console.log('Conexões com InfluxDB encerradas.');
-        process.exit(0);
-      })
-      .catch((err) => {
-        console.error('Erro ao fechar conexão com InfluxDB:', err);
-        process.exit(1);
-      });
+export const shutdown = () => {
+  return new Promise((resolve) => {
+    console.log('Encerrando servidor...');
+    io.close();
+    httpServer.close();
+    server.close(() => {
+      writeApi.close()
+        .then(() => {
+          console.log('Conexões com InfluxDB encerradas.');
+          if (process.env.NODE_ENV !== 'test') process.exit(0);
+          resolve();
+        })
+        .catch((err) => {
+          console.error('Erro ao fechar conexão com InfluxDB:', err);
+          if (process.env.NODE_ENV !== 'test') process.exit(1);
+          resolve();
+        });
+    });
   });
 };
 
