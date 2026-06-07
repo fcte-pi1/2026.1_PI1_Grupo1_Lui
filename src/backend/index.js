@@ -2,11 +2,14 @@ import dgram from 'node:dgram';
 import { decode } from '@msgpack/msgpack';
 import { InfluxDB, Point } from '@influxdata/influxdb-client';
 import dotenv from 'dotenv';
+import { createServer } from 'node:http';
+import { Server } from 'socket.io';
 
 dotenv.config();
 
 const UDP_PORT = process.env.UDP_PORT ? parseInt(process.env.UDP_PORT, 10) : 41234;
 const UDP_HOST = process.env.UDP_HOST || '0.0.0.0';
+const WS_PORT = process.env.WS_PORT ? parseInt(process.env.WS_PORT, 10) : 3001;
 
 const INFLUX_URL = process.env.INFLUX_URL || 'http://localhost:8086';
 const INFLUX_TOKEN = process.env.INFLUX_TOKEN || 'micromouse-token-12345';
@@ -16,17 +19,34 @@ const INFLUX_BUCKET = process.env.INFLUX_BUCKET || 'micromouse_telemetria';
 console.log('--- CONFIGURAÇÃO DO BACKEND ---');
 console.log(`Porta UDP: ${UDP_PORT}`);
 console.log(`Endereço UDP: ${UDP_HOST}`);
+console.log(`Porta WS: ${WS_PORT}`);
 console.log(`InfluxDB URL: ${INFLUX_URL}`);
 console.log(`InfluxDB Org: ${INFLUX_ORG}`);
 console.log(`InfluxDB Bucket: ${INFLUX_BUCKET}`);
 console.log('--------------------------------');
 
 // Inicializa cliente InfluxDB
-const influxDB = new InfluxDB({ url: INFLUX_URL, token: INFLUX_TOKEN });
-const writeApi = influxDB.getWriteApi(INFLUX_ORG, INFLUX_BUCKET, 'ns');
+export const influxDB = new InfluxDB({ url: INFLUX_URL, token: INFLUX_TOKEN });
+export const writeApi = influxDB.getWriteApi(INFLUX_ORG, INFLUX_BUCKET, 'ns');
+
+// Cria servidor HTTP e WebSocket
+export const httpServer = createServer();
+export const io = new Server(httpServer, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"]
+  }
+});
+
+io.on('connection', (socket) => {
+  console.log(`[WS] Novo cliente conectado: ${socket.id}`);
+  socket.on('disconnect', () => {
+    console.log(`[WS] Cliente desconectado: ${socket.id}`);
+  });
+});
 
 // Cria servidor UDP
-const server = dgram.createSocket('udp4');
+export const server = dgram.createSocket('udp4');
 
 server.on('listening', () => {
   const address = server.address();
@@ -38,6 +58,9 @@ server.on('message', (msg, rinfo) => {
     // Decodifica o payload recebido via MsgPack
     const data = decode(msg);
     console.log(`[UDP] Recebido de ${rinfo.address}:${rinfo.port}:`, data);
+
+    // Envia dados para clientes conectados via WebSocket
+    io.emit('telemetry', data);
 
     // Mapeamento dinâmico e seguro para o esquema InfluxDB
     const estado_robo = data.estado_fsm || data.estado_robo || 'IDLE';
@@ -124,22 +147,37 @@ server.on('error', (err) => {
   server.close();
 });
 
-// Inicia escuta
-server.bind(UDP_PORT, UDP_HOST);
+export function startServer(overrideUdpPort = UDP_PORT, overrideWsPort = WS_PORT) {
+  httpServer.listen(overrideWsPort, () => {
+    console.log(`[WS] Servidor WebSocket escutando na porta ${overrideWsPort}`);
+  });
+  server.bind(overrideUdpPort, UDP_HOST);
+}
+
+// Inicia escuta automaticamente se não estiver em ambiente de teste
+if (process.env.NODE_ENV !== 'test') {
+  startServer();
+}
 
 // Encerramento limpo
-const shutdown = () => {
-  console.log('Encerrando servidor...');
-  server.close(() => {
-    writeApi.close()
-      .then(() => {
-        console.log('Conexões com InfluxDB encerradas.');
-        process.exit(0);
-      })
-      .catch((err) => {
-        console.error('Erro ao fechar conexão com InfluxDB:', err);
-        process.exit(1);
-      });
+export const shutdown = () => {
+  return new Promise((resolve) => {
+    console.log('Encerrando servidor...');
+    io.close();
+    httpServer.close();
+    server.close(() => {
+      writeApi.close()
+        .then(() => {
+          console.log('Conexões com InfluxDB encerradas.');
+          if (process.env.NODE_ENV !== 'test') process.exit(0);
+          resolve();
+        })
+        .catch((err) => {
+          console.error('Erro ao fechar conexão com InfluxDB:', err);
+          if (process.env.NODE_ENV !== 'test') process.exit(1);
+          resolve();
+        });
+    });
   });
 };
 
