@@ -17,6 +17,7 @@ set(FLOODFILL_SOURCES
 
 add_executable(test_floodfill
   test_flood_fill.cpp
+  test_ff_inicializar.cpp
   ${FLOODFILL_SOURCES}
 )
 
