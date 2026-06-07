@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react';
+import { io } from 'socket.io-client';
 import { cn } from '../lib/utils';
+
+const SOCKET_URL = 'http://localhost:3001';
 
 export interface RobotTelemetry {
   timestamp: number;
@@ -73,8 +76,12 @@ export function RobotMap({ onTelemetryUpdate }: PropriedadesMapa = {}) {
     orientacao: 'NORTE',
   });
 
-  // Reinicia simulação quando o tamanho muda
+  const [isSimulation, setIsSimulation] = useState(true);
+
+  // Reinicia simulação quando o tamanho muda e estamos em modo Simulação
   useEffect(() => {
+    if (!isSimulation) return;
+
     let currentStep = 0;
 
     setGrid(createEmptyGrid(mazeSize));
@@ -143,7 +150,46 @@ export function RobotMap({ onTelemetryUpdate }: PropriedadesMapa = {}) {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [mazeSize]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [mazeSize, isSimulation]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Liga ao WebSocket se estiver em modo Tempo Real
+  useEffect(() => {
+    if (isSimulation) return;
+
+    setGrid(createEmptyGrid(mazeSize));
+
+    const socket = io(SOCKET_URL);
+
+    socket.on('telemetry', (data: any) => {
+      // Nota: a renderização dinâmica de paredes será feita futuramente quando
+      // os sensores enviarem os dados de paredes nos pacotes UDP.
+      const newTelemetry: RobotTelemetry = {
+        timestamp: data.timestamp || Math.floor(Date.now() / 1000),
+        estado_fsm: data.estado_fsm || data.estado_robo || 'IDLE',
+        posicao_x: data.posicao_x ?? data.pos_x ?? 0,
+        posicao_y: data.posicao_y ?? data.pos_y ?? 0,
+        orientacao: data.orientacao || 'NORTE',
+      };
+
+      setTelemetry(newTelemetry);
+      onTelemetryUpdate?.(newTelemetry);
+
+      setGrid(prevGrid => {
+        const newGrid = prevGrid.map(col => [...col]);
+        if (newTelemetry.posicao_x < mazeSize && newTelemetry.posicao_y < mazeSize) {
+          newGrid[newTelemetry.posicao_x][newTelemetry.posicao_y] = { 
+            ...newGrid[newTelemetry.posicao_x][newTelemetry.posicao_y], 
+            visitada: true 
+          };
+        }
+        return newGrid;
+      });
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [mazeSize, isSimulation]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const getRotation = (orientacao: string): string => {
     switch (orientacao) {
@@ -163,10 +209,21 @@ export function RobotMap({ onTelemetryUpdate }: PropriedadesMapa = {}) {
 
       {/* Header: título + seletor de tamanho */}
       <div className="flex items-center justify-between px-5 py-3 border-b border-slate-700/60 shrink-0">
-        <span className="text-white font-semibold text-sm">
-          Mapa Ao Vivo
-          <span className="ml-2 text-slate-400 font-normal text-xs">({mazeSize}×{mazeSize})</span>
-        </span>
+        <div className="flex items-center gap-4">
+          <span className="text-white font-semibold text-sm">
+            Mapa Ao Vivo
+            <span className="ml-2 text-slate-400 font-normal text-xs">({mazeSize}×{mazeSize})</span>
+          </span>
+          <button
+            onClick={() => setIsSimulation(!isSimulation)}
+            className={cn(
+              'px-3 py-1 text-[10px] font-bold rounded-full transition-all tracking-wider',
+              isSimulation ? 'bg-amber-500/20 text-amber-400 border border-amber-500/50 hover:bg-amber-500/30' : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/50 hover:bg-emerald-500/30'
+            )}
+          >
+            {isSimulation ? 'MODO SIMULAÇÃO' : 'TEMPO REAL'}
+          </button>
+        </div>
         <div className="flex items-center gap-1.5">
           <span className="text-xs text-slate-500 mr-1">Tamanho:</span>
           {([4, 8, 16] as const).map(s => (

@@ -2,11 +2,14 @@ import dgram from 'node:dgram';
 import { decode } from '@msgpack/msgpack';
 import { InfluxDB, Point } from '@influxdata/influxdb-client';
 import dotenv from 'dotenv';
+import { createServer } from 'node:http';
+import { Server } from 'socket.io';
 
 dotenv.config();
 
 const UDP_PORT = process.env.UDP_PORT ? parseInt(process.env.UDP_PORT, 10) : 41234;
 const UDP_HOST = process.env.UDP_HOST || '0.0.0.0';
+const WS_PORT = process.env.WS_PORT ? parseInt(process.env.WS_PORT, 10) : 3001;
 
 const INFLUX_URL = process.env.INFLUX_URL || 'http://localhost:8086';
 const INFLUX_TOKEN = process.env.INFLUX_TOKEN || 'micromouse-token-12345';
@@ -16,6 +19,7 @@ const INFLUX_BUCKET = process.env.INFLUX_BUCKET || 'micromouse_telemetria';
 console.log('--- CONFIGURAÇÃO DO BACKEND ---');
 console.log(`Porta UDP: ${UDP_PORT}`);
 console.log(`Endereço UDP: ${UDP_HOST}`);
+console.log(`Porta WS: ${WS_PORT}`);
 console.log(`InfluxDB URL: ${INFLUX_URL}`);
 console.log(`InfluxDB Org: ${INFLUX_ORG}`);
 console.log(`InfluxDB Bucket: ${INFLUX_BUCKET}`);
@@ -24,6 +28,26 @@ console.log('--------------------------------');
 // Inicializa cliente InfluxDB
 const influxDB = new InfluxDB({ url: INFLUX_URL, token: INFLUX_TOKEN });
 const writeApi = influxDB.getWriteApi(INFLUX_ORG, INFLUX_BUCKET, 'ns');
+
+// Cria servidor HTTP e WebSocket
+const httpServer = createServer();
+const io = new Server(httpServer, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"]
+  }
+});
+
+io.on('connection', (socket) => {
+  console.log(`[WS] Novo cliente conectado: ${socket.id}`);
+  socket.on('disconnect', () => {
+    console.log(`[WS] Cliente desconectado: ${socket.id}`);
+  });
+});
+
+httpServer.listen(WS_PORT, () => {
+  console.log(`[WS] Servidor WebSocket escutando na porta ${WS_PORT}`);
+});
 
 // Cria servidor UDP
 const server = dgram.createSocket('udp4');
@@ -38,6 +62,9 @@ server.on('message', (msg, rinfo) => {
     // Decodifica o payload recebido via MsgPack
     const data = decode(msg);
     console.log(`[UDP] Recebido de ${rinfo.address}:${rinfo.port}:`, data);
+
+    // Envia dados para clientes conectados via WebSocket
+    io.emit('telemetry', data);
 
     // Mapeamento dinâmico e seguro para o esquema InfluxDB
     const estado_robo = data.estado_fsm || data.estado_robo || 'IDLE';
@@ -130,6 +157,8 @@ server.bind(UDP_PORT, UDP_HOST);
 // Encerramento limpo
 const shutdown = () => {
   console.log('Encerrando servidor...');
+  io.close();
+  httpServer.close();
   server.close(() => {
     writeApi.close()
       .then(() => {
