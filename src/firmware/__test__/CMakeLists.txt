@@ -1,0 +1,32 @@
+cmake_minimum_required(VERSION 3.16)
+project(floodfill_test)
+
+# Catch2 via FetchContent
+include(FetchContent)
+FetchContent_Declare(
+  Catch2
+  GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+  GIT_TAG        v3.7.1
+)
+FetchContent_MakeAvailable(Catch2)
+
+# Arquivos fonte do floodfill (sem main.cpp do firmware)
+set(FLOODFILL_SOURCES
+  ${CMAKE_SOURCE_DIR}/../floodfill/flood_fill.cpp
+)
+
+add_executable(test_floodfill
+  test_flood_fill.cpp
+  ${FLOODFILL_SOURCES}
+)
+
+target_include_directories(test_floodfill PRIVATE
+  ${CMAKE_SOURCE_DIR}/../floodfill
+)
+
+target_link_libraries(test_floodfill PRIVATE Catch2::Catch2WithMain)
+
+# Descoberta de testes com CTest
+include(CTest)
+include(Catch)
+catch_discover_tests(test_floodfill)
