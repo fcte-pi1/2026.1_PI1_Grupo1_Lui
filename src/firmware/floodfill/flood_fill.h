@@ -28,13 +28,22 @@ struct Celula {
     bool visitada = false;
 };
 
+struct PassoExplorador {
+    int x;
+    int y;
+    string orientacao;
+    vector<pair<pair<int,int>, string>> paredes; // {{x,y}, "NORTE"}, {{x,y}, "LESTE"}, ...
+};
+
 extern int largura;
 extern int altura;
 extern vector<vector<Celula>> labirinto;
 extern vector<vector<int>> distancia;
 extern vector<pair<int,int>> objetivo;
+extern vector<PassoExplorador> historico_exploracao;
 void ff_inicializar(int larg, int alt, vector<pair<int,int>> meta);
 void ff_parede(int x, int y, Direcao dir);
 void ff_recalcular();
 void ff_visitado(int x, int y);
 Direcao ff_melhor_movimento(int x, int y, Direcao direcao_atual);
+void salva_json();

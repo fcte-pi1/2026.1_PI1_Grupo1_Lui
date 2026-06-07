@@ -1,0 +1,135 @@
+[
+  {
+    "x": 0,
+    "y": 0,
+    "orientacao": "NORTE",
+    "paredes": [
+      { "x": 0, "y": 0, "dir": "OESTE" },
+      { "x": 0, "y": 0, "dir": "SUL" }
+    ]
+  },
+  {
+    "x": 0,
+    "y": 1,
+    "orientacao": "NORTE",
+    "paredes": [
+      { "x": 0, "y": 1, "dir": "OESTE" },
+      { "x": 0, "y": 1, "dir": "LESTE" }
+    ]
+  },
+  {
+    "x": 0,
+    "y": 2,
+    "orientacao": "NORTE",
+    "paredes": [
+      { "x": 0, "y": 2, "dir": "OESTE" },
+      { "x": 0, "y": 2, "dir": "NORTE" }
+    ]
+  },
+  {
+    "x": 1,
+    "y": 2,
+    "orientacao": "LESTE",
+    "paredes": [
+      { "x": 1, "y": 2, "dir": "NORTE" }
+    ]
+  },
+  {
+    "x": 2,
+    "y": 2,
+    "orientacao": "LESTE",
+    "paredes": [
+      { "x": 2, "y": 2, "dir": "SUL" }
+    ]
+  },
+  {
+    "x": 2,
+    "y": 3,
+    "orientacao": "NORTE",
+    "paredes": [
+      { "x": 2, "y": 3, "dir": "LESTE" }
+    ]
+  },
+  {
+    "x": 2,
+    "y": 4,
+    "orientacao": "NORTE",
+    "paredes": [
+      { "x": 2, "y": 4, "dir": "NORTE" },
+      { "x": 2, "y": 4, "dir": "LESTE" }
+    ]
+  },
+  {
+    "x": 2,
+    "y": 4,
+    "orientacao": "OESTE",
+    "paredes": [
+      { "x": 2, "y": 4, "dir": "OESTE" }
+    ]
+  },
+  {
+    "x": 1,
+    "y": 4,
+    "orientacao": "OESTE",
+    "paredes": [
+      { "x": 1, "y": 4, "dir": "NORTE" }
+    ]
+  },
+  {
+    "x": 1,
+    "y": 3,
+    "orientacao": "SUL",
+    "paredes": [
+      { "x": 1, "y": 3, "dir": "OESTE" }
+    ]
+  },
+  {
+    "x": 1,
+    "y": 2,
+    "orientacao": "SUL",
+    "paredes": []
+  },
+  {
+    "x": 1,
+    "y": 1,
+    "orientacao": "SUL",
+    "paredes": [
+      { "x": 1, "y": 1, "dir": "SUL" },
+      { "x": 1, "y": 1, "dir": "LESTE" }
+    ]
+  },
+  {
+    "x": 2,
+    "y": 1,
+    "orientacao": "LESTE",
+    "paredes": [
+      { "x": 2, "y": 1, "dir": "NORTE" }
+    ]
+  },
+  {
+    "x": 3,
+    "y": 1,
+    "orientacao": "LESTE",
+    "paredes": [
+      { "x": 3, "y": 1, "dir": "LESTE" },
+      { "x": 3, "y": 1, "dir": "SUL" }
+    ]
+  },
+  {
+    "x": 3,
+    "y": 2,
+    "orientacao": "NORTE",
+    "paredes": [
+      { "x": 3, "y": 2, "dir": "LESTE" }
+    ]
+  },
+  {
+    "x": 3,
+    "y": 3,
+    "orientacao": "NORTE",
+    "paredes": [
+      { "x": 3, "y": 3, "dir": "LESTE" },
+      { "x": 3, "y": 3, "dir": "NORTE" }
+    ]
+  }
+]
