@@ -50,3 +50,11 @@ Caso você esteja depurando um bug específico e não queira rodar o pacote comp
   ```bash
   make mock
   ```
+* Gera os arquivos estáticos de produção do frontend (útil para testes de deploy):
+  ```bash
+  make build
+  ```
+* Limpa todos os arquivos temporários e dependências instaladas (`node_modules` e pastas de dist/build):
+  ```bash
+  make clean
+  ```
