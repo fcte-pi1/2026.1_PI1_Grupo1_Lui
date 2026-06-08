@@ -41,6 +41,7 @@ extern vector<vector<Celula>> labirinto;
 extern vector<vector<int>> distancia;
 extern vector<pair<int,int>> objetivo;
 extern vector<PassoExplorador> historico_exploracao;
+extern string id_corrida;
 void ff_inicializar(int larg, int alt, vector<pair<int,int>> meta);
 void ff_parede(int x, int y, Direcao dir);
 void ff_recalcular();

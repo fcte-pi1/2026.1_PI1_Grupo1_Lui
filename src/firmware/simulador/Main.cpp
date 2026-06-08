@@ -33,6 +33,7 @@ Direcao direcao_relativa(Direcao atual, int offset) {
     return (Direcao)((atual + offset + 4) % 4);
 }
 
+#ifndef TESTING
 void girar_para(Direcao& atual, Direcao alvo) {
     while (atual != alvo) {
         int diferenca = (alvo - atual + 4) % 4;
@@ -45,7 +46,9 @@ void girar_para(Direcao& atual, Direcao alvo) {
         }
     }
 }
+#endif
 
+#ifndef TESTING
 int main() {
     // gera ID unico para esta corrida
     id_corrida = gerar_id_corrida();
@@ -132,6 +135,7 @@ int main() {
 
     return 0;
 }
+#endif
 
 
 // Algoritmo pra salvar o json das paredes
