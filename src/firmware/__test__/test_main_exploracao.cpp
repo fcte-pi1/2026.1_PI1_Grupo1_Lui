@@ -80,21 +80,10 @@ TEST_CASE("Exploracao 4x4 simples - robo nao repete posicao em loop", "[integrac
 TEST_CASE("Exploracao com beco sem saida - robo encontra alternativa", "[integracao][beco]") {
     vector<pair<int,int>> metas = {{1, 1}};
 
-    // monta labirinto com beco: bloqueia caminho direto (0,0)->(0,1)
-    // forcando o robo a ir por (1,0)->(1,1)
-    bool chegou = executar_exploracao(4, 4, metas);
-
     // adiciona parede apos inicializar para simular descoberta em campo
-    mock().add_parede(0, 0, NORTE); // bloqueia saida norte de (0,0)
-
-    // reinicia e roda de novo com o beco configurado antes da exploracao
     mock().inicializar(4, 4);
-    mock().add_parede(0, 0, NORTE);
+    mock().add_parede(0, 0, NORTE); // bloqueia saida norte de (0,0)
     historico_exploracao.clear();
-
-    ff_inicializar(4, 4, metas);
-    int x = 0, y = 0;
-    Direcao dir = NORTE;
 
     bool chegou_beco = executar_exploracao(4, 4, metas);
     REQUIRE(chegou_beco == true);
@@ -107,8 +96,6 @@ TEST_CASE("Exploracao com beco - historico registra mais de 1 passo", "[integrac
 
     vector<pair<int,int>> metas = {{1, 1}};
     historico_exploracao.clear();
-    id_corrida = "teste_beco";
-    ff_inicializar(4, 4, metas);
 
     executar_exploracao(4, 4, metas);
 
@@ -159,7 +146,6 @@ TEST_CASE("JSON - parede registrada bate com labirinto mockado", "[integracao][j
 
     vector<pair<int,int>> metas = {{1, 1}};
     historico_exploracao.clear();
-    id_corrida = "teste_parede";
 
     // executa exploracao — o mock ja tem a parede, o robo vai detectar
     executar_exploracao(4, 4, metas);
@@ -195,7 +181,6 @@ TEST_CASE("Robo nao fica preso em loop infinito - labirinto com becos", "[integr
     mock().add_parede(1, 0, NORTE);
 
     vector<pair<int,int>> metas = {{2, 2}};
-    mock().limite_passos = 512;
 
     REQUIRE_NOTHROW(executar_exploracao(4, 4, metas));
 }

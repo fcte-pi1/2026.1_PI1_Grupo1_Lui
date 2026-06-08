@@ -131,7 +131,7 @@ inline bool moverFrente() {
 
 // Loop de exploracao extraido do Main.cpp (identico, sem #ifndef TESTING)
 
-string direcao_para_string(Direcao dir) {
+inline string direcao_para_string(Direcao dir) {
     switch(dir) {
         case NORTE: return "NORTE";
         case LESTE: return "LESTE";
