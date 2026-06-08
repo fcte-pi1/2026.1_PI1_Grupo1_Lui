@@ -38,7 +38,7 @@ void TaskTelemetria(void *parametrospv) {
 
             // Tenta resolver o hostname se ainda não foi resolvido
             if (!ip_resolved) {
-                struct hostent *hp = gethostbyname("host.wokwi.internal");
+                struct hostent *hp = gethostbyname("192.168.0.50");
                 if (hp != NULL) {
                     struct in_addr **addr_list = (struct in_addr **)hp->h_addr_list;
                     dest_addr.sin_addr = *addr_list[0];
@@ -46,7 +46,7 @@ void TaskTelemetria(void *parametrospv) {
                     ip_resolved = true;
                 } else {
                     // Fallback para o IP do gateway privado padrão do Wokwi (10.13.37.1)
-                    dest_addr.sin_addr.s_addr = inet_addr("10.13.37.1");
+                    dest_addr.sin_addr.s_addr = inet_addr("192.168.0.50");
                     printf("Aviso: DNS falhou. Usando IP fallback: 10.13.37.1\n");
                 }
             }

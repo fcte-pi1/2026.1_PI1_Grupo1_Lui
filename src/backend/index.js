@@ -2,11 +2,16 @@ import dgram from 'node:dgram';
 import { decode } from '@msgpack/msgpack';
 import { InfluxDB, Point } from '@influxdata/influxdb-client';
 import dotenv from 'dotenv';
+import { createServer } from 'node:http';
+import { Server } from 'socket.io';
+import fs from 'node:fs';
+import path from 'node:path';
 
 dotenv.config();
 
 const UDP_PORT = process.env.UDP_PORT ? parseInt(process.env.UDP_PORT, 10) : 41234;
 const UDP_HOST = process.env.UDP_HOST || '0.0.0.0';
+const WS_PORT = process.env.WS_PORT ? parseInt(process.env.WS_PORT, 10) : 3001;
 
 const INFLUX_URL = process.env.INFLUX_URL || 'http://localhost:8086';
 const INFLUX_TOKEN = process.env.INFLUX_TOKEN || 'micromouse-token-12345';
@@ -16,17 +21,66 @@ const INFLUX_BUCKET = process.env.INFLUX_BUCKET || 'micromouse_telemetria';
 console.log('--- CONFIGURAÇÃO DO BACKEND ---');
 console.log(`Porta UDP: ${UDP_PORT}`);
 console.log(`Endereço UDP: ${UDP_HOST}`);
+console.log(`Porta WS: ${WS_PORT}`);
 console.log(`InfluxDB URL: ${INFLUX_URL}`);
 console.log(`InfluxDB Org: ${INFLUX_ORG}`);
 console.log(`InfluxDB Bucket: ${INFLUX_BUCKET}`);
 console.log('--------------------------------');
 
 // Inicializa cliente InfluxDB
-const influxDB = new InfluxDB({ url: INFLUX_URL, token: INFLUX_TOKEN });
-const writeApi = influxDB.getWriteApi(INFLUX_ORG, INFLUX_BUCKET, 'ns');
+export const influxDB = new InfluxDB({ url: INFLUX_URL, token: INFLUX_TOKEN });
+export const writeApi = influxDB.getWriteApi(INFLUX_ORG, INFLUX_BUCKET, 'ns');
+
+// --- AUTOMAÇÃO DO HISTÓRICO JSON ---
+const sessoesAtivas = {};
+// Usa __dirname para garantir que sempre ache a pasta src/maze_runs, independente de onde o node foi rodado
+import { fileURLToPath } from 'node:url';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const MAZE_RUNS_DIR = path.resolve(__dirname, '../maze_runs');
+
+if (!fs.existsSync(MAZE_RUNS_DIR)) {
+  fs.mkdirSync(MAZE_RUNS_DIR, { recursive: true });
+}
+// -----------------------------------
+
+// Cria servidor HTTP e WebSocket
+export const httpServer = createServer();
+export const io = new Server(httpServer, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"]
+  }
+});
+
+// --- DECODIFICADOR DE PAREDES (Issue #145) ---
+function decodificarParedes(paredesPayload, x, y) {
+  // Mantém compatibilidade se o mock já mandar o Array pronto
+  if (Array.isArray(paredesPayload)) return paredesPayload;
+
+  // Se não vier um número (bitmask), retorna array vazio
+  if (typeof paredesPayload !== 'number') return [];
+
+  const paredesDecodificadas = [];
+  // 1 = NORTE, 2 = LESTE, 4 = SUL, 8 = OESTE
+  if (paredesPayload & 1) paredesDecodificadas.push({ x, y, dir: 'NORTE' });
+  if (paredesPayload & 2) paredesDecodificadas.push({ x, y, dir: 'LESTE' });
+  if (paredesPayload & 4) paredesDecodificadas.push({ x, y, dir: 'SUL' });
+  if (paredesPayload & 8) paredesDecodificadas.push({ x, y, dir: 'OESTE' });
+
+  return paredesDecodificadas;
+}
+// ---------------------------------------------
+
+io.on('connection', (socket) => {
+  console.log(`[WS] Novo cliente conectado: ${socket.id}`);
+  socket.on('disconnect', () => {
+    console.log(`[WS] Cliente desconectado: ${socket.id}`);
+  });
+});
 
 // Cria servidor UDP
-const server = dgram.createSocket('udp4');
+export const server = dgram.createSocket('udp4');
 
 server.on('listening', () => {
   const address = server.address();
@@ -39,11 +93,59 @@ server.on('message', (msg, rinfo) => {
     const data = decode(msg);
     console.log(`[UDP] Recebido de ${rinfo.address}:${rinfo.port}:`, data);
 
+    // Envia dados para clientes conectados via WebSocket
+    io.emit('telemetry', data);
+
     // Mapeamento dinâmico e seguro para o esquema InfluxDB
     const estado_robo = data.estado_fsm || data.estado_robo || 'IDLE';
     const id_labirinto = data.id_labirinto || 'default';
     const id_corrida = data.id_corrida || 'default';
     const objetivo = data.objetivo || 'N';
+
+    // --- LÓGICA DE GERAÇÃO DO JSON AUTOMÁTICO ---
+    if (!sessoesAtivas[id_corrida]) {
+      sessoesAtivas[id_corrida] = {
+        id_corrida,
+        historico: []
+      };
+    }
+
+    const pos_x = data.posicao_x !== undefined ? data.posicao_x : data.pos_x;
+    const pos_y = data.posicao_y !== undefined ? data.posicao_y : data.pos_y;
+
+    // Se tiver coordenadas, adiciona na memória (evita lixo de quando o robô tá desligado)
+    if (pos_x !== undefined && pos_y !== undefined && (estado_robo === 'MAPPING' || estado_robo === 'FAST_RUN' || estado_robo === 'GOAL_REACHED' || estado_robo === 'FINISHED')) {
+      // Pega a parede ou usa o decoder da Bitmask (Issue #145 futura)
+      const passo_historico = {
+        x: pos_x,
+        y: pos_y,
+        orientacao: data.orientacao || 'NORTE',
+        paredes: decodificarParedes(data.paredes, pos_x, pos_y)
+      };
+      
+      // Só adiciona se o robô se moveu para não floodar o json com o robô parado
+      const length = sessoesAtivas[id_corrida].historico.length;
+      const ultimo = length > 0 ? sessoesAtivas[id_corrida].historico[length - 1] : null;
+      if (!ultimo || ultimo.x !== passo_historico.x || ultimo.y !== passo_historico.y || ultimo.orientacao !== passo_historico.orientacao || passo_historico.paredes.length > 0) {
+        sessoesAtivas[id_corrida].historico.push(passo_historico);
+      }
+    }
+
+    // Gatilho final (Issue #243)
+    if (estado_robo === 'FINISHED' || estado_robo === 'GOAL_REACHED') {
+      console.log(`[JSON Automático] Gatilho de fim recebido para corrida: ${id_corrida}`);
+      if (sessoesAtivas[id_corrida] && sessoesAtivas[id_corrida].historico.length > 0) {
+        const timestamp = Date.now();
+        const filename = `corrida_${timestamp}.json`;
+        const filepath = path.join(MAZE_RUNS_DIR, filename);
+        
+        fs.writeFileSync(filepath, JSON.stringify(sessoesAtivas[id_corrida], null, 2), 'utf-8');
+        console.log(`[JSON Automático] Arquivo salvo com sucesso: ${filepath}`);
+      }
+      // Limpa a RAM
+      delete sessoesAtivas[id_corrida];
+    }
+    // ---------------------------------------------
 
     const point = new Point('log_corrida')
       .tag('id_labirinto', id_labirinto)
@@ -124,22 +226,37 @@ server.on('error', (err) => {
   server.close();
 });
 
-// Inicia escuta
-server.bind(UDP_PORT, UDP_HOST);
+export function startServer(overrideUdpPort = UDP_PORT, overrideWsPort = WS_PORT) {
+  httpServer.listen(overrideWsPort, () => {
+    console.log(`[WS] Servidor WebSocket escutando na porta ${overrideWsPort}`);
+  });
+  server.bind(overrideUdpPort, UDP_HOST);
+}
+
+// Inicia escuta automaticamente se não estiver em ambiente de teste
+if (process.env.NODE_ENV !== 'test') {
+  startServer();
+}
 
 // Encerramento limpo
-const shutdown = () => {
-  console.log('Encerrando servidor...');
-  server.close(() => {
-    writeApi.close()
-      .then(() => {
-        console.log('Conexões com InfluxDB encerradas.');
-        process.exit(0);
-      })
-      .catch((err) => {
-        console.error('Erro ao fechar conexão com InfluxDB:', err);
-        process.exit(1);
-      });
+export const shutdown = () => {
+  return new Promise((resolve) => {
+    console.log('Encerrando servidor...');
+    io.close();
+    httpServer.close();
+    server.close(() => {
+      writeApi.close()
+        .then(() => {
+          console.log('Conexões com InfluxDB encerradas.');
+          if (process.env.NODE_ENV !== 'test') process.exit(0);
+          resolve();
+        })
+        .catch((err) => {
+          console.error('Erro ao fechar conexão com InfluxDB:', err);
+          if (process.env.NODE_ENV !== 'test') process.exit(1);
+          resolve();
+        });
+    });
   });
 };
 

@@ -3,6 +3,7 @@
 #include "freertos/task.h"
 #include "movement.hpp"
 #include "telemetry.hpp"
+#include "tof_sensor.hpp"
 #include "wifi_manager.hpp"
 
 extern "C" void app_main(void) {
@@ -18,7 +19,18 @@ extern "C" void app_main(void) {
         return;
     }
 
-    // 2. Cria a tarefa de movimento no Core 0
+    // 2. Cria a tarefa de leitura do sensor ToF no Core 0
+    xTaskCreatePinnedToCore(
+        ToFTask,
+        "TOF_Core0",
+        4096,
+        NULL,
+        6,
+        NULL,
+        0
+    );
+
+    // 3. Cria a tarefa de movimento no Core 0
     xTaskCreatePinnedToCore(
         MoveTask,            // Função executada
         "Movement_Core0",    // Nome para debug
@@ -29,7 +41,7 @@ extern "C" void app_main(void) {
         0                    // Executa no Core 0
     );
     
-    // 3. Cria a tarefa de telemetria no Core 1
+    // 4. Cria a tarefa de telemetria no Core 1
     xTaskCreatePinnedToCore(
         TaskTelemetria,
         "Telemetry_core1",
