@@ -23,8 +23,9 @@ set(SIMULADOR_SOURCES
 add_executable(test_floodfill
   test_flood_fill.cpp
   test_ff_inicializar.cpp
-  test_salva_json.cpp
   test_ff_helpers.cpp
+  test_salva_json.cpp
+  test_main_exploracao.cpp
   ${FLOODFILL_SOURCES}
   ${SIMULADOR_SOURCES}
 )
