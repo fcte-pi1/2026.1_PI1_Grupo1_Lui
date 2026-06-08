@@ -14,3 +14,24 @@ Lembrem sempre de evitar enviar arquivos muito grandes (>5MB). No caso de vídeo
 1. Crie o repositório do projeto utilizando a nomenclatura padrão no formato: `<ano>.<semestre>_PI1_Grupo<n>_<professor>`. Como um exemplo, um nome formado corretamente seria `2026.1_PI1_Grupo1_Diogo`. 
 
 2. Crie uma equipe do projeto com a mesma nomenclatura do repositório porém com o sufixo `_Equipe`, como `2026.1_PI1_Grupo1_Diogo_Equipe`, e solicite, caso necessário, que a equipe tenha permissão de escrita no repositório do projeto.
+
+## Executando o Projeto (Software)
+
+Para testar o Micromouse na sua máquina local, utilizamos um `Makefile` na raiz do projeto que facilita a inicialização simultânea de todos os serviços (Backend, Frontend e Simulador Mock).
+
+**1. Instale as dependências (Primeira vez apenas):**
+```bash
+make install
+```
+
+**2. Rode todos os serviços juntos:**
+```bash
+make run
+```
+
+Ao fazer isso, o sistema irá subir o Backend Node.js, a Dashboard em React e o emissor de telemetria UDP do Mock em paralelo. Pressione `Ctrl + C` uma única vez para derrubar tudo.
+
+Caso prefira rodar módulos específicos:
+- `make backend`
+- `make frontend`
+- `make mock`
