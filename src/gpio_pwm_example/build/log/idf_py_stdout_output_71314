@@ -1,0 +1,157 @@
+ets Jul 29 2019 12:21:46
+
+rst:0x1 (POWERON_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0030,len:6276
+load:0x40078000,len:15716
+load:0x40080400,len:4
+ho 8 tail 4 room 4
+load:0x40080404,len:3860
+entry 0x4008063c
+[0;32mI (31) boot: ESP-IDF v5.4 2nd stage bootloader[0m
+[0;32mI (31) boot: compile time Jun  3 2026 17:09:03[0m
+[0;32mI (31) boot: Multicore bootloader[0m
+[0;32mI (32) boot: chip revision: v3.1[0m
+[0;32mI (35) boot.esp32: SPI Speed      : 40MHz[0m
+[0;32mI (39) boot.esp32: SPI Mode       : DIO[0m
+[0;32mI (42) boot.esp32: SPI Flash Size : 2MB[0m
+[0;32mI (46) boot: Enabling RNG early entropy source...[0m
+[0;32mI (50) boot: Partition Table:[0m
+[0;32mI (53) boot: ## Label            Usage          Type ST Offset   Length[0m
+[0;32mI (59) boot:  0 nvs              WiFi data        01 02 00009000 00006000[0m
+[0;32mI (66) boot:  1 phy_init         RF data          01 01 0000f000 00001000[0m
+[0;32mI (72) boot:  2 factory          factory app      00 00 00010000 00100000[0m
+[0;32mI (79) boot: End of partition table[0m
+[0;32mI (82) esp_image: segment 0: paddr=00010020 vaddr=3f400020 size=0b22ch ( 45612) map[0m
+[0;32mI (105) esp_image: segment 1: paddr=0001b254 vaddr=3ff80000 size=0001ch (    28) load[0m
+[0;32mI (106) esp_image: segment 2: paddr=0001b278 vaddr=3ffb0000 size=023c4h (  9156) load[0m
+[0;32mI (113) esp_image: segment 3: paddr=0001d644 vaddr=40080000 size=029d4h ( 10708) load[0m
+[0;32mI (121) esp_image: segment 4: paddr=00020020 vaddr=400d0020 size=1707ch ( 94332) map[0m
+[0;32mI (157) esp_image: segment 5: paddr=000370a4 vaddr=400829d4 size=0a630h ( 42544) load[0m
+[0;32mI (180) boot: Loaded app from partition at offset 0x10000[0m
+[0;32mI (180) boot: Disabling RNG early entropy source...[0m
+[0;32mI (190) cpu_start: Multicore app[0m
+[0;32mI (198) cpu_start: Pro cpu start user code[0m
+[0;32mI (198) cpu_start: cpu freq: 160000000 Hz[0m
+[0;32mI (198) app_init: Application information:[0m
+[0;32mI (199) app_init: Project name:     gpio_pwm_example[0m
+[0;32mI (203) app_init: App version:      1[0m
+[0;32mI (207) app_init: Compile time:     Jun  3 2026 17:09:24[0m
+[0;32mI (212) app_init: ELF file SHA256:  d349627f2...[0m
+[0;32mI (216) app_init: ESP-IDF:          v5.4[0m
+[0;32mI (220) efuse_init: Min chip rev:     v0.0[0m
+[0;32mI (223) efuse_init: Max chip rev:     v3.99 [0m
+[0;32mI (227) efuse_init: Chip rev:         v3.1[0m
+[0;32mI (232) heap_init: Initializing. RAM available for dynamic allocation:[0m
+[0;32mI (238) heap_init: At 3FFAE6E0 len 00001920 (6 KiB): DRAM[0m
+[0;32mI (243) heap_init: At 3FFB2CE8 len 0002D318 (180 KiB): DRAM[0m
+[0;32mI (248) heap_init: At 3FFE0440 len 00003AE0 (14 KiB): D/IRAM[0m
+[0;32mI (253) heap_init: At 3FFE4350 len 0001BCB0 (111 KiB): D/IRAM[0m
+[0;32mI (259) heap_init: At 4008D004 len 00012FFC (75 KiB): IRAM[0m
+[0;32mI (265) spi_flash: detected chip: generic[0m
+[0;32mI (268) spi_flash: flash io: dio[0m
+[0;33mW (271) spi_flash: Detected size(4096k) larger than the size in the binary image header(2048k). Using the size in the binary image header.[0m
+[0;32mI (284) main_task: Started on CPU0[0m
+[0;32mI (294) main_task: Calling app_main()[0m
+Iniciando controle dos motores
+[0;32mI (294) gpio: GPIO[25]| InputEn: 0| OutputEn: 0| OpenDrain: 0| Pullup: 1| Pulldown: 0| Intr:0 [0m
+[0;32mI (294) gpio: GPIO[26]| InputEn: 0| OutputEn: 0| OpenDrain: 0| Pullup: 1| Pulldown: 0| Intr:0 [0m
+[0;32mI (304) gpio: GPIO[35]| InputEn: 0| OutputEn: 0| OpenDrain: 0| Pullup: 1| Pulldown: 0| Intr:0 [0m
+[1;31mE (314) gpio: io_num=35 can only be input[0m
+[1;31mE (314) gpio: gpio_set_level(238): GPIO output gpio_num error[0m
+[0;32mI (324) gpio: GPIO[32]| InputEn: 0| OutputEn: 0| OpenDrain: 0| Pullup: 1| Pulldown: 0| Intr:0 [0m
+[1;31mE (334) gpio: gpio_set_level(238): GPIO output gpio_num error[0m
+Encoder motor A: 0 pulsos
+Encoder motor A: 0 pulsos
+Encoder motor A: 0 pulsos
+Encoder motor A: 0 pulsos
+Encoder motor A: 0 pulsos
+Encoder motor A: 0 pulsos
+Encoder motor A: 0 pulsos
+Encoder motor A: 0 pulsos
+Encoder motor A: 0 pulsos
+Encoder motor A: 0 pulsos
+Encoder motor A: 0 pulsos
+Encoder motor A: 0 pulsos
+Encoder motor A: 0 pulsos
+Encoder motor A: 0 pulsos
+Encoder motor A: 0 pulsos
+Encoder motor A: 0 pulsos
+Encoder motor A: 0 pulsos
+Encoder motor A: 0 pulsos
+Encoder motor A: 0 pulsos
+Encoder motor A: 0 pulsos
+Encoder motor A: 0 pulsos
+Encoder motor A: 0 pulsos
+Encoder motor A: 0 pulsos
+Encoder motor A: 0 pulsos
+Encoder motor A: 0 pulsos
+Encoder motor A: 0 pulsos
+Encoder motor A: 0 pulsos
+Encoder motor A: 0 pulsos
+Encoder motor A: 0 pulsos
+Encoder motor A: 0 pulsos
+Encoder motor A: 0 pulsos
+Encoder motor A: 0 pulsos
+Encoder motor A: 0 pulsos
+Encoder motor A: 0 pulsos
+Encoder motor A: 25 pulsos
+Encoder motor A: 6790 pulsos
+Encoder motor A: 13719 pulsos
+Encoder motor A: 20646 pulsos
+Encoder motor A: 27574 pulsos
+Encoder motor A: 34496 pulsos
+Encoder motor A: 41423 pulsos
+Encoder motor A: 48350 pulsos
+Encoder motor A: 55280 pulsos
+Encoder motor A: 62207 pulsos
+Encoder motor A: 69122 pulsos
+Encoder motor A: 76051 pulsos
+Encoder motor A: 82980 pulsos
+Encoder motor A: 89901 pulsos
+Encoder motor A: 96826 pulsos
+Encoder motor A: 103756 pulsos
+Encoder motor A: 110691 pulsos
+Encoder motor A: 117626 pulsos
+Encoder motor A: 124559 pulsos
+Encoder motor A: 131489 pulsos
+Encoder motor A: 138422 pulsos
+Encoder motor A: 145358 pulsos
+Encoder motor A: 152295 pulsos
+Encoder motor A: 159243 pulsos
+Encoder motor A: 166195 pulsos
+Encoder motor A: 173150 pulsos
+Encoder motor A: 180103 pulsos
+Encoder motor A: 187067 pulsos
+Encoder motor A: 194041 pulsos
+Encoder motor A: 201012 pulsos
+Encoder motor A: 207984 pulsos
+Encoder motor A: 214942 pulsos
+Encoder motor A: 221901 pulsos
+Encoder motor A: 228863 pulsos
+Encoder motor A: 235826 pulsos
+Encoder motor A: 242779 pulsos
+Encoder motor A: 249740 pulsos
+Encoder motor A: 256708 pulsos
+Encoder motor A: 263680 pulsos
+Encoder motor A: 270661 pulsos
+Encoder motor A: 277653 pulsos
+Encoder motor A: 284644 pulsos
+Encoder motor A: 291637 pulsos
+Encoder motor A: 298631 pulsos
+Encoder motor A: 305633 pulsos
+Encoder motor A: 312631 pulsos
+Encoder motor A: 319636 pulsos
+Encoder motor A: 326636 pulsos
+Encoder motor A: 333635 pulsos
+Encoder motor A: 337215 pulsos
+Encoder motor A: 337215 pulsos
+Encoder motor A: 337215 pulsos
+Encoder motor A: 337215 pulsos
+Encoder motor A: 337215 pulsos
+Encoder motor A: 337215 pulsos
+Encoder motor A: 337215 pulsos
+Encoder motor A: 337215 pulsos
+Encoder motor A: 337215 pulsos

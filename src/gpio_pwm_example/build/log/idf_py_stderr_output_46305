@@ -1,0 +1,4 @@
+/home/mauricio/esp/gpio_pwm_example/main/main.cpp: In member function 'void Motores::setVelocidade(uint32_t)':
+/home/mauricio/esp/gpio_pwm_example/main/main.cpp:156:13: warning: comparison of unsigned expression in '< 0' is always false [-Wtype-limits]
+  156 |     if (vel < 0) {
+      |         ~~~~^~~
