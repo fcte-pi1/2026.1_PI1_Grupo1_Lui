@@ -1,2 +1,0 @@
-CMakeFiles/gpio_pwm_example.elf.dir/project_elf_src_esp32.c.obj: \
- /home/mauricio/esp/gpio_pwm_example/build/project_elf_src_esp32.c
