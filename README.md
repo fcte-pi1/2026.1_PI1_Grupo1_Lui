@@ -14,7 +14,9 @@ make run
 
 Ao fazer isso, o sistema irá subir o Backend Node.js, a Dashboard em React e o emissor de telemetria UDP do Mock em paralelo. Pressione `Ctrl + C` uma única vez para derrubar tudo.
 
-Caso prefira rodar módulos específicos:
-- `make backend`
-- `make frontend`
-- `make mock`
+Caso prefira rodar ou manipular módulos específicos:
+- `make backend` (Sobe apenas o Node.js)
+- `make frontend` (Sobe apenas a dashboard)
+- `make mock` (Sobe o emissor UDP)
+- `make build` (Gera a versão de produção do frontend)
+- `make clean` (Apaga todas as pastas `node_modules` e pastas de `build` compiladas)
