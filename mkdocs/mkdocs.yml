@@ -66,6 +66,7 @@ nav:
       - Requisitos: estruturas/Elicitacao_Requisitos_Estrutura_Navegacao.md
   - Software: 
       - Home: software/index.md
+      - Executando o Projeto: software/executando_projeto.md
       - Documentação: software/requisitosSoftware.md
       - Backlog e Requisitos Declarados: software/requisitos-testes.md
       - Algoritmos de Solução: software/algoritmos_solucao.md
