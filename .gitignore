@@ -6,7 +6,7 @@
 # ...
 
 # Build (Catch2 tests)
-build/
+**/build/
 
 # LaTeX
 
