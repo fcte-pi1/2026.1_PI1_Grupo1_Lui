@@ -63,6 +63,7 @@ function sendTelemetry() {
   const isFastRun = stepData.estado_fsm === "FAST_RUN";
   const fullTelemetry = {
     ...stepData,
+    paredes: stepData.paredes || [],
     timestamp: Math.floor(Date.now() / 1000),
     id_corrida: currentRun.id_corrida,
     id_labirinto: currentRun.id_labirinto,
