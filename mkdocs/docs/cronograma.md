@@ -1,14 +1,14 @@
-# Cronograma de Execução e Sprints (Hierarquia Estrita e Multidisciplinar)
+# Cronograma de Execução e Sprints (Estratégia de Folga Antecipada)
 
 Este documento detalha o planejamento estratégico do projeto Micromouse até a Inspeção Prévia do Produto (IPP) em 29/06 e a Apresentação Final de Trabalho (APT) em 08/07. A hierarquia de backlog segue regras estritas de rastreabilidade numérica onde `Épico -> Subépico -> HU Folha`.
 
-As fases foram distribuídas de maneira a garantir paralelismo entre as frentes de Engenharia, assegurando que requisitos físicos e lógicos convirjam nas fases de integração.
+As fases foram reestruturadas para o **Modo de Paralelismo Máximo (20 pessoas)**, unindo o desenvolvimento mecânico, elétrico e de software em uma única Sprint hiper-densa. O objetivo é finalizar o escopo antecipadamente para gerar **duas semanas inteiras de folga e buffer** contra imprevistos de hardware antes da IPP.
 
 ---
 
 ## Sprint 1: Fundação Crítica, Prototipagem e Simulação (27/05 a 08/06)
 **Marco:** ED2 (Entrega de Documentação 2) em 08/06
-**Objetivo:** Estabelecer a infraestrutura inicial de comunicação no software e preparar os requisitos de hardware e modelos paramétricos primários.
+**Objetivo:** Estabelecer a infraestrutura inicial de comunicação no software e preparar os modelos paramétricos primários.
 
 ### Estruturas e Mecânica
 - [x] **Atividade (#128)** — Validação do Modelo CAD do Labirinto.
@@ -28,41 +28,44 @@ As fases foram distribuídas de maneira a garantir paralelismo entre as frentes 
 
 ---
 
-## Sprint 2: Montagem Estrutural e Algoritmos Pós-Mapeamento (09/06 a 15/06)
-**Objetivo:** Integrar as peças físicas manufaturadas à placa eletrônica e avançar na infraestrutura de roteamento visual (Fast Run) na aplicação Web.
+## Sprint 2: A Grande Integração - PID, Hardware e Rotas (09/06 a 16/06)
+**Objetivo:** Mobilizar todas as 20 pessoas simultaneamente. Montar o robô, programar o controle PID em malha fechada e finalizar a visualização do Fast Run. Todas as frentes técnicas de desenvolvimento pesado devem ser extintas aqui.
 
 ### Estruturas e Mecânica
 - [ ] **Atividade (#133)** — Montagem da Estrutura e Validação de Rigidez.
 
 ### Eletrônica e Energia
 - [ ] **Atividade (#157)** — Validação da Autonomia e Distribuição Buck (LM2596).
-- [ ] **Atividade (#216)** — Teste com todos os componentes eletrônicos ligados.
-
-### Software (Controle, Backend, Frontend)
-- [ ] **HU 6.3.1 (#248)** — Adicionar array de rota_calculada ao simulador (Mock).
-- [ ] **HU 6.3.2 (#249)** — Repassar rota_calculada via Socket.io no Backend.
-- [ ] **HU 6.3.3 (#250)** — Desenhar a Rota da Fast Run na Dashboard Frontend.
-
----
-
-## Sprint 3: Malha de Controle e Visão Periférica (16/06 a 22/06)
-**Objetivo:** Implementação da malha PID para locomoção do hardware físico e integração dos sensores de barreira.
+- [ ] **Atividade (#216)** — Teste com todos os componentes eletrônicos ligados (Soldagem da PCB).
 
 ### Eletrônica e Firmware
 - [ ] **Atividade (#156)** — Integração e Calibração dos Sensores VL53L0X e Encoders na pista oficial.
 - [ ] **HU 3.8.1 (#173)** — Validar controle lógico matemático do PID.
 - [ ] **HU 3.8.2 (#174)** — Navegar em eixo reto sem colidir contra as quinas físicas.
 
-### Software (Backend, Frontend)
+### Software (Controle, Backend, Frontend)
+- [ ] **HU 6.3.1 (#248)** — Adicionar array de rota_calculada ao simulador (Mock).
+- [ ] **HU 6.3.2 (#249)** — Repassar rota_calculada via Socket.io no Backend.
+- [ ] **HU 6.3.3 (#250)** — Desenhar a Rota da Fast Run na Dashboard Frontend.
 - [ ] **HU 2.1.2 (#171)** — Consumir telemetria do backend para acompanhar posição real.
 - [ ] **HU 2.2.2 (#166)** — Sincronizar mapa descoberto com backend.
 - [ ] **HU 3.1.2 (#181)** — Monitorar transições dinâmicas da FSM integradas ao backend.
 
 ---
 
-## Sprint 4: Estabilidade, Histórico e Inspeção (23/06 a 29/06)
+## Sprint 3: Semana de Buffer (Folga) e Adaptação Físico-Lógica (17/06 a 23/06)
+**Objetivo:** Absorver absolutamente todos os atrasos de queima de componentes, atraso de entrega de peças ou erros de solda. Nenhum código novo (features) deve ser programado. 
+
+### Atividades de Refinamento (Sem Features Novas)
+- [ ] Sintonização fina das constantes Kp, Ki, Kd do robô no labirinto de madeira.
+- [ ] Refazer soldas que soltarem com a trepidação do motor.
+- [ ] Estabilização da rede Wi-Fi e redução de ruídos de comunicação.
+
+---
+
+## Sprint 4: Estabilidade, Histórico e Inspeção IPP (24/06 a 29/06)
 **Marco:** IPP (Inspeção Prévia do Produto) em 29/06
-**Objetivo:** Sistema totalmente integrado (Firmware + Software). Testes ininterruptos no labirinto físico.
+**Objetivo:** Bug Bash contínuo. Sistema totalmente integrado operando com consistência no labirinto oficial.
 
 ### Atividades Globais Consolidadas
 - [ ] **HU 2.1.3 (#172)** — Visualizar dados de movimento provenientes do robô físico.
