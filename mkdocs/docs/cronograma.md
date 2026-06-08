@@ -47,9 +47,16 @@ As fases foram reestruturadas para o **Modo de Paralelismo Máximo (20 pessoas)*
 - [ ] **HU 6.3.1 (#248)** — Adicionar array de rota_calculada ao simulador (Mock).
 - [ ] **HU 6.3.2 (#249)** — Repassar rota_calculada via Socket.io no Backend.
 - [ ] **HU 6.3.3 (#250)** — Desenhar a Rota da Fast Run na Dashboard Frontend.
-- [ ] **HU 2.1.2 (#171)** — Consumir telemetria do backend para acompanhar posição real.
-- [ ] **HU 2.2.2 (#166)** — Sincronizar mapa descoberto com backend.
-- [ ] **HU 3.1.2 (#181)** — Monitorar transições dinâmicas da FSM integradas ao backend.
+- [x] **HU 2.1.2 (#171)** — Consumir telemetria do backend para acompanhar posição real.
+- [x] **HU 2.2.2 (#166)** — Sincronizar mapa descoberto com backend.
+- [x] **HU 3.1.2 (#181)** — Monitorar transições dinâmicas da FSM integradas ao backend.
+
+### Software (Resiliência, Banco de Dados e Exportação)
+- [ ] **HU 4.2 (#115)** — Carregamento e Comparação de Sessões Anteriores (InfluxDB).
+- [ ] **HU 4.3 (#116)** — Exportação de Histórico para Análise Externa (CSV/JSON).
+- [ ] **HU 5.1.1 (#178)** — Resiliência: Continuar operando sob queda momentânea de rede.
+- [ ] **HU 5.1.2 (#179)** — Resiliência: Manter interface responsiva sem travamentos na queda de pacotes UDP.
+
 
 ---
 
@@ -81,11 +88,7 @@ As fases foram reestruturadas para o **Modo de Paralelismo Máximo (20 pessoas)*
 **Marco:** APT (Apresentação Final de Trabalho) em 08/07
 **Objetivo:** Foco nas histórias de resiliência e painéis analíticos não essenciais para a IPP, mas cruciais para a documentação final.
 
-### Software (Resiliência e Dados)
-- [ ] **HU 4.2 (#115)** — Carregamento e Comparação de Sessões Anteriores.
-- [ ] **HU 4.3 (#116)** — Exportação de Histórico para Análise Externa.
+### Software (Refinamento Pós-IPP)
 - [ ] **HU 4.4 (#117)** — Filtragem e Comparação de Desempenho por Pista.
-- [ ] **HU 5.1.1 (#178)** — Continuar operando sob queda momentânea de rede (Buffer local no ESP).
-- [ ] **HU 5.1.2 (#179)** — Manter interface responsiva sem travamentos na queda de pacotes UDP.
 - [ ] **HU 4.7 (#140)** — Ingestão em Lote (Batch) para Buffer Offline.
 - [ ] **Apresentação Oficial APT (08/07)**.
