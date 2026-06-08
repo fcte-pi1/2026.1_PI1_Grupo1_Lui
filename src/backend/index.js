@@ -53,6 +53,25 @@ export const io = new Server(httpServer, {
   }
 });
 
+// --- DECODIFICADOR DE PAREDES (Issue #145) ---
+function decodificarParedes(paredesPayload, x, y) {
+  // Mantém compatibilidade se o mock já mandar o Array pronto
+  if (Array.isArray(paredesPayload)) return paredesPayload;
+
+  // Se não vier um número (bitmask), retorna array vazio
+  if (typeof paredesPayload !== 'number') return [];
+
+  const paredesDecodificadas = [];
+  // 1 = NORTE, 2 = LESTE, 4 = SUL, 8 = OESTE
+  if (paredesPayload & 1) paredesDecodificadas.push({ x, y, dir: 'NORTE' });
+  if (paredesPayload & 2) paredesDecodificadas.push({ x, y, dir: 'LESTE' });
+  if (paredesPayload & 4) paredesDecodificadas.push({ x, y, dir: 'SUL' });
+  if (paredesPayload & 8) paredesDecodificadas.push({ x, y, dir: 'OESTE' });
+
+  return paredesDecodificadas;
+}
+// ---------------------------------------------
+
 io.on('connection', (socket) => {
   console.log(`[WS] Novo cliente conectado: ${socket.id}`);
   socket.on('disconnect', () => {
@@ -101,7 +120,7 @@ server.on('message', (msg, rinfo) => {
         x: pos_x,
         y: pos_y,
         orientacao: data.orientacao || 'NORTE',
-        paredes: data.paredes || []
+        paredes: decodificarParedes(data.paredes, pos_x, pos_y)
       };
       
       // Só adiciona se o robô se moveu para não floodar o json com o robô parado

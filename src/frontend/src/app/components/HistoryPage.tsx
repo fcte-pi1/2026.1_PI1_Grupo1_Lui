@@ -170,24 +170,6 @@ export function HistoryPage() {
   const grid = passos ? reconstruirAteStep(passos, stepAtual, larg, alt) : null;
   const passoAtual = passos ? passos[Math.min(stepAtual, passos.length - 1)] : null;
 
-  // ─── Buscar lista de JSONs disponíveis na pasta maze_runs ───
-  useEffect(() => {
-    fetch('/api/maze_runs')
-      .then(res => res.json())
-      .then((files: string[]) => {
-        setArquivosDisponiveis(files);
-        // Auto-carregar o mais recente se existir
-        if (files.length > 0) {
-          carregarDeApi(files[0]);
-        }
-      })
-      .catch(() => {
-        // Silencioso se a API não estiver disponível
-        setArquivosDisponiveis([]);
-      });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   // ─── Carregar JSON da API (maze_runs) ───
   const carregarDeApi = useCallback(async (arquivo: string) => {
     try {
@@ -211,6 +193,23 @@ export function HistoryPage() {
       setCarregando(false);
     }
   }, []);
+
+  // ─── Buscar lista de JSONs disponíveis na pasta maze_runs ───
+  useEffect(() => {
+    fetch('/api/maze_runs')
+      .then(res => res.json())
+      .then((files: string[]) => {
+        setArquivosDisponiveis(files);
+        // Auto-carregar o mais recente se existir
+        if (files.length > 0) {
+          carregarDeApi(files[0]);
+        }
+      })
+      .catch(() => {
+        // Silencioso se a API não estiver disponível
+        setArquivosDisponiveis([]);
+      });
+  }, [carregarDeApi]);
 
   // ─── Carregar JSON por upload do usuário ───
   const handleFileUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {

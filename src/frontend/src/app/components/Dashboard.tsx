@@ -35,7 +35,7 @@ export interface RegistoErro {
   posicao_y: number;
 }
 
-export const TRAJETO_RAPIDO_IDEAL = [
+const TRAJETO_RAPIDO_IDEAL = [
   { x: 0, y: 7 },
   { x: 0, y: 6 },
   { x: 0, y: 5 },
@@ -133,6 +133,7 @@ export function Dashboard() {
   useEffect(() => {
     if (overrideModo === 'PERFORMANCE') {
       lapStartTimeRef.current = Date.now();
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setTempoLapAtual(0);
       setIsLapRunning(true);
       setIsLogAberto(true);
@@ -153,7 +154,7 @@ export function Dashboard() {
   }, [overrideModo, isFastRunReal]);
 
   useEffect(() => {
-    let timer: any;
+    let timer: ReturnType<typeof setInterval>;
     if (isLapRunning) {
       timer = setInterval(() => {
         setTempoLapAtual((Date.now() - lapStartTimeRef.current) / 1000);
@@ -243,12 +244,22 @@ export function Dashboard() {
     });
 
     socket.on('telemetry', (dadosDecodificados) => {
+      // Decodifica a Bitmask (número) para o objeto de booleanos que o MapaTempoReal.tsx usa
+      const p = dadosDecodificados.paredes;
+      const bitmask = typeof p === 'number' ? p : 0;
+      const paredesDecodificadas = {
+        norte: !!(bitmask & 1),
+        leste: !!(bitmask & 2),
+        sul: !!(bitmask & 4),
+        oeste: !!(bitmask & 8)
+      };
+
       // Atualiza telemetria base
       const novaTelemetria: DadosTelemetria = {
         ...dadosDecodificados,
         timestamp: Math.floor(Date.now() / 1000),
         tamanho_grade: dadosDecodificados.tamanho_grade || telemetriaAtual.tamanho_grade,
-        paredes_atuais: dadosDecodificados.paredes || { norte: false, sul: false, leste: false, oeste: false }
+        paredes_atuais: paredesDecodificadas
       };
       
       setTelemetriaAtual(novaTelemetria);
