@@ -10,4 +10,4 @@ COPY . .
 
 EXPOSE 41234/udp
 
-CMD ["node", "index.js"]
+CMD ["node", "src/app.js"]

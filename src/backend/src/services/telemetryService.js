@@ -1,39 +1,9 @@
-import dgram from 'node:dgram';
 import { decode } from '@msgpack/msgpack';
-import { InfluxDB, Point } from '@influxdata/influxdb-client';
-import dotenv from 'dotenv';
+import { Point } from '@influxdata/influxdb-client';
+import { writeApi } from '../db/influx.js';
+import config from '../config/env.js';
 
-dotenv.config();
-
-const UDP_PORT = process.env.UDP_PORT ? parseInt(process.env.UDP_PORT, 10) : 41234;
-const UDP_HOST = process.env.UDP_HOST || '0.0.0.0';
-
-const INFLUX_URL = process.env.INFLUX_URL || 'http://localhost:8086';
-const INFLUX_TOKEN = process.env.INFLUX_TOKEN || 'micromouse-token-12345';
-const INFLUX_ORG = process.env.INFLUX_ORG || 'micromouse';
-const INFLUX_BUCKET = process.env.INFLUX_BUCKET || 'micromouse_telemetria';
-
-console.log('--- CONFIGURAÇÃO DO BACKEND ---');
-console.log(`Porta UDP: ${UDP_PORT}`);
-console.log(`Endereço UDP: ${UDP_HOST}`);
-console.log(`InfluxDB URL: ${INFLUX_URL}`);
-console.log(`InfluxDB Org: ${INFLUX_ORG}`);
-console.log(`InfluxDB Bucket: ${INFLUX_BUCKET}`);
-console.log('--------------------------------');
-
-// Inicializa cliente InfluxDB
-const influxDB = new InfluxDB({ url: INFLUX_URL, token: INFLUX_TOKEN });
-const writeApi = influxDB.getWriteApi(INFLUX_ORG, INFLUX_BUCKET, 'ns');
-
-// Cria servidor UDP
-const server = dgram.createSocket('udp4');
-
-server.on('listening', () => {
-  const address = server.address();
-  console.log(`[UDP] Servidor escutando em ${address.address}:${address.port}`);
-});
-
-server.on('message', (msg, rinfo) => {
+export function processTelemetry(msg, rinfo) {
   try {
     // Decodifica o payload recebido via MsgPack
     const data = decode(msg);
@@ -107,7 +77,7 @@ server.on('message', (msg, rinfo) => {
     // Tenta flush para persistência imediata (útil para desenvolvimento)
     writeApi.flush()
       .then(() => {
-        console.log(`[InfluxDB] Ponto gravado com sucesso no bucket: ${INFLUX_BUCKET}`);
+        console.log(`[InfluxDB] Ponto gravado com sucesso no bucket: ${config.INFLUX_BUCKET}`);
       })
       .catch((err) => {
         console.error('[InfluxDB] Erro ao gravar ponto:', err.message);
@@ -117,31 +87,4 @@ server.on('message', (msg, rinfo) => {
     console.error('[UDP] Erro ao processar mensagem ou decodificar MsgPack:', err.message);
     console.log('[UDP] Pacote bruto recebido (String):', msg.toString());
   }
-});
-
-server.on('error', (err) => {
-  console.error(`[UDP] Erro no servidor: ${err.message}`);
-  server.close();
-});
-
-// Inicia escuta
-server.bind(UDP_PORT, UDP_HOST);
-
-// Encerramento limpo
-const shutdown = () => {
-  console.log('Encerrando servidor...');
-  server.close(() => {
-    writeApi.close()
-      .then(() => {
-        console.log('Conexões com InfluxDB encerradas.');
-        process.exit(0);
-      })
-      .catch((err) => {
-        console.error('Erro ao fechar conexão com InfluxDB:', err);
-        process.exit(1);
-      });
-  });
-};
-
-process.on('SIGTERM', shutdown);
-process.on('SIGINT', shutdown);
+}
