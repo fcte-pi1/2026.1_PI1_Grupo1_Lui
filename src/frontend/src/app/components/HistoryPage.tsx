@@ -4,15 +4,12 @@ import { Badge } from './ui/badge';
 import { cn } from '../lib/utils';
 
 import {
-  criarGridVazio,
   detectarTamanho,
-  aplicarParede,
   reconstruirAteStep,
   extrairPassos,
   extrairIdCorrida,
   getRotacao,
   formatarTimestamp,
-  type ParedeDescoberta,
   type PassoExploracao
 } from '../utils/historyUtils';
 
