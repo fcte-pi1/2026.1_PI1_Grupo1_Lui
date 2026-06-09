@@ -5,6 +5,9 @@
 # Adicione outros arquivos a serem ignorados aqui
 # ...
 
+# Build (Catch2 tests)
+**/build/
+
 # LaTeX
 
 relatorio.pdf
@@ -342,3 +345,7 @@ src/firmware/sdkconfig
 src/firmware/sdkconfig.old
 src/firmware/dependencies.lock
 .clangd
+
+# Playwright
+playwright-report/
+test-results/

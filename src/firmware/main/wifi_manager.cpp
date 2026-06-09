@@ -6,8 +6,8 @@
 #include "esp_log.h"
 #include "nvs_flash.h"
 
-#define WIFI_SSID "Wokwi-GUEST"
-#define WIFI_PASS ""
+#define WIFI_SSID "FORTUNATO"
+#define WIFI_PASS "410671_Rocha"
 
 static void event_handler(void* arg, esp_event_base_t event_base,
                           int32_t event_id, void* event_data) {
