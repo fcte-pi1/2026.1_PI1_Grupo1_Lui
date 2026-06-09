@@ -1,0 +1,5 @@
+if(EXISTS "/home/asus/GITHUB/PI1/src/firmware/__test__/build/test_floodfill-b12d07c_tests.cmake")
+  include("/home/asus/GITHUB/PI1/src/firmware/__test__/build/test_floodfill-b12d07c_tests.cmake")
+else()
+  add_test(test_floodfill_NOT_BUILT-b12d07c test_floodfill_NOT_BUILT-b12d07c)
+endif()
