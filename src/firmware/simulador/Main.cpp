@@ -13,6 +13,7 @@ using namespace std;
 string id_corrida = "";
 
 // apenas para testes já que não está conectando com o banco
+#ifndef TESTING
 string gerar_id_corrida() {
     auto agora = chrono::system_clock::now();
     auto tempo = chrono::duration_cast<chrono::milliseconds>(agora.time_since_epoch());
@@ -32,7 +33,9 @@ string direcao_para_string(Direcao dir) {
 Direcao direcao_relativa(Direcao atual, int offset) {
     return (Direcao)((atual + offset + 4) % 4);
 }
+#endif
 
+#ifndef TESTING
 void girar_para(Direcao& atual, Direcao alvo) {
     while (atual != alvo) {
         int diferenca = (alvo - atual + 4) % 4;
@@ -45,7 +48,9 @@ void girar_para(Direcao& atual, Direcao alvo) {
         }
     }
 }
+#endif
 
+#ifndef TESTING
 int main() {
     // gera ID unico para esta corrida
     id_corrida = gerar_id_corrida();
@@ -132,6 +137,7 @@ int main() {
 
     return 0;
 }
+#endif
 
 
 // Algoritmo pra salvar o json das paredes
