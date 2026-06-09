@@ -1,69 +1,42 @@
-import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
-import { Badge } from './ui/badge';
-import { Activity } from 'lucide-react';
+import { Navigation } from 'lucide-react';
+import type { DadosTelemetria } from './Dashboard';
 
-interface RobotTelemetry {
-  timestamp: number;
-  estado_fsm: string;
-  bateria_v: number;
-  posicao_x: number;
-  posicao_y: number;
-  orientacao: string;
+interface PropriedadesStatus {
+  telemetria: DadosTelemetria;
 }
 
-const mockData: RobotTelemetry = {
-  timestamp: 1715456789,
-  estado_fsm: "MAPPING", 
-  bateria_v: 7.4,
-  posicao_x: 1,
-  posicao_y: 2,
-  orientacao: "NORTE"
-};
-
-export function FSMStatus() {
-  const [telemetry] = useState<RobotTelemetry>(mockData);
-
-  const isError = telemetry.estado_fsm === 'ERROR';
+export function FSMStatus({ telemetria }: PropriedadesStatus) {
+  const isError = telemetria.estado_fsm === 'ERROR';
 
   return (
-    <Card className={`w-fit min-w-[320px] transition-colors ${isError ? 'border-destructive bg-destructive/10' : ''}`}>
-      <CardHeader className="pb-2">
+    <Card className={`w-fit min-w-[260px] h-fit transition-colors ${isError ? 'border-destructive bg-destructive/10' : ''}`}>
+      <CardHeader className="pb-2 border-b">
         <CardTitle className="flex items-center gap-2 text-lg">
-          <Activity size={20} className={isError ? "text-destructive" : ""} />
-          Status do Robô
+          <Navigation size={20} className={isError ? "text-destructive" : "text-slate-600"} />
+          Navegação Interna
         </CardTitle>
       </CardHeader>
       
-      <CardContent className="flex flex-col gap-4">
-        <div className="flex items-center justify-between">
-          <span className="font-semibold text-foreground/80">Estado Operacional:</span>
-          <Badge variant={isError ? "destructive" : "default"} className="text-sm px-3 py-1">
-            {telemetry.estado_fsm}
-          </Badge>
-        </div>
+      <CardContent className="flex flex-col gap-4 pt-4">
+        <div className="flex flex-col gap-3 text-sm text-muted-foreground">
+          
+          <div className="flex flex-col p-3 bg-slate-50 rounded-lg border">
+            <span className="font-medium text-xs uppercase">Bússola (Orientação)</span>
+            <span className="text-xl font-bold text-slate-800 tracking-wide mt-1">
+              {telemetria.orientacao}
+            </span>
+          </div>
 
-        <div className="grid grid-cols-2 gap-3 text-sm text-muted-foreground mt-2 border-t pt-4">
-          <div className="flex flex-col">
-            <span className="font-medium">Bateria</span>
-            <span>{telemetry.bateria_v}V</span>
+          <div className="flex flex-col p-3 bg-slate-50 rounded-lg border">
+            <span className="font-medium text-xs uppercase">Último Pacote Recebido</span>
+            <span className="font-mono text-slate-600 mt-1">
+              {telemetria.timestamp}
+            </span>
           </div>
-          <div className="flex flex-col">
-            <span className="font-medium">Orientação</span>
-            <span>{telemetry.orientacao}</span>
-          </div>
-          <div className="flex flex-col">
-            <span className="font-medium">Posição X</span>
-            <span>{telemetry.posicao_x}</span>
-          </div>
-          <div className="flex flex-col">
-            <span className="font-medium">Posição Y</span>
-            <span>{telemetry.posicao_y}</span>
-          </div>
+
         </div>
       </CardContent>
     </Card>
   );
 }
-
-

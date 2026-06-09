@@ -131,3 +131,33 @@
     font-size: var(--font-size);
   }
 }
+
+@keyframes battery-critical-flash {
+  0%, 100% {
+    background-color: rgba(254, 226, 226, 1); /* bg-red-100 */
+    border-color: rgba(239, 68, 68, 1);       /* border-red-500 */
+    box-shadow: 0 0 0px rgba(239, 68, 68, 0);
+  }
+  50% {
+    background-color: rgba(239, 68, 68, 0.9); /* bright red */
+    border-color: rgba(185, 28, 28, 1);       /* border-red-700 */
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.6);
+  }
+}
+
+@keyframes text-flash {
+  0%, 100% {
+    color: rgba(220, 38, 38, 1); /* red-600 */
+  }
+  50% {
+    color: rgba(255, 255, 255, 1); /* white */
+  }
+}
+
+.animate-battery-critical {
+  animation: battery-critical-flash 1s infinite ease-in-out;
+}
+
+.animate-text-flash {
+  animation: text-flash 1s infinite ease-in-out;
+}

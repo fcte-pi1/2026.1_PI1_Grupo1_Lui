@@ -1,20 +1,21 @@
-import { FSMStatus } from './app/components/FSMStatus';
-import { RobotMap } from './app/components/MapaTempoReal';
+import { RouterProvider, createBrowserRouter } from "react-router";
+import { Layout } from "./app/components/Layout";
+import { Dashboard } from "./app/components/Dashboard";
+import { HistoryPage } from './app/components/HistoryPage';
+
+const router = createBrowserRouter([
+  {
+    path: "/",
+    Component: Layout,
+    children: [
+      { index: true, Component: Dashboard },
+      { path: "historico", Component: HistoryPage },
+    ],
+  },
+]);
 
 function App() {
-  return (
-    <div className="min-h-screen bg-muted/20 p-6">
-      <div className="flex flex-col lg:flex-row gap-6 items-start justify-center">
-        <div className="w-full lg:w-auto">
-          <FSMStatus />
-        </div>
-
-        <div className="w-full lg:w-auto">
-          <RobotMap />
-        </div>
-      </div>
-    </div>
-  );
+  return <RouterProvider router={router} />;
 }
 
 export default App;
