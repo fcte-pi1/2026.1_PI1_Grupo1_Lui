@@ -1,0 +1,15 @@
+apiVersion: 1
+
+datasources:
+  - name: InfluxDB
+    type: influxdb
+    url: http://micromouse_influxdb:8086
+    access: proxy
+    uid: bfnc9si9h05c0a
+    isDefault: true
+    jsonData:
+      version: Flux
+      organization: micromouse
+      defaultBucket: micromouse_telemetria
+    secureJsonData:
+      token: micromouse-token-12345
