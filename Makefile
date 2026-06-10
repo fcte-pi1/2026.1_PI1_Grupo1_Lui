@@ -1,4 +1,4 @@
-.PHONY: help install build run backend frontend mock clean
+.PHONY: help install build run backend frontend mock clean test test-backend test-frontend test-firmware
 
 help:
 	@echo "Comandos disponíveis:"
@@ -11,6 +11,7 @@ help:
 	@echo "  make clean    - Remove as pastas node_modules e diretórios de build"
 	@echo "  make infra    - Sobe apenas os bancos e ferramentas (InfluxDB e Grafana) via Docker"
 	@echo "  make down     - Derruba todos os containers do Docker"
+	@echo "  make test     - Roda toda a bateria de testes do repositório (Backend, Frontend e Firmware)"
 
 infra:
 	@echo "=> Subindo infraestrutura (InfluxDB e Grafana)..."
@@ -55,3 +56,18 @@ clean:
 	@rm -rf src/frontend/node_modules
 	@rm -rf src/frontend/dist
 	@echo "=> Limpeza concluída!"
+
+test-backend:
+	@echo "=> Executando testes do Backend..."
+	@cd src/backend && npm test
+
+test-frontend:
+	@echo "=> Executando testes do Frontend..."
+	@cd src/frontend && npm test
+
+test-firmware:
+	@echo "=> Executando testes do Firmware (Floodfill)..."
+	@cd src/firmware/__test__ && cmake -S . -B build && cmake --build build && cd build && ctest --output-on-failure
+
+test: test-backend test-frontend test-firmware
+	@echo "=> Todos os testes do repositório passaram com sucesso!"
