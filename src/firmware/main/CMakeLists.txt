@@ -12,4 +12,5 @@ idf_component_register(SRCS "main.cpp"
                              esp_netif
                              esp_wifi
                              lwip
-                             nvs_flash)
+                             nvs_flash
+                             esp_timer)

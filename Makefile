@@ -9,6 +9,16 @@ help:
 	@echo "  make frontend - Sobe apenas o Frontend"
 	@echo "  make mock     - Sobe apenas o Mock Sender"
 	@echo "  make clean    - Remove as pastas node_modules e diretórios de build"
+	@echo "  make infra    - Sobe apenas os bancos e ferramentas (InfluxDB e Grafana) via Docker"
+	@echo "  make down     - Derruba todos os containers do Docker"
+
+infra:
+	@echo "=> Subindo infraestrutura (InfluxDB e Grafana)..."
+	@cd src/backend && docker compose up -d influxdb grafana
+
+down:
+	@echo "=> Derrubando infraestrutura do Docker..."
+	@cd src/backend && docker compose down
 
 install:
 	@echo "=> Instalando dependências do Backend..."
@@ -23,7 +33,7 @@ build:
 
 backend:
 	@echo "=> Iniciando Backend..."
-	@node src/backend/index.js
+	@node src/backend/src/services/telemetryService.js
 
 frontend:
 	@echo "=> Iniciando Frontend..."

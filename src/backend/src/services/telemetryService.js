@@ -90,129 +90,123 @@ server.on('listening', () => {
 server.on('message', (msg, rinfo) => {
   try {
     // Decodifica o payload recebido via MsgPack
-    const data = decode(msg);
-    console.log(`[UDP] Recebido de ${rinfo.address}:${rinfo.port}:`, data);
-
-    // Envia dados para clientes conectados via WebSocket
-    io.emit('telemetry', data);
-
-    // Mapeamento dinâmico e seguro para o esquema InfluxDB
-    const estado_robo = data.estado_fsm || data.estado_robo || 'IDLE';
-    const id_labirinto = data.id_labirinto || 'default';
-    const id_corrida = data.id_corrida || 'default';
-    const objetivo = data.objetivo || 'N';
-
-    // --- LÓGICA DE GERAÇÃO DO JSON AUTOMÁTICO ---
-    if (!sessoesAtivas[id_corrida]) {
-      sessoesAtivas[id_corrida] = {
-        id_corrida,
-        historico: []
-      };
-    }
-
-    const pos_x = data.posicao_x !== undefined ? data.posicao_x : data.pos_x;
-    const pos_y = data.posicao_y !== undefined ? data.posicao_y : data.pos_y;
-
-    // Se tiver coordenadas, adiciona na memória (evita lixo de quando o robô tá desligado)
-    if (pos_x !== undefined && pos_y !== undefined && (estado_robo === 'MAPPING' || estado_robo === 'FAST_RUN' || estado_robo === 'GOAL_REACHED' || estado_robo === 'FINISHED')) {
-      // Pega a parede ou usa o decoder da Bitmask (Issue #145 futura)
-      const passo_historico = {
-        x: pos_x,
-        y: pos_y,
-        orientacao: data.orientacao || 'NORTE',
-        paredes: decodificarParedes(data.paredes, pos_x, pos_y)
-      };
-      
-      // Só adiciona se o robô se moveu para não floodar o json com o robô parado
-      const length = sessoesAtivas[id_corrida].historico.length;
-      const ultimo = length > 0 ? sessoesAtivas[id_corrida].historico[length - 1] : null;
-      if (!ultimo || ultimo.x !== passo_historico.x || ultimo.y !== passo_historico.y || ultimo.orientacao !== passo_historico.orientacao || passo_historico.paredes.length > 0) {
-        sessoesAtivas[id_corrida].historico.push(passo_historico);
-      }
-    }
-
-    // Gatilho final (Issue #243)
-    if (estado_robo === 'FINISHED' || estado_robo === 'GOAL_REACHED') {
-      console.log(`[JSON Automático] Gatilho de fim recebido para corrida: ${id_corrida}`);
-      if (sessoesAtivas[id_corrida] && sessoesAtivas[id_corrida].historico.length > 0) {
-        const timestamp = Date.now();
-        const filename = `corrida_${timestamp}.json`;
-        const filepath = path.join(MAZE_RUNS_DIR, filename);
-        
-        fs.writeFileSync(filepath, JSON.stringify(sessoesAtivas[id_corrida], null, 2), 'utf-8');
-        console.log(`[JSON Automático] Arquivo salvo com sucesso: ${filepath}`);
-      }
-      // Limpa a RAM
-      delete sessoesAtivas[id_corrida];
-    }
-    // ---------------------------------------------
-
-    const point = new Point('log_corrida')
-      .tag('id_labirinto', id_labirinto)
-      .tag('id_corrida', id_corrida)
-      .tag('objetivo', objetivo)
-      .tag('estado_robo', estado_robo);
-
-    // Campos (Fields) numéricos ou strings
-    const floatFields = {
-      bateria: data.bateria_v !== undefined ? data.bateria_v : data.bateria,
-      erro_pid: data.erro_pid,
-      velocidade_media: data.velocidade_media
-    };
-
-    const intFields = {
-      pos_x: data.posicao_x !== undefined ? data.posicao_x : data.pos_x,
-      pos_y: data.posicao_y !== undefined ? data.posicao_y : data.pos_y,
-      dist_frontal: data.dist_frontal,
-      dist_esq: data.dist_esq,
-      dist_dir: data.dist_dir,
-      pwm_esq: data.pwm_esq,
-      pwm_dir: data.pwm_dir
-    };
-
-    const stringFields = {
-      orientacao: data.orientacao
-    };
-
-    // Adiciona Fields Float
-    for (const [key, val] of Object.entries(floatFields)) {
-      if (val !== undefined && val !== null) {
-        point.floatField(key, parseFloat(val));
-      }
-    }
-
-    // Adiciona Fields Int
-    for (const [key, val] of Object.entries(intFields)) {
-      if (val !== undefined && val !== null) {
-        point.intField(key, parseInt(val, 10));
-      }
-    }
-
-    // Adiciona Fields String
-    for (const [key, val] of Object.entries(stringFields)) {
-      if (val !== undefined && val !== null) {
-        point.stringField(key, String(val));
-      }
-    }
-
-    // Define timestamp (se vier em segundos Unix, converte para ns)
-    if (data.timestamp) {
-      const tsMs = data.timestamp < 9999999999 ? data.timestamp * 1000 : data.timestamp;
-      point.timestamp(new Date(tsMs));
-    } else {
-      point.timestamp(new Date()); // Se não tiver, usa hora atual do servidor
-    }
-
-    // Grava ponto no InfluxDB
-    writeApi.writePoint(point);
+    const dataDecoded = decode(msg);
     
-    // Tenta flush para persistência imediata (útil para desenvolvimento)
+    // Normaliza para sempre iterar, mesmo se for apenas 1 pacote solto
+    const pacotes = Array.isArray(dataDecoded) ? dataDecoded : [dataDecoded];
+
+    if (pacotes.length > 1) {
+      console.log(`[UDP] Recebido um LOTE BATCH com ${pacotes.length} pacotes de ${rinfo.address}:${rinfo.port}`);
+    } else {
+      console.log(`[UDP] Recebido PACOTE INDIVIDUAL de ${rinfo.address}:${rinfo.port}`);
+    }
+
+    // Processa cada pacote do lote (ou o único pacote)
+    for (const data of pacotes) {
+      // Envia dados para clientes conectados via WebSocket
+      io.emit('telemetry', data);
+
+      // Mapeamento dinâmico e seguro para o esquema InfluxDB
+      const estado_robo = data.estado_fsm || data.estado_robo || 'IDLE';
+      const id_labirinto = data.id_labirinto || 'default';
+      const id_corrida = data.id_corrida || 'default';
+      const objetivo = data.objetivo || 'N';
+
+      // --- LÓGICA DE GERAÇÃO DO JSON AUTOMÁTICO ---
+      if (!sessoesAtivas[id_corrida]) {
+        sessoesAtivas[id_corrida] = {
+          id_corrida,
+          historico: []
+        };
+      }
+
+      const pos_x = data.posicao_x !== undefined ? data.posicao_x : data.pos_x;
+      const pos_y = data.posicao_y !== undefined ? data.posicao_y : data.pos_y;
+
+      // Se tiver coordenadas, adiciona na memória (evita lixo de quando o robô tá desligado)
+      if (pos_x !== undefined && pos_y !== undefined && (estado_robo === 'MAPPING' || estado_robo === 'FAST_RUN' || estado_robo === 'GOAL_REACHED' || estado_robo === 'RETURNING')) {
+        const passo_historico = {
+          x: pos_x,
+          y: pos_y,
+          orientacao: data.orientacao || 'NORTE',
+          paredes: decodificarParedes(data.paredes, pos_x, pos_y)
+        };
+        
+        const length = sessoesAtivas[id_corrida].historico.length;
+        const ultimo = length > 0 ? sessoesAtivas[id_corrida].historico[length - 1] : null;
+        if (!ultimo || ultimo.x !== passo_historico.x || ultimo.y !== passo_historico.y || ultimo.orientacao !== passo_historico.orientacao || passo_historico.paredes.length > 0) {
+          sessoesAtivas[id_corrida].historico.push(passo_historico);
+        }
+      }
+
+      // Gatilho final
+      if (estado_robo === 'GOAL_REACHED') {
+        console.log(`[JSON Automático] Gatilho de fim recebido para corrida: ${id_corrida}`);
+        if (sessoesAtivas[id_corrida] && sessoesAtivas[id_corrida].historico.length > 0) {
+          const timestamp = Date.now();
+          const filename = `corrida_${timestamp}.json`;
+          const filepath = path.join(MAZE_RUNS_DIR, filename);
+          
+          fs.writeFileSync(filepath, JSON.stringify(sessoesAtivas[id_corrida], null, 2), 'utf-8');
+          console.log(`[JSON Automático] Arquivo salvo com sucesso: ${filepath}`);
+        }
+        delete sessoesAtivas[id_corrida];
+      }
+      // ---------------------------------------------
+
+      const point = new Point('log_corrida')
+        .tag('id_labirinto', id_labirinto)
+        .tag('id_corrida', id_corrida)
+        .tag('objetivo', objetivo)
+        .tag('estado_robo', estado_robo);
+
+      const floatFields = {
+        bateria: data.bateria_v !== undefined ? data.bateria_v : data.bateria,
+        erro_pid: data.erro_pid,
+        velocidade_media: data.velocidade_media
+      };
+
+      const intFields = {
+        pos_x: pos_x,
+        pos_y: pos_y,
+        dist_frontal: data.dist_frontal,
+        dist_esq: data.dist_esq,
+        dist_dir: data.dist_dir,
+        pwm_esq: data.pwm_esq,
+        pwm_dir: data.pwm_dir
+      };
+
+      const stringFields = {
+        orientacao: data.orientacao
+      };
+
+      for (const [key, val] of Object.entries(floatFields)) {
+        if (val !== undefined && val !== null) point.floatField(key, parseFloat(val));
+      }
+
+      for (const [key, val] of Object.entries(intFields)) {
+        if (val !== undefined && val !== null) point.intField(key, parseInt(val, 10));
+      }
+
+      for (const [key, val] of Object.entries(stringFields)) {
+        if (val !== undefined && val !== null) point.stringField(key, String(val));
+      }
+
+      // Define timestamp (com fidelidade temporal ao relógio interno do ESP32)
+      if (data.timestamp) {
+        // Assume timestamp do ESP32 como millisegundos
+        point.timestamp(new Date(data.timestamp));
+      } else {
+        point.timestamp(new Date()); 
+      }
+
+      writeApi.writePoint(point);
+    } // Fim do For
+    
+    // Tenta flush para persistência imediata após iterar todos
     writeApi.flush()
-      .then(() => {
-        console.log(`[InfluxDB] Ponto gravado com sucesso no bucket: ${INFLUX_BUCKET}`);
-      })
       .catch((err) => {
-        console.error('[InfluxDB] Erro ao gravar ponto:', err.message);
+        console.error('[InfluxDB] Erro ao gravar lote:', err.message);
       });
 
   } catch (err) {

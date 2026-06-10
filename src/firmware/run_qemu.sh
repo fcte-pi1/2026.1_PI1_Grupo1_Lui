@@ -13,7 +13,7 @@ esptool.py --chip esp32 merge_bin \
   --fill-flash-size 2MB \
   0x1000 build/bootloader/bootloader.bin \
   0x8000 build/partition_table/partition-table.bin \
-  0x10000 build/firmware.bin
+  0x10000 build/micromouse_firmware.bin
 
 echo "=================================================="
 echo "Starting QEMU emulation for ESP32..."

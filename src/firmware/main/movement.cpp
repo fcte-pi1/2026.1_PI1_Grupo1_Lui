@@ -32,15 +32,13 @@ void MoveTask(void *parametrospv) {
         }
         pacote.pos_x += 1;
 
-        // Empurra os dados na Fila global (definida em telemetry.hpp)
+        // Envia telemetria para processamento assíncrono
         xQueueSend(FilaTelemetria, &pacote, 0);
         printf("Core 0 -> Enviou telemetria para a fila (X: %d | ToF: %d mm)\n",
                pacote.pos_x,
                pacote.dist_frontal);
 
-        // TAXA DE ATUALIZAÇÃO (DELAY DO LOOP):
-        // [OFICIAL]: pdMS_TO_TICKS(100) -> 10Hz (Controle e amostragem rápidos para o robô real)
-        // [TESTES/DEBUG]: pdMS_TO_TICKS(1000) -> 1Hz (Mais lento para visualizar os logs sem inundar o terminal)
+        // Taxa de amostragem de controle: 1Hz (Testes) | Padrão Oficial: 10Hz
         vTaskDelay(pdMS_TO_TICKS(1000));
     }
 }
