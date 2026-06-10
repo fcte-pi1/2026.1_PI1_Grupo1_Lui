@@ -351,3 +351,10 @@ src/firmware/dependencies.lock
 # Playwright
 playwright-report/
 test-results/
+
+# Arquivos que eu (Ian) uso para facilitar meu gerenciamento da equipe, bashscrips documentos meus internos etc.
+docs/planejamento/
+extract_issues.sh
+issues_repositorio.json
+open_issues.json
+src/firmware/floodfill/test_runner
