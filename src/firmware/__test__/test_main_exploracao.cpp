@@ -111,14 +111,18 @@ TEST_CASE("JSON - numero de passos bate com historico_exploracao", "[integracao]
     size_t passos_exploracao = historico_exploracao.size();
 
     id_corrida = "teste_contagem";
-    string diretorio = "../../maze_runs";
+    #ifdef PROJECT_ROOT_DIR
+        string diretorio = string(PROJECT_ROOT_DIR) + "/maze_runs";
+    #else
+        string diretorio = "../../maze_runs";
+    #endif
     #ifndef _WIN32
         mkdir(diretorio.c_str(), 0755);
     #endif
     string caminho = diretorio + "/corrida_teste_contagem.json";
     limpar_arquivo(caminho);
 
-    salva_json();
+    salva_json(mock().largura, mock().altura);
 
     string conteudo = ler_arquivo(caminho);
     REQUIRE_FALSE(conteudo.empty());
@@ -151,13 +155,17 @@ TEST_CASE("JSON - parede registrada bate com labirinto mockado", "[integracao][j
     executar_exploracao(4, 4, metas);
 
     id_corrida = "teste_parede";
-    string diretorio = "../../maze_runs";
+    #ifdef PROJECT_ROOT_DIR
+        string diretorio = string(PROJECT_ROOT_DIR) + "/maze_runs";
+    #else
+        string diretorio = "../../maze_runs";
+    #endif
     #ifndef _WIN32
         mkdir(diretorio.c_str(), 0755);
     #endif
     string caminho = diretorio + "/corrida_teste_parede.json";
     limpar_arquivo(caminho);
-    salva_json();
+    salva_json(mock().largura, mock().altura);
 
     string conteudo = ler_arquivo(caminho);
 
@@ -183,4 +191,32 @@ TEST_CASE("Robo nao fica preso em loop infinito - labirinto com becos", "[integr
     vector<pair<int,int>> metas = {{2, 2}};
 
     REQUIRE_NOTHROW(executar_exploracao(4, 4, metas));
+}
+
+TEST_CASE("Gera json persistente para pipeline", "[integracao][pipeline]") {
+    mock().inicializar(8, 8);
+    mock().add_parede(2, 3, NORTE);
+
+    vector<pair<int,int>> metas = {{3, 3}, {3, 4}, {4, 3}, {4, 4}};
+    historico_exploracao.clear();
+
+    executar_exploracao(8, 8, metas);
+
+    id_corrida = "pipeline_preview";
+    #ifdef PROJECT_ROOT_DIR
+        string diretorio = string(PROJECT_ROOT_DIR) + "/maze_runs";
+    #else
+        string diretorio = "../../maze_runs";
+    #endif
+    #ifndef _WIN32
+        mkdir(diretorio.c_str(), 0755);
+    #endif
+    string caminho = diretorio + "/corrida_pipeline_preview.json";
+    limpar_arquivo(caminho);
+    
+    salva_json(mock().largura, mock().altura);
+
+    // NÃO limpamos o arquivo gerado aqui, para que ele fique disponível
+    // na pasta src/maze_runs/ para ser testado pela pipeline no Frontend.
+    REQUIRE(true);
 }

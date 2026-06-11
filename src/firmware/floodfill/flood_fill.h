@@ -49,4 +49,4 @@ void ff_parede(int x, int y, Direcao dir);
 void ff_recalcular();
 void ff_visitado(int x, int y);
 Direcao ff_melhor_movimento(int x, int y, Direcao direcao_atual);
-void salva_json();
+void salva_json(int larg, int alt);

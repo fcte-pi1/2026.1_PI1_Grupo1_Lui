@@ -27,8 +27,10 @@ export function HistoryPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Tamanho do labirinto detectado
-  const tamanho = passos ? detectarTamanho(passos) : { larg: 0, alt: 0 };
+  const [tamanhoOriginal, setTamanhoOriginal] = useState<{ larg: number; alt: number } | null>(null);
+
+  // Tamanho do labirinto detectado ou do json
+  const tamanho = tamanhoOriginal || (passos ? detectarTamanho(passos) : { larg: 0, alt: 0 });
   const { larg, alt } = tamanho;
 
   // Grid reconstruído até o step atual
@@ -49,6 +51,11 @@ export function HistoryPage() {
       }
       setPassos(steps);
       setIdCorrida(extrairIdCorrida(data));
+      if (data.tamanho && data.tamanho.larg && data.tamanho.alt) {
+        setTamanhoOriginal({ larg: data.tamanho.larg, alt: data.tamanho.alt });
+      } else {
+        setTamanhoOriginal(null);
+      }
       setNomeArquivo(arquivo);
       setStepAtual(0);
       setPlaying(false);
@@ -92,6 +99,11 @@ export function HistoryPage() {
         }
         setPassos(steps);
         setIdCorrida(extrairIdCorrida(data));
+        if (data.tamanho && data.tamanho.larg && data.tamanho.alt) {
+          setTamanhoOriginal({ larg: data.tamanho.larg, alt: data.tamanho.alt });
+        } else {
+          setTamanhoOriginal(null);
+        }
         setNomeArquivo(file.name);
         setStepAtual(0);
         setPlaying(false);
