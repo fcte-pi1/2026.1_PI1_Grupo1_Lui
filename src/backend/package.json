@@ -2,10 +2,10 @@
   "name": "micromouse-backend",
   "version": "1.0.0",
   "description": "UDP telemetry listener and InfluxDB writer",
-  "main": "index.js",
+  "main": "src/services/telemetryService.js",
   "type": "module",
   "scripts": {
-    "start": "node index.js",
+    "start": "node src/services/telemetryService.js",
     "mock": "node mock_sender.js",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand",
     "test:integration": "node --experimental-vm-modules node_modules/jest/bin/jest.js __tests__/integration.test.js --runInBand"

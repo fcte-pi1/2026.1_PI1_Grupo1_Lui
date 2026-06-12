@@ -2,7 +2,7 @@ import dgram from 'node:dgram';
 import { encode } from '@msgpack/msgpack';
 import { InfluxDB } from '@influxdata/influxdb-client';
 import { jest } from '@jest/globals';
-import { startServer, shutdown } from '../index.js';
+import { startServer, shutdown } from '../src/services/telemetryService.js';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -123,7 +123,7 @@ describe('MsgPack Decoding & Dynamic Mapping (Issues 212 & 213)', () => {
   test('Issue 213: Fallback de estado_robo e conversão de timestamp Unix para ms', async () => {
     const runId = `test_timestamp_${Date.now()}`;
     // Timestamp within last minute so `range(start: -1m)` works
-    const unixTimestamp = Math.floor(Date.now() / 1000) - 10;
+    const unixTimestamp = Date.now() - 10000;
     
     const payload = {
       id_corrida: runId,
@@ -156,9 +156,9 @@ describe('MsgPack Decoding & Dynamic Mapping (Issues 212 & 213)', () => {
     expect(posYRecord).toBeDefined();
     expect(posYRecord.estado_robo).toBe('ERROR');
     
-    // Verifica se a data foi convertida corretamente (se multiplicou por 1000)
+    // Verifica se a data foi salva corretamente (agora o backend assume ms direto)
     const recordDate = new Date(posYRecord._time);
-    expect(recordDate.getTime()).toBe(unixTimestamp * 1000);
+    expect(recordDate.getTime()).toBe(unixTimestamp);
   });
 
   test('Issue 212: Pacote com campos faltando não lança exceção e salva usando fallback Timestamp Date()', async () => {
