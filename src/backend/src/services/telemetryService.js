@@ -37,7 +37,7 @@ const sessoesAtivas = {};
 import { fileURLToPath } from 'node:url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const MAZE_RUNS_DIR = path.resolve(__dirname, '../maze_runs');
+const MAZE_RUNS_DIR = path.resolve(__dirname, '../../../maze_runs');
 
 if (!fs.existsSync(MAZE_RUNS_DIR)) {
   fs.mkdirSync(MAZE_RUNS_DIR, { recursive: true });
@@ -114,8 +114,14 @@ server.on('message', (msg, rinfo) => {
 
       // --- LÓGICA DE GERAÇÃO DO JSON AUTOMÁTICO ---
       if (!sessoesAtivas[id_corrida]) {
+        let larg = 16, alt = 16;
+        const match = id_labirinto.match(/(\d+)x(\d+)/);
+        if (match) { larg = parseInt(match[1]); alt = parseInt(match[2]); }
+
         sessoesAtivas[id_corrida] = {
           id_corrida,
+          id_labirinto,
+          tamanho: { larg, alt },
           historico: []
         };
       }
@@ -143,8 +149,9 @@ server.on('message', (msg, rinfo) => {
       if (estado_robo === 'GOAL_REACHED') {
         console.log(`[JSON Automático] Gatilho de fim recebido para corrida: ${id_corrida}`);
         if (sessoesAtivas[id_corrida] && sessoesAtivas[id_corrida].historico.length > 0) {
-          const timestamp = Date.now();
-          const filename = `corrida_${timestamp}.json`;
+          const dataAtual = new Date();
+          const dataFormatada = dataAtual.toISOString().replace(/[:.]/g, '-').substring(0, 19);
+          const filename = `corrida_${id_corrida}_${dataFormatada}.json`;
           const filepath = path.join(MAZE_RUNS_DIR, filename);
           
           fs.writeFileSync(filepath, JSON.stringify(sessoesAtivas[id_corrida], null, 2), 'utf-8');

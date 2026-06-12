@@ -133,7 +133,14 @@ int main() {
     registrarLog("Objetivo atingido em (" + to_string(x) + "," + to_string(y) + ")");
     definirCor(x, y, 'Y');
     
-    salva_json();
+    // Registra o passo final no histórico
+    PassoExplorador passo_final;
+    passo_final.x = x;
+    passo_final.y = y;
+    passo_final.orientacao = direcao_para_string(direcao_atual);
+    historico_exploracao.push_back(passo_final);
+
+    salva_json(larguraLabirinto(), alturaLabirinto());
 
     return 0;
 }
@@ -141,9 +148,13 @@ int main() {
 
 
 // Algoritmo pra salvar o json das paredes
-void salva_json(){
-    // Cria diretório se nao existir (relativo a src/)
-    string diretorio = "../../maze_runs";
+void salva_json(int larg, int alt){
+    // Cria diretório para o histórico da corrida
+    #ifdef PROJECT_ROOT_DIR
+        string diretorio = string(PROJECT_ROOT_DIR) + "/maze_runs";
+    #else
+        string diretorio = "../../maze_runs";
+    #endif
     
     #ifdef _WIN32
         system(("if not exist " + diretorio + " mkdir " + diretorio).c_str());
@@ -160,6 +171,10 @@ void salva_json(){
 
     arquivo << "{\n";
     arquivo << "  \"id_corrida\": \"" << id_corrida << "\",\n";
+    arquivo << "  \"tamanho\": {\n";
+    arquivo << "    \"larg\": " << larg << ",\n";
+    arquivo << "    \"alt\": " << alt << "\n";
+    arquivo << "  },\n";
     arquivo << "  \"historico\": [\n";
     
     for (size_t i = 0; i < historico_exploracao.size(); i++) {

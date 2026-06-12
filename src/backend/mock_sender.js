@@ -15,14 +15,21 @@ const runs = [
     id_corrida: "run_test_01_sucesso",
     id_labirinto: "16x16_standard",
     stream: [
-      { estado_fsm: "CALIBRATING", bateria_v: 7.40, posicao_x: 0, posicao_y: 0, orientacao: "SUL", erro_pid: 0.0, dist_frontal: 150, paredes: 11 },
-      { estado_fsm: "MAPPING",     bateria_v: 7.38, posicao_x: 0, posicao_y: 1, orientacao: "SUL", erro_pid: 0.05, dist_frontal: 140, paredes: 10 },
-      { estado_fsm: "MAPPING",     bateria_v: 7.35, posicao_x: 0, posicao_y: 2, orientacao: "SUL", erro_pid: -0.02, dist_frontal: 130, paredes: 12 },
-      { estado_fsm: "MAPPING",     bateria_v: 7.33, posicao_x: 1, posicao_y: 2, orientacao: "LESTE", erro_pid: 0.08, dist_frontal: 120, paredes: 5 },
-      { estado_fsm: "MAPPING",     bateria_v: 7.31, posicao_x: 2, posicao_y: 2, orientacao: "LESTE", erro_pid: -0.04, dist_frontal: 110, paredes: 3 },
-      { estado_fsm: "MAPPING",     bateria_v: 7.28, posicao_x: 2, posicao_y: 3, orientacao: "SUL", erro_pid: 0.01, dist_frontal: 100, paredes: 10 },
-      { estado_fsm: "MAPPING",     bateria_v: 7.25, posicao_x: 2, posicao_y: 4, orientacao: "SUL", erro_pid: 0.03, dist_frontal: 90, paredes: 14 },
-      { estado_fsm: "GOAL_REACHED", bateria_v: 7.22, posicao_x: 2, posicao_y: 4, orientacao: "SUL", erro_pid: 0.00, dist_frontal: 80, paredes: 14 }
+      { estado_fsm: "CALIBRATING", bateria_v: 7.40, posicao_x: 0, posicao_y: 0, orientacao: "NORTE", erro_pid: 0.0, dist_frontal: 150, paredes: 14 },
+      { estado_fsm: "MAPPING",     bateria_v: 7.38, posicao_x: 0, posicao_y: 1, orientacao: "NORTE", erro_pid: 0.05, dist_frontal: 140, paredes: 10 },
+      { estado_fsm: "MAPPING",     bateria_v: 7.35, posicao_x: 0, posicao_y: 2, orientacao: "NORTE", erro_pid: -0.02, dist_frontal: 130, paredes: 10 },
+      { estado_fsm: "MAPPING",     bateria_v: 7.33, posicao_x: 0, posicao_y: 3, orientacao: "NORTE", erro_pid: 0.08, dist_frontal: 120, paredes: 10 },
+      { estado_fsm: "MAPPING",     bateria_v: 7.31, posicao_x: 0, posicao_y: 4, orientacao: "NORTE", erro_pid: -0.04, dist_frontal: 110, paredes: 10 },
+      { estado_fsm: "MAPPING",     bateria_v: 7.28, posicao_x: 0, posicao_y: 5, orientacao: "NORTE", erro_pid: 0.01, dist_frontal: 100, paredes: 10 },
+      { estado_fsm: "MAPPING",     bateria_v: 7.25, posicao_x: 0, posicao_y: 6, orientacao: "NORTE", erro_pid: 0.03, dist_frontal: 90, paredes: 10 },
+      { estado_fsm: "MAPPING",     bateria_v: 7.22, posicao_x: 0, posicao_y: 7, orientacao: "NORTE", erro_pid: 0.00, dist_frontal: 80, paredes: 9 },
+      { estado_fsm: "MAPPING",     bateria_v: 7.20, posicao_x: 1, posicao_y: 7, orientacao: "LESTE", erro_pid: 0.00, dist_frontal: 80, paredes: 5 },
+      { estado_fsm: "MAPPING",     bateria_v: 7.18, posicao_x: 2, posicao_y: 7, orientacao: "LESTE", erro_pid: 0.00, dist_frontal: 80, paredes: 5 },
+      { estado_fsm: "MAPPING",     bateria_v: 7.15, posicao_x: 3, posicao_y: 7, orientacao: "LESTE", erro_pid: 0.00, dist_frontal: 80, paredes: 5 },
+      { estado_fsm: "MAPPING",     bateria_v: 7.12, posicao_x: 4, posicao_y: 7, orientacao: "LESTE", erro_pid: 0.00, dist_frontal: 80, paredes: 5 },
+      { estado_fsm: "MAPPING",     bateria_v: 7.10, posicao_x: 5, posicao_y: 7, orientacao: "LESTE", erro_pid: 0.00, dist_frontal: 80, paredes: 5 },
+      { estado_fsm: "MAPPING",     bateria_v: 7.08, posicao_x: 6, posicao_y: 7, orientacao: "LESTE", erro_pid: 0.00, dist_frontal: 80, paredes: 5 },
+      { estado_fsm: "GOAL_REACHED",bateria_v: 7.05, posicao_x: 7, posicao_y: 7, orientacao: "LESTE", erro_pid: 0.00, dist_frontal: 80, paredes: 7 }
     ]
   },
   {

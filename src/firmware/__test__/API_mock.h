@@ -206,5 +206,12 @@ inline bool executar_exploracao(int larg, int alt, vector<pair<int,int>> metas) 
         mock().direcao = direcao_atual;
     }
 
+    // Registra o passo final na meta
+    PassoExplorador passo_final;
+    passo_final.x = x;
+    passo_final.y = y;
+    passo_final.orientacao = direcao_para_string(direcao_atual);
+    historico_exploracao.push_back(passo_final);
+
     return true;
 }
