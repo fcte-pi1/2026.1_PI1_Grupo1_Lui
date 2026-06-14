@@ -142,3 +142,74 @@ export const formatarTimestamp = (ts: string): string => {
   if (isNaN(num)) return ts;
   return new Date(num).toLocaleString('pt-BR');
 };
+
+
+/**
+ * Função utilitária genérica para fazer o download de um arquivo no navegador.
+ */
+const baixarArquivo = (conteudo: string, nomeArquivo: string, tipoMime: string) => {
+  const blob = new Blob([conteudo], { type: tipoMime });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  
+  link.href = url;
+  link.download = nomeArquivo;
+  document.body.appendChild(link);
+  link.click();
+  
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+};
+
+/**
+ * Exporta a série temporal estruturada no formato nativo JSON.
+ */
+export const exportarHistoricoJSON = (passos: PassoExploracao[], idCorrida: string | null) => {
+  const id = idCorrida || `sessao_${Date.now()}`;
+  const data: CorridaJSON = { id_corrida: id, historico: passos };
+  const conteudo = JSON.stringify(data, null, 2);
+  
+  baixarArquivo(conteudo, `telemetria_${id}.json`, 'application/json');
+};
+
+/**
+ * Exporta a série temporal em formato CSV achatado (flattened), 
+ * ideal para análises post-mortem em ferramentas como Excel, Python (Pandas) ou MATLAB.
+ */
+export const exportarHistoricoCSV = (passos: PassoExploracao[], idCorrida: string | null) => {
+  const id = idCorrida || `sessao_${Date.now()}`;
+  
+  // Cabeçalhos das colunas
+  const cabecalho = [
+    'passo_index',
+    'pos_x',
+    'pos_y',
+    'orientacao',
+    'detectou_parede_norte',
+    'detectou_parede_sul',
+    'detectou_parede_leste',
+    'detectou_parede_oeste'
+  ].join(',');
+
+  // Mapeamento linear de cada passo da máquina de estados
+  const linhas = passos.map((passo, index) => {
+    const paredeNorte = passo.paredes.some(w => w.dir === 'NORTE') ? 1 : 0;
+    const paredeSul = passo.paredes.some(w => w.dir === 'SUL') ? 1 : 0;
+    const paredeLeste = passo.paredes.some(w => w.dir === 'LESTE') ? 1 : 0;
+    const paredeOeste = passo.paredes.some(w => w.dir === 'OESTE') ? 1 : 0;
+
+    return [
+      index + 1,
+      passo.x,
+      passo.y,
+      passo.orientacao,
+      paredeNorte,
+      paredeSul,
+      paredeLeste,
+      paredeOeste
+    ].join(',');
+  });
+
+  const conteudo = [cabecalho, ...linhas].join('\n');
+  baixarArquivo(conteudo, `telemetria_${id}.csv`, 'text/csv');
+};
