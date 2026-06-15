@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { FSMStatus } from '../app/components/FSMSStatus';
+import { FSMStatus } from '../app/components/FSMStatus';
 import type { DadosTelemetria } from '../app/components/Dashboard';
 
 function criarTelemetria(override: Partial<DadosTelemetria> = {}): DadosTelemetria {

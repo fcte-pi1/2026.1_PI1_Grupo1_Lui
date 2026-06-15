@@ -2,7 +2,7 @@ import dgram from 'node:dgram';
 import { encode } from '@msgpack/msgpack';
 import { InfluxDB } from '@influxdata/influxdb-client';
 import { jest } from '@jest/globals';
-import { startServer, shutdown } from '../index.js';
+import { server, io, httpServer, startServer, shutdown } from '../src/services/telemetryService.js';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -165,7 +165,7 @@ describe('Integration Tests: UDP -> Backend -> InfluxDB', () => {
     const mockSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 
     // Forçar um erro no writeApi para observar
-    const { writeApi } = await import('../index.js');
+    const { writeApi } = await import('../src/services/telemetryService.js');
     jest.spyOn(writeApi, 'writePoint').mockImplementationOnce(() => {
       throw new Error("Simulated Write Error");
     });

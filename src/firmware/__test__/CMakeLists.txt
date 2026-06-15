@@ -36,6 +36,7 @@ target_include_directories(test_floodfill PRIVATE
 )
 
 target_compile_definitions(test_floodfill PRIVATE TESTING)
+target_compile_definitions(test_floodfill PRIVATE PROJECT_ROOT_DIR="${CMAKE_CURRENT_SOURCE_DIR}/../..")
 
 target_link_libraries(test_floodfill PRIVATE Catch2::Catch2WithMain)
 
