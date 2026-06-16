@@ -72,7 +72,18 @@ function sendTelemetry() {
     // Simula motores mais rápidos e estáveis no FAST_RUN
     pwm_esq: isFastRun ? 210 : 120 + Math.floor(Math.random() * 8),
     pwm_dir: isFastRun ? 212 : 120 + Math.floor(Math.random() * 8),
-    velocidade_media: isFastRun ? 0.85 + (Math.random() * 0.05) : 0.35 + (Math.random() * 0.03)
+    velocidade_media: isFastRun ? 0.85 + (Math.random() * 0.05) : 0.35 + (Math.random() * 0.03),
+    ...(isFastRun ? {
+      rota_calculada: [
+        { x: 0, y: 0 },
+        { x: 0, y: 1 },
+        { x: 0, y: 2 },
+        { x: 1, y: 2 },
+        { x: 2, y: 2 },
+        { x: 2, y: 3 },
+        { x: 2, y: 4 }
+      ]
+    } : {})
   };
 
   // Codifica em MsgPack

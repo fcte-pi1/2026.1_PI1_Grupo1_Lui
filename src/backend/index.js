@@ -55,12 +55,30 @@ server.on('listening', () => {
 
 server.on('message', (msg, rinfo) => {
   try {
-    // Decodifica o payload recebido via MsgPack
-    const data = decode(msg);
-    console.log(`[UDP] Recebido de ${rinfo.address}:${rinfo.port}:`, data);
+    // Tenta decodificar o payload recebido via MsgPack ou JSON.parse()
+    let dadosDecodificados;
+    try {
+      dadosDecodificados = decode(msg);
+    } catch (msgPackErr) {
+      try {
+        dadosDecodificados = JSON.parse(msg.toString());
+      } catch (jsonErr) {
+        throw new Error(`Falha ao decodificar MsgPack e JSON: ${msgPackErr.message} / ${jsonErr.message}`);
+      }
+    }
+
+    console.log(`[UDP] Recebido de ${rinfo.address}:${rinfo.port}:`, dadosDecodificados);
+
+    // Adiciona um console.log condicional avisando que uma rota foi recebida
+    if (dadosDecodificados.rota_calculada) {
+      const passos = Array.isArray(dadosDecodificados.rota_calculada) ? dadosDecodificados.rota_calculada.length : 0;
+      console.log(`Rota otimizada recebida: ${passos} passos`);
+    }
 
     // Envia dados para clientes conectados via WebSocket
-    io.emit('telemetry', data);
+    io.emit('telemetry', dadosDecodificados);
+
+    const data = dadosDecodificados;
 
     // Mapeamento dinâmico e seguro para o esquema InfluxDB
     const estado_robo = data.estado_fsm || data.estado_robo || 'IDLE';
