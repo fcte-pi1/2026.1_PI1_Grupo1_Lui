@@ -1,7 +1,7 @@
 import dgram from 'node:dgram';
 import { encode } from '@msgpack/msgpack';
 import { jest } from '@jest/globals';
-import { startServer, shutdown, io, writeApi } from '../index.js';
+import { startServer, shutdown, io, writeApi } from '../src/services/telemetryService.js';
 
 const TEST_UDP_PORT = 41236;
 const TEST_WS_PORT = 3006;
