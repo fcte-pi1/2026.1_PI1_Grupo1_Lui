@@ -65,7 +65,7 @@ describe('MsgPack Decoding & Dynamic Mapping (Issues 212 & 213)', () => {
     await delay(200);
 
     expect(mockConsoleError).toHaveBeenCalledWith(
-      expect.stringContaining('[UDP] Erro ao processar mensagem ou decodificar MsgPack:'),
+      expect.stringContaining('[UDP] Erro ao processar mensagem ou decodificar MsgPack/JSON:'),
       expect.anything()
     );
   });

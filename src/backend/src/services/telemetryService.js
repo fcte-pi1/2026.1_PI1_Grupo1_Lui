@@ -89,8 +89,17 @@ server.on('listening', () => {
 
 server.on('message', (msg, rinfo) => {
   try {
-    // Decodifica o payload recebido via MsgPack
-    const dataDecoded = decode(msg);
+    // Tenta decodificar o payload recebido via MsgPack ou JSON.parse()
+    let dataDecoded;
+    try {
+      dataDecoded = decode(msg);
+    } catch (msgPackErr) {
+      try {
+        dataDecoded = JSON.parse(msg.toString());
+      } catch (jsonErr) {
+        throw new Error(`Falha ao decodificar MsgPack e JSON: ${msgPackErr.message} / ${jsonErr.message}`);
+      }
+    }
     
     // Normaliza para sempre iterar, mesmo se for apenas 1 pacote solto
     const pacotes = Array.isArray(dataDecoded) ? dataDecoded : [dataDecoded];
@@ -103,6 +112,12 @@ server.on('message', (msg, rinfo) => {
 
     // Processa cada pacote do lote (ou o único pacote)
     for (const data of pacotes) {
+      // Adiciona um console.log condicional avisando que uma rota foi recebida
+      if (data.rota_calculada) {
+        const passos = Array.isArray(data.rota_calculada) ? data.rota_calculada.length : 0;
+        console.log(`Rota otimizada recebida: ${passos} passos`);
+      }
+
       // Envia dados para clientes conectados via WebSocket
       io.emit('telemetry', data);
 
@@ -217,7 +232,7 @@ server.on('message', (msg, rinfo) => {
       });
 
   } catch (err) {
-    console.error('[UDP] Erro ao processar mensagem ou decodificar MsgPack:', err.message);
+    console.error('[UDP] Erro ao processar mensagem ou decodificar MsgPack/JSON:', err.message);
     console.log('[UDP] Pacote bruto recebido (String):', msg.toString());
   }
 });
