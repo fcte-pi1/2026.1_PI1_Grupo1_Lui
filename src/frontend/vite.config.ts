@@ -48,6 +48,14 @@ export default defineConfig({
       }
     }
   ],
+  optimizeDeps: {
+    include: ['react-is', 'recharts']
+  },  
+  build: {
+    commonjsOptions: {
+      include: [/react-is/, /node_modules/],
+    },
+  },
   test: {
     globals: true,
     environment: 'jsdom',
