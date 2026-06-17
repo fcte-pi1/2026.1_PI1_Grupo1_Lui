@@ -48,13 +48,39 @@ const runs = [
     id_corrida: "run_test_03_fast_run",
     id_labirinto: "16x16_standard",
     stream: [
-      { estado_fsm: "CALIBRATING", bateria_v: 7.40, posicao_x: 0, posicao_y: 0, orientacao: "SUL", erro_pid: 0.0, dist_frontal: 150, paredes: 11 },
-      { estado_fsm: "FAST_RUN",    bateria_v: 7.30, posicao_x: 0, posicao_y: 1, orientacao: "SUL", erro_pid: 0.01, dist_frontal: 140, paredes: 10 },
-      { estado_fsm: "FAST_RUN",    bateria_v: 7.25, posicao_x: 0, posicao_y: 2, orientacao: "SUL", erro_pid: -0.01, dist_frontal: 130, paredes: 12 },
-      { estado_fsm: "FAST_RUN",    bateria_v: 7.20, posicao_x: 1, posicao_y: 2, orientacao: "LESTE", erro_pid: 0.02, dist_frontal: 120, paredes: 5 },
-      { estado_fsm: "FAST_RUN",    bateria_v: 7.15, posicao_x: 2, posicao_y: 2, orientacao: "LESTE", erro_pid: -0.01, dist_frontal: 110, paredes: 3 },
-      { estado_fsm: "FAST_RUN",    bateria_v: 7.12, posicao_x: 2, posicao_y: 3, orientacao: "SUL", erro_pid: 0.0, dist_frontal: 100, paredes: 10 },
-      { estado_fsm: "FAST_RUN",    bateria_v: 7.10, posicao_x: 2, posicao_y: 4, orientacao: "SUL", erro_pid: 0.02, dist_frontal: 90, paredes: 14 }
+      { estado_fsm: "CALIBRATING", bateria_v: 7.40, posicao_x: 0, posicao_y: 0, orientacao: "SUL", erro_pid: 0.0, dist_frontal: 150, paredes: 11},
+      
+      // Primeiro sobe, depois vira
+      { estado_fsm: "FAST_RUN",    bateria_v: 7.30, posicao_x: 0, posicao_y: 1, orientacao: "SUL", erro_pid: 0.01, dist_frontal: 140, paredes: 10, rota_calculada: [
+  { "x": 0, "y": 0 }, { "x": 0, "y": 1 }, { "x": 0, "y": 2 }, { "x": 0, "y": 3 }, { "x": 0, "y": 4 }, { "x": 0, "y": 5 }, { "x": 0, "y": 6 }, { "x": 0, "y": 7 },
+  { "x": 1, "y": 7 }, { "x": 2, "y": 7 }, { "x": 3, "y": 7 }, { "x": 4, "y": 7 }, { "x": 5, "y": 7 }, { "x": 6, "y": 7 }, { "x": 7, "y": 7 }] },
+      
+      // Com pequenas curvas
+      { estado_fsm: "FAST_RUN",    bateria_v: 7.25, posicao_x: 0, posicao_y: 2, orientacao: "SUL", erro_pid: -0.01, dist_frontal: 130, paredes: 12, rota_calculada: [
+  { "x": 0, "y": 0 }, { "x": 1, "y": 0 }, { "x": 1, "y": 1 }, { "x": 2, "y": 1 }, { "x": 2, "y": 2 }, { "x": 3, "y": 2 }, { "x": 3, "y": 3 }, { "x": 4, "y": 3 },
+  { "x": 4, "y": 4 }, { "x": 5, "y": 4 }, { "x": 5, "y": 5 }, { "x": 6, "y": 5 }, { "x": 6, "y": 6 }, { "x": 7, "y": 6 }, { "x": 7, "y": 7 }] },
+      
+      // Chegando ao centro (8,8)
+      { estado_fsm: "FAST_RUN",    bateria_v: 7.20, posicao_x: 1, posicao_y: 2, orientacao: "LESTE", erro_pid: 0.02, dist_frontal: 120, paredes: 5, rota_calculada: [
+  { "x": 0, "y": 0 }, { "x": 1, "y": 0 }, { "x": 2, "y": 0 }, { "x": 3, "y": 0 }, { "x": 4, "y": 0 }, { "x": 5, "y": 0 }, { "x": 6, "y": 0 }, { "x": 7, "y": 0 },
+  { "x": 8, "y": 0 }, { "x": 8, "y": 1 }, { "x": 8, "y": 2 }, { "x": 8, "y": 3 }, { "x": 8, "y": 4 }, { "x": 8, "y": 5 }, { "x": 8, "y": 6 }, { "x": 8, "y": 7 },
+  { "x": 8, "y": 8 }] },
+      
+      // Caminho em "L"
+      { estado_fsm: "FAST_RUN",    bateria_v: 7.15, posicao_x: 2, posicao_y: 2, orientacao: "LESTE", erro_pid: -0.01, dist_frontal: 110, paredes: 3, rota_calculada: [
+  { "x": 0, "y": 0 }, { "x": 1, "y": 0 }, { "x": 2, "y": 0 }, { "x": 3, "y": 0 }, { "x": 4, "y": 0 }, { "x": 5, "y": 0 }, { "x": 6, "y": 0 }, { "x": 7, "y": 0 },
+  { "x": 7, "y": 1 }, { "x": 7, "y": 2 }, { "x": 7, "y": 3 }, { "x": 7, "y": 4 }, { "x": 7, "y": 5 }, { "x": 7, "y": 6 }, { "x": 7, "y": 7 }]  },
+      
+      // Rota mais orgânica
+      { estado_fsm: "FAST_RUN",    bateria_v: 7.12, posicao_x: 2, posicao_y: 3, orientacao: "SUL", erro_pid: 0.0, dist_frontal: 100, paredes: 10, rota_calculada: [
+  { "x": 0, "y": 0 }, { "x": 0, "y": 1 }, { "x": 1, "y": 1 }, { "x": 2, "y": 1 }, { "x": 2, "y": 2 }, { "x": 2, "y": 3 }, { "x": 3, "y": 3 }, { "x": 4, "y": 3 },
+  { "x": 4, "y": 4 }, { "x": 5, "y": 4 }, { "x": 5, "y": 5 }, { "x": 6, "y": 5 }, { "x": 6, "y": 6 }, { "x": 7, "y": 6 }, { "x": 7, "y": 7 }] },
+      
+      // Simulando resultado de Flood Fill
+    { estado_fsm: "FAST_RUN",    bateria_v: 7.10, posicao_x: 2, posicao_y: 4, orientacao: "SUL", erro_pid: 0.02, dist_frontal: 90, paredes: 14, rota_calculada: [
+  { "x": 0, "y": 0 }, { "x": 1, "y": 0 }, { "x": 1, "y": 1 }, { "x": 1, "y": 2 }, { "x": 2, "y": 2 }, { "x": 3, "y": 2 }, { "x": 4, "y": 2 }, { "x": 4, "y": 3 },
+  { "x": 4, "y": 4 }, { "x": 5, "y": 4 }, { "x": 6, "y": 4 }, { "x": 6, "y": 5 }, { "x": 6, "y": 6 }, { "x": 7, "y": 6 }, { "x": 7, "y": 7 }] }
+
     ]
   }
 ];
