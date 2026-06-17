@@ -22,6 +22,8 @@ export interface DadosTelemetria {
   posicao_y: number;
   orientacao: 'NORTE' | 'SUL' | 'LESTE' | 'OESTE';
   tamanho_grade: number;
+  mazeSize?: number;
+  mapping?: boolean;
   paredes_atuais: { norte: boolean; sul: boolean; leste: boolean; oeste: boolean };
   causa_erro?: string;
   velocidade_media?: number;
@@ -408,7 +410,10 @@ export function Dashboard() {
               <span className="font-mono text-sm text-slate-500 font-medium">{telemetriaAtual.timestamp}</span>
             </div>
             <div className="flex items-center gap-1.5 text-xs text-slate-400 font-medium">
-              <span>Grade detetada: {telemetriaAtual.tamanho_grade}x{telemetriaAtual.tamanho_grade}</span>
+              <span className={`px-2 py-0.5 rounded text-[10px] font-bold tracking-widest uppercase text-white ${telemetriaAtual.mapping !== false ? 'bg-indigo-500' : 'bg-slate-600'}`}>
+                {telemetriaAtual.mapping !== false ? 'Modo: Mapeamento' : 'Modo: Mapa Salvo'}
+              </span>
+              <span>Grade: {telemetriaAtual.mazeSize || telemetriaAtual.tamanho_grade}x{telemetriaAtual.mazeSize || telemetriaAtual.tamanho_grade}</span>
               <span className="text-slate-300">•</span>
               <span>{qtdExploradas} de {totalCelulas} células ({percentual}%)</span>
             </div>

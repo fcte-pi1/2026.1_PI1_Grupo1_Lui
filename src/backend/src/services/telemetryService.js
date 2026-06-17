@@ -130,13 +130,24 @@ server.on('message', (msg, rinfo) => {
       // --- LÓGICA DE GERAÇÃO DO JSON AUTOMÁTICO ---
       if (!sessoesAtivas[id_corrida]) {
         let larg = 16, alt = 16;
-        const match = id_labirinto.match(/(\d+)x(\d+)/);
-        if (match) { larg = parseInt(match[1]); alt = parseInt(match[2]); }
+        
+        // Prioriza a informação explícita enviada pelo firmware
+        if (data.mazeSize) {
+          larg = data.mazeSize;
+          alt = data.mazeSize;
+        } else {
+          // Fallback para deduzir pela string
+          const match = id_labirinto.match(/(\d+)x(\d+)/);
+          if (match) { larg = parseInt(match[1]); alt = parseInt(match[2]); }
+        }
+
+        const mapping = data.mapping !== undefined ? data.mapping : true;
 
         sessoesAtivas[id_corrida] = {
           id_corrida,
           id_labirinto,
           tamanho: { larg, alt },
+          mapping,
           historico: []
         };
       }

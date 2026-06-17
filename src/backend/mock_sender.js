@@ -14,6 +14,8 @@ const runs = [
   {
     id_corrida: "run_test_01_sucesso",
     id_labirinto: "16x16_standard",
+    mazeSize: 16,
+    mapping: true,
     stream: [
       { estado_fsm: "CALIBRATING", bateria_v: 7.40, posicao_x: 0, posicao_y: 0, orientacao: "NORTE", erro_pid: 0.0, dist_frontal: 150, paredes: 14 },
       { estado_fsm: "MAPPING",     bateria_v: 7.38, posicao_x: 0, posicao_y: 1, orientacao: "NORTE", erro_pid: 0.05, dist_frontal: 140, paredes: 10 },
@@ -35,6 +37,8 @@ const runs = [
   {
     id_corrida: "run_test_02_falha_bateria",
     id_labirinto: "16x16_standard",
+    mazeSize: 16,
+    mapping: true,
     stream: [
       { estado_fsm: "CALIBRATING", bateria_v: 7.40, posicao_x: 0, posicao_y: 0, orientacao: "SUL", erro_pid: 0.0, dist_frontal: 150, paredes: 11 },
       { estado_fsm: "MAPPING",     bateria_v: 7.10, posicao_x: 0, posicao_y: 1, orientacao: "SUL", erro_pid: 0.04, dist_frontal: 140, paredes: 10 },
@@ -47,6 +51,8 @@ const runs = [
   {
     id_corrida: "run_test_03_fast_run",
     id_labirinto: "16x16_standard",
+    mazeSize: 16,
+    mapping: false,
     // Rota ideal calculada pelo Flood Fill para esta corrida (HU Fast Run)
     rota_calculada: [
       { x: 1, y: 1 },
@@ -105,6 +111,8 @@ function sendTelemetry() {
     ...stepData,
     // Envia a Bitmask pré-calculada do stepData, ou 0 se não houver
     paredes: stepData.paredes !== undefined ? stepData.paredes : 0, 
+    mazeSize: currentRun.mazeSize || 16,
+    mapping: currentRun.mapping !== undefined ? currentRun.mapping : true,
     timestamp: Math.floor(Date.now() / 1000),
     id_corrida: currentRun.id_corrida,
     id_labirinto: currentRun.id_labirinto,

@@ -56,6 +56,7 @@ interface CorridaRow {
   date: string;
   seed: number;
   origem: 'api' | 'local';
+  mapping?: boolean;
   dadosBrutos?: unknown;
 }
 
@@ -155,13 +156,16 @@ export function HistoryPage() {
     let tempoS = 40 + (semente % 180);
     let grade = semente % 2 === 0 ? "16×16" : "8×8";
 
+    let mapping = true;
+
     // CORREÇÃO: Se os dados brutos já existirem (Upload Local), calcula exatamente a grade e o tempo
     if (dadosBrutos) {
       try {
         const passos = extrairPassos(dadosBrutos);
-        const dados = dadosBrutos as { tamanho?: { larg: number, alt: number } };
+        const dados = dadosBrutos as { tamanho?: { larg: number, alt: number }, mapping?: boolean };
         const tam = dados.tamanho ? { larg: dados.tamanho.larg, alt: dados.tamanho.alt } : detectarTamanho(passos);
         grade = `${tam.larg}×${tam.alt}`;
+        if (dados.mapping !== undefined) mapping = dados.mapping;
         tempoS = Math.max(10, Math.floor(passos.length * 1.5));
       } catch {
         // Fallback silencioso
@@ -182,6 +186,7 @@ export function HistoryPage() {
       date: dataStr,
       seed: semente,
       origem,
+      mapping,
       dadosBrutos
     };
   }
@@ -225,11 +230,13 @@ export function HistoryPage() {
       const sec = tempoSReal % 60;
 
       // CORREÇÃO: Atualiza silenciosamente os metadados da tabela agora que temos os dados absolutos da API
+      const jsonTyped = jsonReal as { mapping?: boolean };
       setCorridas(prev => prev.map(c => c.id === corrida.id ? {
         ...c,
         grade: `${tam.larg}×${tam.alt}`,
         tempoS: tempoSReal,
         tempo: `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`,
+        mapping: jsonTyped.mapping !== undefined ? jsonTyped.mapping : true,
         dadosBrutos: jsonReal
       } : c));
 
@@ -347,9 +354,16 @@ export function HistoryPage() {
               <div key={run.id} className="border-b border-slate-50 last:border-b-0">
                 
                 <button onClick={() => abrirCorrida(run)} className="w-full text-left hover:bg-slate-50/80 transition-colors">
-                  <div className="grid items-center px-5 py-3.5" style={{ gridTemplateColumns: "40px 90px 80px 1fr 160px 140px 40px" }}>
+                  <div className="grid items-center px-5 py-3.5" style={{ gridTemplateColumns: "40px 160px 80px 1fr 160px 140px 40px" }}>
                     <span className="text-slate-400 tabular-nums" style={{ fontSize: "0.85rem" }}>{run.numero}</span>
-                    <span><span className="bg-slate-100 text-slate-700 rounded-md px-2 py-0.5 tabular-nums" style={{ fontSize: "0.8rem", fontWeight: 500 }}>{run.grade}</span></span>
+                    <span className="flex items-center gap-2">
+                      <span className="bg-slate-100 text-slate-700 rounded-md px-2 py-0.5 tabular-nums" style={{ fontSize: "0.8rem", fontWeight: 500 }}>{run.grade}</span>
+                      {run.dadosBrutos ? (
+                        <span className={`px-2 py-0.5 rounded text-[9px] font-bold tracking-widest uppercase text-white ${run.mapping !== false ? 'bg-indigo-500' : 'bg-slate-600'}`}>
+                          {run.mapping !== false ? 'Mapeamento' : 'Salvo'}
+                        </span>
+                      ) : null}
+                    </span>
                     <span className="text-slate-800 tabular-nums" style={{ fontSize: "0.88rem", fontWeight: 600 }}>{run.tempo}</span>
                     <span>
                       {run.objetivo ? (
