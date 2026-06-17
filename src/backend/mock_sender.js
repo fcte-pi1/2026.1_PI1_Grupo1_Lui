@@ -47,6 +47,13 @@ const runs = [
   {
     id_corrida: "run_test_03_fast_run",
     id_labirinto: "16x16_standard",
+    // Rota ideal calculada pelo Flood Fill para esta corrida (HU Fast Run)
+    rota_calculada: [
+      { x: 1, y: 1 },
+      { x: 1, y: 2 },
+      { x: 1, y: 3 },
+      { x: 2, y: 3 }
+    ],
     stream: [
       { estado_fsm: "CALIBRATING", bateria_v: 7.40, posicao_x: 0, posicao_y: 0, orientacao: "SUL", erro_pid: 0.0, dist_frontal: 150, paredes: 11 },
       { estado_fsm: "FAST_RUN",    bateria_v: 7.30, posicao_x: 0, posicao_y: 1, orientacao: "SUL", erro_pid: 0.01, dist_frontal: 140, paredes: 10 },
@@ -81,7 +88,9 @@ function sendTelemetry() {
     // Simula motores mais rápidos e estáveis no FAST_RUN
     pwm_esq: isFastRun ? 210 : 120 + Math.floor(Math.random() * 8),
     pwm_dir: isFastRun ? 212 : 120 + Math.floor(Math.random() * 8),
-    velocidade_media: isFastRun ? 0.85 + (Math.random() * 0.05) : 0.35 + (Math.random() * 0.03)
+    velocidade_media: isFastRun ? 0.85 + (Math.random() * 0.05) : 0.35 + (Math.random() * 0.03),
+    // Repassa a rota calculada da corrida apenas durante o FAST_RUN
+    rota_calculada: isFastRun ? currentRun.rota_calculada : undefined
   };
 
   // Codifica em MsgPack
