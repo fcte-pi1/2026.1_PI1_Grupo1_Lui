@@ -1,3 +1,4 @@
+/// <reference types="vitest/config" />
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
@@ -47,4 +48,19 @@ export default defineConfig({
       }
     }
   ],
+  optimizeDeps: {
+    include: ['react-is', 'recharts']
+  },  
+  build: {
+    commonjsOptions: {
+      include: [/react-is/, /node_modules/],
+    },
+  },
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: ['./src/test/setup.ts'],
+    css: true,
+    exclude: ['__tests__/e2e/**', 'node_modules/**'],
+  },
 })

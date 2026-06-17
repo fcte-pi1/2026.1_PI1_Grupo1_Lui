@@ -2,3 +2,4 @@
 
 void wifi_init_sta(void);
 
+extern bool wifi_conectado;

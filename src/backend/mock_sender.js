@@ -15,39 +15,79 @@ const runs = [
     id_corrida: "run_test_01_sucesso",
     id_labirinto: "16x16_standard",
     stream: [
-      { estado_fsm: "CALIBRATING", bateria_v: 7.40, posicao_x: 0, posicao_y: 0, orientacao: "NORTE", erro_pid: 0.0, dist_frontal: 150 },
-      { estado_fsm: "MAPPING",     bateria_v: 7.38, posicao_x: 0, posicao_y: 1, orientacao: "NORTE", erro_pid: 0.05, dist_frontal: 140 },
-      { estado_fsm: "MAPPING",     bateria_v: 7.35, posicao_x: 0, posicao_y: 2, orientacao: "NORTE", erro_pid: -0.02, dist_frontal: 130 },
-      { estado_fsm: "MAPPING",     bateria_v: 7.33, posicao_x: 1, posicao_y: 2, orientacao: "LESTE", erro_pid: 0.08, dist_frontal: 120 },
-      { estado_fsm: "MAPPING",     bateria_v: 7.31, posicao_x: 2, posicao_y: 2, orientacao: "LESTE", erro_pid: -0.04, dist_frontal: 110 },
-      { estado_fsm: "MAPPING",     bateria_v: 7.28, posicao_x: 2, posicao_y: 3, orientacao: "NORTE", erro_pid: 0.01, dist_frontal: 100 },
-      { estado_fsm: "MAPPING",     bateria_v: 7.25, posicao_x: 2, posicao_y: 4, orientacao: "NORTE", erro_pid: 0.03, dist_frontal: 90 },
-      { estado_fsm: "GOAL_REACHED", bateria_v: 7.22, posicao_x: 2, posicao_y: 4, orientacao: "NORTE", erro_pid: 0.00, dist_frontal: 80 }
+      { estado_fsm: "CALIBRATING", bateria_v: 7.40, posicao_x: 0, posicao_y: 0, orientacao: "NORTE", erro_pid: 0.0, dist_frontal: 150, paredes: 14 },
+      { estado_fsm: "MAPPING",     bateria_v: 7.38, posicao_x: 0, posicao_y: 1, orientacao: "NORTE", erro_pid: 0.05, dist_frontal: 140, paredes: 10 },
+      { estado_fsm: "MAPPING",     bateria_v: 7.35, posicao_x: 0, posicao_y: 2, orientacao: "NORTE", erro_pid: -0.02, dist_frontal: 130, paredes: 10 },
+      { estado_fsm: "MAPPING",     bateria_v: 7.33, posicao_x: 0, posicao_y: 3, orientacao: "NORTE", erro_pid: 0.08, dist_frontal: 120, paredes: 10 },
+      { estado_fsm: "MAPPING",     bateria_v: 7.31, posicao_x: 0, posicao_y: 4, orientacao: "NORTE", erro_pid: -0.04, dist_frontal: 110, paredes: 10 },
+      { estado_fsm: "MAPPING",     bateria_v: 7.28, posicao_x: 0, posicao_y: 5, orientacao: "NORTE", erro_pid: 0.01, dist_frontal: 100, paredes: 10 },
+      { estado_fsm: "MAPPING",     bateria_v: 7.25, posicao_x: 0, posicao_y: 6, orientacao: "NORTE", erro_pid: 0.03, dist_frontal: 90, paredes: 10 },
+      { estado_fsm: "MAPPING",     bateria_v: 7.22, posicao_x: 0, posicao_y: 7, orientacao: "NORTE", erro_pid: 0.00, dist_frontal: 80, paredes: 9 },
+      { estado_fsm: "MAPPING",     bateria_v: 7.20, posicao_x: 1, posicao_y: 7, orientacao: "LESTE", erro_pid: 0.00, dist_frontal: 80, paredes: 5 },
+      { estado_fsm: "MAPPING",     bateria_v: 7.18, posicao_x: 2, posicao_y: 7, orientacao: "LESTE", erro_pid: 0.00, dist_frontal: 80, paredes: 5 },
+      { estado_fsm: "MAPPING",     bateria_v: 7.15, posicao_x: 3, posicao_y: 7, orientacao: "LESTE", erro_pid: 0.00, dist_frontal: 80, paredes: 5 },
+      { estado_fsm: "MAPPING",     bateria_v: 7.12, posicao_x: 4, posicao_y: 7, orientacao: "LESTE", erro_pid: 0.00, dist_frontal: 80, paredes: 5 },
+      { estado_fsm: "MAPPING",     bateria_v: 7.10, posicao_x: 5, posicao_y: 7, orientacao: "LESTE", erro_pid: 0.00, dist_frontal: 80, paredes: 5 },
+      { estado_fsm: "MAPPING",     bateria_v: 7.08, posicao_x: 6, posicao_y: 7, orientacao: "LESTE", erro_pid: 0.00, dist_frontal: 80, paredes: 5 },
+      { estado_fsm: "GOAL_REACHED",bateria_v: 7.05, posicao_x: 7, posicao_y: 7, orientacao: "LESTE", erro_pid: 0.00, dist_frontal: 80, paredes: 7 }
     ]
   },
   {
     id_corrida: "run_test_02_falha_bateria",
     id_labirinto: "16x16_standard",
     stream: [
-      { estado_fsm: "CALIBRATING", bateria_v: 7.40, posicao_x: 0, posicao_y: 0, orientacao: "NORTE", erro_pid: 0.0, dist_frontal: 150 },
-      { estado_fsm: "MAPPING",     bateria_v: 7.10, posicao_x: 0, posicao_y: 1, orientacao: "NORTE", erro_pid: 0.04, dist_frontal: 140 },
-      { estado_fsm: "MAPPING",     bateria_v: 6.80, posicao_x: 0, posicao_y: 2, orientacao: "NORTE", erro_pid: -0.05, dist_frontal: 130 },
-      { estado_fsm: "MAPPING",     bateria_v: 6.20, posicao_x: 1, posicao_y: 2, orientacao: "LESTE", erro_pid: 0.12, dist_frontal: 120 },
-      { estado_fsm: "ERROR",       bateria_v: 5.75, posicao_x: 1, posicao_y: 2, orientacao: "LESTE", erro_pid: 0.00, dist_frontal: 120 },
-      { estado_fsm: "ERROR",       bateria_v: 5.50, posicao_x: 1, posicao_y: 2, orientacao: "LESTE", erro_pid: 0.00, dist_frontal: 120 }
+      { estado_fsm: "CALIBRATING", bateria_v: 7.40, posicao_x: 0, posicao_y: 0, orientacao: "SUL", erro_pid: 0.0, dist_frontal: 150, paredes: 11 },
+      { estado_fsm: "MAPPING",     bateria_v: 7.10, posicao_x: 0, posicao_y: 1, orientacao: "SUL", erro_pid: 0.04, dist_frontal: 140, paredes: 10 },
+      { estado_fsm: "MAPPING",     bateria_v: 6.80, posicao_x: 0, posicao_y: 2, orientacao: "SUL", erro_pid: -0.05, dist_frontal: 130, paredes: 12 },
+      { estado_fsm: "MAPPING",     bateria_v: 6.20, posicao_x: 1, posicao_y: 2, orientacao: "LESTE", erro_pid: 0.12, dist_frontal: 120, paredes: 5 },
+      { estado_fsm: "ERROR",       bateria_v: 5.75, posicao_x: 1, posicao_y: 2, orientacao: "LESTE", erro_pid: 0.00, dist_frontal: 120, paredes: 5 },
+      { estado_fsm: "ERROR",       bateria_v: 5.50, posicao_x: 1, posicao_y: 2, orientacao: "LESTE", erro_pid: 0.00, dist_frontal: 120, paredes: 5 }
     ]
   },
   {
     id_corrida: "run_test_03_fast_run",
     id_labirinto: "16x16_standard",
+    // Rota ideal calculada pelo Flood Fill para esta corrida (HU Fast Run)
+    rota_calculada: [
+      { x: 1, y: 1 },
+      { x: 1, y: 2 },
+      { x: 1, y: 3 },
+      { x: 2, y: 3 }
+    ],
     stream: [
-      { estado_fsm: "FAST_RUN", bateria_v: 7.30, posicao_x: 0, posicao_y: 0, orientacao: "NORTE", erro_pid: 0.01, dist_frontal: 150 },
-      { estado_fsm: "FAST_RUN", bateria_v: 7.27, posicao_x: 0, posicao_y: 1, orientacao: "NORTE", erro_pid: 0.02, dist_frontal: 140 },
-      { estado_fsm: "FAST_RUN", bateria_v: 7.24, posicao_x: 0, posicao_y: 2, orientacao: "NORTE", erro_pid: -0.01, dist_frontal: 130 },
-      { estado_fsm: "FAST_RUN", bateria_v: 7.21, posicao_x: 1, posicao_y: 2, orientacao: "LESTE", erro_pid: 0.03, dist_frontal: 120 },
-      { estado_fsm: "FAST_RUN", bateria_v: 7.18, posicao_x: 2, posicao_y: 2, orientacao: "LESTE", erro_pid: -0.02, dist_frontal: 110 },
-      { estado_fsm: "FAST_RUN", bateria_v: 7.14, posicao_x: 2, posicao_y: 3, orientacao: "NORTE", erro_pid: 0.01, dist_frontal: 100 },
-      { estado_fsm: "FAST_RUN", bateria_v: 7.10, posicao_x: 2, posicao_y: 4, orientacao: "NORTE", erro_pid: 0.02, dist_frontal: 90 }
+      { estado_fsm: "CALIBRATING", bateria_v: 7.40, posicao_x: 0, posicao_y: 0, orientacao: "SUL", erro_pid: 0.0, dist_frontal: 150, paredes: 11},
+      
+      // Primeiro sobe, depois vira
+      { estado_fsm: "FAST_RUN",    bateria_v: 7.30, posicao_x: 0, posicao_y: 1, orientacao: "SUL", erro_pid: 0.01, dist_frontal: 140, paredes: 10, rota_calculada: [
+  { "x": 0, "y": 0 }, { "x": 0, "y": 1 }, { "x": 0, "y": 2 }, { "x": 0, "y": 3 }, { "x": 0, "y": 4 }, { "x": 0, "y": 5 }, { "x": 0, "y": 6 }, { "x": 0, "y": 7 },
+  { "x": 1, "y": 7 }, { "x": 2, "y": 7 }, { "x": 3, "y": 7 }, { "x": 4, "y": 7 }, { "x": 5, "y": 7 }, { "x": 6, "y": 7 }, { "x": 7, "y": 7 }] },
+      
+      // Com pequenas curvas
+      { estado_fsm: "FAST_RUN",    bateria_v: 7.25, posicao_x: 0, posicao_y: 2, orientacao: "SUL", erro_pid: -0.01, dist_frontal: 130, paredes: 12, rota_calculada: [
+  { "x": 0, "y": 0 }, { "x": 1, "y": 0 }, { "x": 1, "y": 1 }, { "x": 2, "y": 1 }, { "x": 2, "y": 2 }, { "x": 3, "y": 2 }, { "x": 3, "y": 3 }, { "x": 4, "y": 3 },
+  { "x": 4, "y": 4 }, { "x": 5, "y": 4 }, { "x": 5, "y": 5 }, { "x": 6, "y": 5 }, { "x": 6, "y": 6 }, { "x": 7, "y": 6 }, { "x": 7, "y": 7 }] },
+      
+      // Chegando ao centro (8,8)
+      { estado_fsm: "FAST_RUN",    bateria_v: 7.20, posicao_x: 1, posicao_y: 2, orientacao: "LESTE", erro_pid: 0.02, dist_frontal: 120, paredes: 5, rota_calculada: [
+  { "x": 0, "y": 0 }, { "x": 1, "y": 0 }, { "x": 2, "y": 0 }, { "x": 3, "y": 0 }, { "x": 4, "y": 0 }, { "x": 5, "y": 0 }, { "x": 6, "y": 0 }, { "x": 7, "y": 0 },
+  { "x": 8, "y": 0 }, { "x": 8, "y": 1 }, { "x": 8, "y": 2 }, { "x": 8, "y": 3 }, { "x": 8, "y": 4 }, { "x": 8, "y": 5 }, { "x": 8, "y": 6 }, { "x": 8, "y": 7 },
+  { "x": 8, "y": 8 }] },
+      
+      // Caminho em "L"
+      { estado_fsm: "FAST_RUN",    bateria_v: 7.15, posicao_x: 2, posicao_y: 2, orientacao: "LESTE", erro_pid: -0.01, dist_frontal: 110, paredes: 3, rota_calculada: [
+  { "x": 0, "y": 0 }, { "x": 1, "y": 0 }, { "x": 2, "y": 0 }, { "x": 3, "y": 0 }, { "x": 4, "y": 0 }, { "x": 5, "y": 0 }, { "x": 6, "y": 0 }, { "x": 7, "y": 0 },
+  { "x": 7, "y": 1 }, { "x": 7, "y": 2 }, { "x": 7, "y": 3 }, { "x": 7, "y": 4 }, { "x": 7, "y": 5 }, { "x": 7, "y": 6 }, { "x": 7, "y": 7 }]  },
+      
+      // Rota mais orgânica
+      { estado_fsm: "FAST_RUN",    bateria_v: 7.12, posicao_x: 2, posicao_y: 3, orientacao: "SUL", erro_pid: 0.0, dist_frontal: 100, paredes: 10, rota_calculada: [
+  { "x": 0, "y": 0 }, { "x": 0, "y": 1 }, { "x": 1, "y": 1 }, { "x": 2, "y": 1 }, { "x": 2, "y": 2 }, { "x": 2, "y": 3 }, { "x": 3, "y": 3 }, { "x": 4, "y": 3 },
+  { "x": 4, "y": 4 }, { "x": 5, "y": 4 }, { "x": 5, "y": 5 }, { "x": 6, "y": 5 }, { "x": 6, "y": 6 }, { "x": 7, "y": 6 }, { "x": 7, "y": 7 }] },
+      
+      // Simulando resultado de Flood Fill
+    { estado_fsm: "FAST_RUN",    bateria_v: 7.10, posicao_x: 2, posicao_y: 4, orientacao: "SUL", erro_pid: 0.02, dist_frontal: 90, paredes: 14, rota_calculada: [
+  { "x": 0, "y": 0 }, { "x": 1, "y": 0 }, { "x": 1, "y": 1 }, { "x": 1, "y": 2 }, { "x": 2, "y": 2 }, { "x": 3, "y": 2 }, { "x": 4, "y": 2 }, { "x": 4, "y": 3 },
+  { "x": 4, "y": 4 }, { "x": 5, "y": 4 }, { "x": 6, "y": 4 }, { "x": 6, "y": 5 }, { "x": 6, "y": 6 }, { "x": 7, "y": 6 }, { "x": 7, "y": 7 }] }
+
     ]
   }
 ];
@@ -63,6 +103,8 @@ function sendTelemetry() {
   const isFastRun = stepData.estado_fsm === "FAST_RUN";
   const fullTelemetry = {
     ...stepData,
+    // Envia a Bitmask pré-calculada do stepData, ou 0 se não houver
+    paredes: stepData.paredes !== undefined ? stepData.paredes : 0, 
     timestamp: Math.floor(Date.now() / 1000),
     id_corrida: currentRun.id_corrida,
     id_labirinto: currentRun.id_labirinto,
@@ -73,16 +115,9 @@ function sendTelemetry() {
     pwm_esq: isFastRun ? 210 : 120 + Math.floor(Math.random() * 8),
     pwm_dir: isFastRun ? 212 : 120 + Math.floor(Math.random() * 8),
     velocidade_media: isFastRun ? 0.85 + (Math.random() * 0.05) : 0.35 + (Math.random() * 0.03),
-    ...(isFastRun ? {
-      rota_calculada: [
-        { x: 0, y: 0 },
-        { x: 0, y: 1 },
-        { x: 0, y: 2 },
-        { x: 1, y: 2 },
-        { x: 2, y: 2 },
-        { x: 2, y: 3 },
-        { x: 2, y: 4 }
-      ]
+    // Repassa a rota calculada específica do passo (se houver), ou da corrida, apenas durante o FAST_RUN
+    ...(isFastRun && (stepData.rota_calculada || currentRun.rota_calculada) ? {
+      rota_calculada: stepData.rota_calculada || currentRun.rota_calculada
     } : {})
   };
 
