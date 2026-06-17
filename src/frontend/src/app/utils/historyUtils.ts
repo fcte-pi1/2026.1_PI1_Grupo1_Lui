@@ -111,11 +111,16 @@ export const reconstruirAteStep = (
 
 /** Extrai os passos do JSON, suportando ambos os formatos */
 export const extrairPassos = (data: unknown): PassoExploracao[] => {
-  // Formato 1: Array direto [...passos]
-  if (Array.isArray(data)) return data;
+  if (Array.isArray(data)) {
+    if (data.length === 0) throw new Error('Histórico vazio');
+    return data;
+  }
   // Formato 2: Objeto { id_corrida, historico: [...passos] }
   const obj = data as CorridaJSON;
-  if (obj.historico && Array.isArray(obj.historico)) return obj.historico;
+  if (obj.historico && Array.isArray(obj.historico)) {
+    if (obj.historico.length === 0) throw new Error('Histórico vazio');
+    return obj.historico;
+  }
   throw new Error('Formato JSON não reconhecido. Esperado array ou { historico: [...] }');
 };
 

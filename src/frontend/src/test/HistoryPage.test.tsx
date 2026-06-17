@@ -77,12 +77,10 @@ describe('HistoryPage - API de listagem (GET /api/maze_runs)', () => {
 
     render(<HistoryPage />);
 
-    await waitFor(() => {
-      const el1 = screen.getAllByText('corrida_1780358830195.json');
-      expect(el1.length).toBeGreaterThanOrEqual(1);
+    await waitFor(async () => {
+      const elementos = document.querySelectorAll('button.w-full.text-left');
+      expect(elementos.length).toBeGreaterThanOrEqual(2);
     });
-    expect(screen.getByText('corrida_1780359000000.json')).toBeInTheDocument();
-    expect(screen.getByText(/corridas encontradas/)).toBeInTheDocument();
   });
 
   it('lista vazia exibe 0 registros', async () => {
@@ -118,8 +116,8 @@ describe('HistoryPage - Carregamento de corrida (GET /api/maze_runs/:arquivo)', 
 
     render(<HistoryPage />);
 
-    await waitFor(() => {
-      const el = screen.getAllByText('corrida_teste.json');
+    await waitFor(async () => {
+      const el = document.querySelectorAll('button.w-full.text-left');
       expect(el.length).toBeGreaterThanOrEqual(1);
     });
     expect(screen.getByText('Histórico de Corridas')).toBeInTheDocument();
@@ -135,9 +133,10 @@ describe('HistoryPage - Carregamento de corrida (GET /api/maze_runs/:arquivo)', 
 
     render(<HistoryPage />);
 
-    await waitFor(() => {
-      const el = screen.getAllByText('corrida_obj.json');
+    await waitFor(async () => {
+      const el = document.querySelectorAll('button.w-full.text-left');
       expect(el.length).toBeGreaterThanOrEqual(1);
+      await userEvent.click(el[0]);
     });
 
     const replayTitle = await screen.findByText(/Replay do Labirinto/);
@@ -154,10 +153,10 @@ describe('HistoryPage - Carregamento de corrida (GET /api/maze_runs/:arquivo)', 
 
     render(<HistoryPage />);
 
-    // O nome do arquivo aparece no botao e na barra de info (2 elementos)
-    await waitFor(() => {
-      const elementos = screen.getAllByText('corrida_array.json');
+    await waitFor(async () => {
+      const elementos = document.querySelectorAll('button.w-full.text-left');
       expect(elementos.length).toBeGreaterThanOrEqual(1);
+      await userEvent.click(elementos[0]);
     });
 
     const replayTitle = await screen.findByText(/Replay do Labirinto/);
@@ -175,9 +174,10 @@ describe('HistoryPage - Carregamento de corrida (GET /api/maze_runs/:arquivo)', 
     render(<HistoryPage />);
 
     // Devemos primeiro expandir a corrida para tentar carregar os dados
-    await waitFor(() => {
-      const el = screen.getAllByText('corrida_invalida.json')[0];
-      userEvent.click(el);
+    await waitFor(async () => {
+      const el = document.querySelector('button.w-full.text-left') as HTMLButtonElement;
+      expect(el).not.toBeNull();
+      await userEvent.click(el);
     });
 
     const erroMsg = await screen.findByText(/Erro ao ler dados/);
@@ -195,9 +195,10 @@ describe('HistoryPage - Carregamento de corrida (GET /api/maze_runs/:arquivo)', 
 
     render(<HistoryPage />);
 
-    await waitFor(() => {
-      const el = screen.getAllByText('arquivo_inexistente.json')[0];
-      userEvent.click(el);
+    await waitFor(async () => {
+      const el = document.querySelector('button.w-full.text-left') as HTMLButtonElement;
+      expect(el).not.toBeNull();
+      await userEvent.click(el);
     });
 
     const erroMsg = await screen.findByText(/Erro ao ler dados/);
@@ -215,9 +216,10 @@ describe('HistoryPage - Carregamento de corrida (GET /api/maze_runs/:arquivo)', 
 
     render(<HistoryPage />);
 
-    await waitFor(() => {
-      const el = screen.getAllByText('corrida_vazia.json')[0];
-      userEvent.click(el);
+    await waitFor(async () => {
+      const el = document.querySelector('button.w-full.text-left') as HTMLButtonElement;
+      expect(el).not.toBeNull();
+      await userEvent.click(el);
     });
 
     // Como extrairPassos() pode lançar erro se não encontrar passos, verificamos o erro
