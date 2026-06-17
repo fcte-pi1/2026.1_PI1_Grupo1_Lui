@@ -25,6 +25,8 @@ export interface DadosTelemetria {
   paredes_atuais: { norte: boolean; sul: boolean; leste: boolean; oeste: boolean };
   causa_erro?: string;
   velocidade_media?: number;
+  rota_calculada?: { x: number; y: number }[];
+  id_corrida?: string;
 }
 
 export interface RegistoErro {
@@ -34,15 +36,6 @@ export interface RegistoErro {
   posicao_x: number;
   posicao_y: number;
 }
-
-const TRAJETO_RAPIDO_IDEAL = [
-  { x: 0, y: 7 },
-  { x: 0, y: 6 },
-  { x: 0, y: 5 },
-  { x: 1, y: 5 },
-  { x: 2, y: 5 },
-  { x: 2, y: 4 }
-];
 
 const FLUXO_MOCK_TELEMETRIA: DadosTelemetria[] = [
   // Mapeamento e Exploração
@@ -55,14 +48,14 @@ const FLUXO_MOCK_TELEMETRIA: DadosTelemetria[] = [
   // Objetivo alcançado no mapeamento
   { timestamp: 1715456795, estado_fsm: "GOAL_REACHED", bateria_v: 7.1, posicao_x: 2, posicao_y: 4, orientacao: "NORTE", tamanho_grade: 8, paredes_atuais: { norte: false, sul: false, leste: true, oeste: true }, velocidade_media: 0.0 },
   // Corrida rápida (FAST_RUN) - Volta 1
-  { timestamp: 1715456796, estado_fsm: "FAST_RUN", bateria_v: 7.0, posicao_x: 0, posicao_y: 7, orientacao: "NORTE", tamanho_grade: 8, paredes_atuais: { norte: false, sul: true, leste: true, oeste: true }, velocidade_media: 0.85 },
-  { timestamp: 1715456797, estado_fsm: "FAST_RUN", bateria_v: 7.0, posicao_x: 0, posicao_y: 5, orientacao: "LESTE", tamanho_grade: 8, paredes_atuais: { norte: true, sul: false, leste: false, oeste: true }, velocidade_media: 0.95 },
-  { timestamp: 1715456798, estado_fsm: "FAST_RUN", bateria_v: 6.9, posicao_x: 2, posicao_y: 5, orientacao: "NORTE", tamanho_grade: 8, paredes_atuais: { norte: false, sul: true, leste: true, oeste: false }, velocidade_media: 1.10 },
-  { timestamp: 1715456799, estado_fsm: "FAST_RUN", bateria_v: 6.9, posicao_x: 2, posicao_y: 4, orientacao: "NORTE", tamanho_grade: 8, paredes_atuais: { norte: false, sul: false, leste: true, oeste: true }, velocidade_media: 1.25 },
+  { timestamp: 1715456796, estado_fsm: "FAST_RUN", bateria_v: 7.0, posicao_x: 0, posicao_y: 7, orientacao: "NORTE", tamanho_grade: 8, paredes_atuais: { norte: false, sul: true, leste: true, oeste: true }, velocidade_media: 0.85, rota_calculada: [{ x: 0, y: 7 }, { x: 0, y: 6 }, { x: 0, y: 5 }, { x: 1, y: 5 }, { x: 2, y: 5 }, { x: 2, y: 4 }] },
+  { timestamp: 1715456797, estado_fsm: "FAST_RUN", bateria_v: 7.0, posicao_x: 0, posicao_y: 5, orientacao: "LESTE", tamanho_grade: 8, paredes_atuais: { norte: true, sul: false, leste: false, oeste: true }, velocidade_media: 0.95, rota_calculada: [{ x: 0, y: 7 }, { x: 0, y: 6 }, { x: 0, y: 5 }, { x: 1, y: 5 }, { x: 2, y: 5 }, { x: 2, y: 4 }] },
+  { timestamp: 1715456798, estado_fsm: "FAST_RUN", bateria_v: 6.9, posicao_x: 2, posicao_y: 5, orientacao: "NORTE", tamanho_grade: 8, paredes_atuais: { norte: false, sul: true, leste: true, oeste: false }, velocidade_media: 1.10, rota_calculada: [{ x: 0, y: 7 }, { x: 0, y: 6 }, { x: 0, y: 5 }, { x: 1, y: 5 }, { x: 2, y: 5 }, { x: 2, y: 4 }] },
+  { timestamp: 1715456799, estado_fsm: "FAST_RUN", bateria_v: 6.9, posicao_x: 2, posicao_y: 4, orientacao: "NORTE", tamanho_grade: 8, paredes_atuais: { norte: false, sul: false, leste: true, oeste: true }, velocidade_media: 1.25, rota_calculada: [{ x: 0, y: 7 }, { x: 0, y: 6 }, { x: 0, y: 5 }, { x: 1, y: 5 }, { x: 2, y: 5 }, { x: 2, y: 4 }] },
   // Volta 2 (Mais rápido) - Bateria baixa / Alerta Crítico
-  { timestamp: 1715456800, estado_fsm: "FAST_RUN", bateria_v: 6.7, posicao_x: 0, posicao_y: 7, orientacao: "NORTE", tamanho_grade: 8, paredes_atuais: { norte: false, sul: true, leste: true, oeste: true }, velocidade_media: 0.90 },
-  { timestamp: 1715456801, estado_fsm: "FAST_RUN", bateria_v: 6.6, posicao_x: 0, posicao_y: 5, orientacao: "LESTE", tamanho_grade: 8, paredes_atuais: { norte: true, sul: false, leste: false, oeste: true }, velocidade_media: 1.05 },
-  { timestamp: 1715456802, estado_fsm: "FAST_RUN", bateria_v: 6.5, posicao_x: 2, posicao_y: 4, orientacao: "NORTE", tamanho_grade: 8, paredes_atuais: { norte: false, sul: false, leste: true, oeste: true }, velocidade_media: 1.30 },
+  { timestamp: 1715456800, estado_fsm: "FAST_RUN", bateria_v: 6.7, posicao_x: 0, posicao_y: 7, orientacao: "NORTE", tamanho_grade: 8, paredes_atuais: { norte: false, sul: true, leste: true, oeste: true }, velocidade_media: 0.90, rota_calculada: [{ x: 0, y: 7 }, { x: 0, y: 6 }, { x: 0, y: 5 }, { x: 1, y: 5 }, { x: 2, y: 5 }, { x: 2, y: 4 }] },
+  { timestamp: 1715456801, estado_fsm: "FAST_RUN", bateria_v: 6.6, posicao_x: 0, posicao_y: 5, orientacao: "LESTE", tamanho_grade: 8, paredes_atuais: { norte: true, sul: false, leste: false, oeste: true }, velocidade_media: 1.05, rota_calculada: [{ x: 0, y: 7 }, { x: 0, y: 6 }, { x: 0, y: 5 }, { x: 1, y: 5 }, { x: 2, y: 5 }, { x: 2, y: 4 }] },
+  { timestamp: 1715456802, estado_fsm: "FAST_RUN", bateria_v: 6.5, posicao_x: 2, posicao_y: 4, orientacao: "NORTE", tamanho_grade: 8, paredes_atuais: { norte: false, sul: false, leste: true, oeste: true }, velocidade_media: 1.30, rota_calculada: [{ x: 0, y: 7 }, { x: 0, y: 6 }, { x: 0, y: 5 }, { x: 1, y: 5 }, { x: 2, y: 5 }, { x: 2, y: 4 }] },
   // Erro crítico de bateria
   { timestamp: 1715456803, estado_fsm: "ERROR", bateria_v: 6.3, posicao_x: 2, posicao_y: 4, orientacao: "NORTE", tamanho_grade: 8, paredes_atuais: { norte: false, sul: false, leste: true, oeste: true }, causa_erro: "Parada de Emergência: Tensão da bateria abaixo do limite crítico (6.5V).", velocidade_media: 0.0 }
 ];
@@ -128,6 +121,10 @@ export function Dashboard() {
   const isBateriaCritica = telemetriaAtual.bateria_v < 6.8; // HU 3.2.1
   const isFastRunReal = telemetriaAtual.estado_fsm === 'FAST_RUN'; // HU 2.4
   const isFastRun = overrideModo === 'AUTO' ? isFastRunReal : overrideModo === 'PERFORMANCE';
+
+  // Critério de Aceite 4: mostrarTrajetoRapido só pode ser true quando o estado
+  // REAL da FSM (não o override de desenvolvimento) é FAST_RUN.
+  const deveExibirTrajetoRapido = telemetriaAtual.estado_fsm === 'FAST_RUN';
 
   // Lógica reativa para iniciar/parar o cronômetro do desenvolvedor sob overrides
   useEffect(() => {
@@ -262,29 +259,41 @@ export function Dashboard() {
         paredes_atuais: paredesDecodificadas
       };
       
-      setTelemetriaAtual(novaTelemetria);
+      setTelemetriaAtual(prevTelemetria => {
+        // Se a corrida mudou (baseado no id_corrida) ou se for o primeiro pacote
+        const corridaMudou = prevTelemetria.id_corrida !== novaTelemetria.id_corrida;
+        
+        if (corridaMudou) {
+          setCelulasExploradas({
+            [`${novaTelemetria.posicao_x}-${novaTelemetria.posicao_y}`]: { x: novaTelemetria.posicao_x, y: novaTelemetria.posicao_y, paredes: novaTelemetria.paredes_atuais }
+          });
+          setHistoricoErros([]);
+        } else {
+          // Atualiza celulas exploradas normalmente
+          const chaveMapa = `${novaTelemetria.posicao_x}-${novaTelemetria.posicao_y}`;
+          setCelulasExploradas(prev => prev[chaveMapa] ? prev : {
+            ...prev,
+            [chaveMapa]: { x: novaTelemetria.posicao_x, y: novaTelemetria.posicao_y, paredes: novaTelemetria.paredes_atuais }
+          });
+        }
 
-      // Atualiza celulas exploradas
-      const chaveMapa = `${novaTelemetria.posicao_x}-${novaTelemetria.posicao_y}`;
-      setCelulasExploradas(prev => prev[chaveMapa] ? prev : {
-        ...prev,
-        [chaveMapa]: { x: novaTelemetria.posicao_x, y: novaTelemetria.posicao_y, paredes: novaTelemetria.paredes_atuais }
+        // Erro handling (com reset se corrida mudou)
+        if (novaTelemetria.estado_fsm === 'ERROR') {
+          setHistoricoErros(prev => {
+            if (prev.some(erro => erro.timestamp === novaTelemetria.timestamp)) return prev;
+            setIsLogAberto(true);
+            return [{
+              id: `${novaTelemetria.timestamp}-${Math.random()}`,
+              timestamp: novaTelemetria.timestamp,
+              causa: novaTelemetria.causa_erro || "Falha captada em tempo real.",
+              posicao_x: novaTelemetria.posicao_x,
+              posicao_y: novaTelemetria.posicao_y
+            }, ...prev];
+          });
+        }
+
+        return novaTelemetria;
       });
-
-      // Erro handling
-      if (novaTelemetria.estado_fsm === 'ERROR') {
-        setHistoricoErros(prev => {
-          if (prev.some(erro => erro.timestamp === novaTelemetria.timestamp)) return prev;
-          setIsLogAberto(true);
-          return [{
-            id: `${novaTelemetria.timestamp}-${Math.random()}`,
-            timestamp: novaTelemetria.timestamp,
-            causa: novaTelemetria.causa_erro || "Falha captada em tempo real.",
-            posicao_x: novaTelemetria.posicao_x,
-            posicao_y: novaTelemetria.posicao_y
-          }, ...prev];
-        });
-      }
     });
 
     return () => {
@@ -485,11 +494,11 @@ export function Dashboard() {
         
         <div className={`w-full h-full rounded-2xl overflow-hidden border shadow-2xl relative transition-colors duration-500 ${possuiErroCritico ? 'border-red-500/50 shadow-red-500/20 bg-[#1A0B0B]' : 'border-slate-800 bg-[#0B1120]'}`}>
           
-          <RobotMap 
-            telemetria={telemetriaAtual} 
-            celulasExploradas={celulasExploradas} 
-            trajetoRapido={TRAJETO_RAPIDO_IDEAL} 
-            mostrarTrajetoRapido={isFastRun}
+          <RobotMap
+            telemetria={telemetriaAtual}
+            celulasExploradas={celulasExploradas}
+            trajetoRapido={telemetriaAtual.rota_calculada}
+            mostrarTrajetoRapido={deveExibirTrajetoRapido}
           />
 
           <div className="absolute top-6 right-6 bottom-6 z-30 flex flex-col items-end gap-3 pointer-events-none">

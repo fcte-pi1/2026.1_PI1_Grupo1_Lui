@@ -85,14 +85,14 @@ describe('HistoryPage - API de listagem (GET /api/maze_runs)', () => {
     expect(screen.getByText(/corridas encontradas/)).toBeInTheDocument();
   });
 
-  it('lista vazia exibe mensagem "Nenhuma corrida encontrada"', async () => {
+  it('lista vazia exibe 0 registros', async () => {
     server.use(
       http.get('/api/maze_runs', () => HttpResponse.json([])),
     );
 
     render(<HistoryPage />);
 
-    const msg = await screen.findByText(/Nenhuma corrida encontrada/);
+    const msg = await screen.findByText(/0 registros/);
     expect(msg).toBeInTheDocument();
   });
 
@@ -106,9 +106,9 @@ describe('HistoryPage - API de listagem (GET /api/maze_runs)', () => {
 
     render(<HistoryPage />);
 
-    const msg = await screen.findByText(/Nenhuma corrida encontrada/);
+    const msg = await screen.findByText(/Não foi possível conectar/);
     expect(msg).toBeInTheDocument();
-    expect(screen.getByText('Histórico do Labirinto')).toBeInTheDocument();
+    expect(screen.getByText('Histórico de Corridas')).toBeInTheDocument();
   });
 });
 
@@ -122,7 +122,7 @@ describe('HistoryPage - Carregamento de corrida (GET /api/maze_runs/:arquivo)', 
       const el = screen.getAllByText('corrida_teste.json');
       expect(el.length).toBeGreaterThanOrEqual(1);
     });
-    expect(screen.getByText('Histórico do Labirinto')).toBeInTheDocument();
+    expect(screen.getByText('Histórico de Corridas')).toBeInTheDocument();
   });
 
   it('JSON com formato {historico: [...]} tem passos extraidos e exibe replay', async () => {
@@ -140,7 +140,7 @@ describe('HistoryPage - Carregamento de corrida (GET /api/maze_runs/:arquivo)', 
       expect(el.length).toBeGreaterThanOrEqual(1);
     });
 
-    const replayTitle = await screen.findByText(/Replay da Exploração/);
+    const replayTitle = await screen.findByText(/Replay do Labirinto/);
     expect(replayTitle).toBeInTheDocument();
   });
 
@@ -160,7 +160,7 @@ describe('HistoryPage - Carregamento de corrida (GET /api/maze_runs/:arquivo)', 
       expect(elementos.length).toBeGreaterThanOrEqual(1);
     });
 
-    const replayTitle = await screen.findByText(/Replay da Exploração/);
+    const replayTitle = await screen.findByText(/Replay do Labirinto/);
     expect(replayTitle).toBeInTheDocument();
   });
 
@@ -174,9 +174,15 @@ describe('HistoryPage - Carregamento de corrida (GET /api/maze_runs/:arquivo)', 
 
     render(<HistoryPage />);
 
-    const erroMsg = await screen.findByText(/Erro ao carregar/);
+    // Devemos primeiro expandir a corrida para tentar carregar os dados
+    await waitFor(() => {
+      const el = screen.getAllByText('corrida_invalida.json')[0];
+      userEvent.click(el);
+    });
+
+    const erroMsg = await screen.findByText(/Erro ao ler dados/);
     expect(erroMsg).toBeInTheDocument();
-    expect(screen.getByText('Histórico do Labirinto')).toBeInTheDocument();
+    expect(screen.getByText('Histórico de Corridas')).toBeInTheDocument();
   });
 
   it('HTTP erro (404) exibe mensagem de erro sem crash', async () => {
@@ -189,9 +195,14 @@ describe('HistoryPage - Carregamento de corrida (GET /api/maze_runs/:arquivo)', 
 
     render(<HistoryPage />);
 
-    const erroMsg = await screen.findByText(/Erro ao carregar/);
+    await waitFor(() => {
+      const el = screen.getAllByText('arquivo_inexistente.json')[0];
+      userEvent.click(el);
+    });
+
+    const erroMsg = await screen.findByText(/Erro ao ler dados/);
     expect(erroMsg).toBeInTheDocument();
-    expect(screen.getByText('Histórico do Labirinto')).toBeInTheDocument();
+    expect(screen.getByText('Histórico de Corridas')).toBeInTheDocument();
   });
 
   it('JSON com historico vazio exibe mensagem de erro', async () => {
@@ -204,9 +215,14 @@ describe('HistoryPage - Carregamento de corrida (GET /api/maze_runs/:arquivo)', 
 
     render(<HistoryPage />);
 
-    const erroMsg = await screen.findByText(/Erro ao carregar/);
+    await waitFor(() => {
+      const el = screen.getAllByText('corrida_vazia.json')[0];
+      userEvent.click(el);
+    });
+
+    // Como extrairPassos() pode lançar erro se não encontrar passos, verificamos o erro
+    const erroMsg = await screen.findByText(/Erro ao ler dados/);
     expect(erroMsg).toBeInTheDocument();
-    expect(screen.getByText(/Histórico vazio/)).toBeInTheDocument();
   });
 });
 
@@ -220,7 +236,7 @@ describe('HistoryPage - Upload manual de arquivo', () => {
 
     render(<HistoryPage />);
 
-    await screen.findByText(/Nenhuma corrida encontrada/);
+    await screen.findByText(/0 registros/);
 
     const corridaJSON = JSON.stringify(criarCorridaCompleta('upload_test'));
     const file = new File([corridaJSON], 'corrida_upload.json', { type: 'application/json' });
@@ -230,7 +246,7 @@ describe('HistoryPage - Upload manual de arquivo', () => {
 
     await user.upload(input, file);
 
-    const replayTitle = await screen.findByText(/Replay da Exploração/);
+    const replayTitle = await screen.findByText(/Replay do Labirinto/);
     expect(replayTitle).toBeInTheDocument();
   });
 
@@ -243,16 +259,16 @@ describe('HistoryPage - Upload manual de arquivo', () => {
 
     render(<HistoryPage />);
 
-    await screen.findByText(/Nenhuma corrida encontrada/);
+    await screen.findByText(/0 registros/);
 
     const file = new File(['{invalid json!!!'], 'corrida_bad.json', { type: 'application/json' });
 
     const input = document.querySelector('input[type="file"]') as HTMLInputElement;
     await user.upload(input, file);
 
-    const erroMsg = await screen.findByText(/Erro no arquivo/);
+    const erroMsg = await screen.findByText(/Arquivo JSON/);
     expect(erroMsg).toBeInTheDocument();
-    expect(screen.getByText('Histórico do Labirinto')).toBeInTheDocument();
+    expect(screen.getByText('Histórico de Corridas')).toBeInTheDocument();
   });
 
   it('upload de JSON array tambem extrai passos e exibe replay', async () => {
@@ -264,7 +280,7 @@ describe('HistoryPage - Upload manual de arquivo', () => {
 
     render(<HistoryPage />);
 
-    await screen.findByText(/Nenhuma corrida encontrada/);
+    await screen.findByText(/0 registros/);
 
     const corridaJSON = JSON.stringify(criarCorridaArray());
     const file = new File([corridaJSON], 'corrida_array_upload.json', { type: 'application/json' });
@@ -272,7 +288,7 @@ describe('HistoryPage - Upload manual de arquivo', () => {
     const input = document.querySelector('input[type="file"]') as HTMLInputElement;
     await user.upload(input, file);
 
-    const replayTitle = await screen.findByText(/Replay da Exploração/);
+    const replayTitle = await screen.findByText(/Replay do Labirinto/);
     expect(replayTitle).toBeInTheDocument();
   });
 });

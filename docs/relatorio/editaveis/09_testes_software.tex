@@ -1,0 +1,126 @@
+\section{Testes de \textit{software}}
+\label{testes-software}
+
+Esta seção detalha os procedimentos de teste aplicados para assegurar a corretude, robustez e integração das funcionalidades de \textit{software}. Considerando o foco da entrega atual na estabilização do fluxo de dados (Firmware $\rightarrow$ Backend $\rightarrow$ Frontend), foram priorizados os testes unitários da lógica crítica, de integração do backend e testes ponta a ponta (E2E), totalizando uma validação abrangente do \textit{backlog} do produto.
+
+\subsection{Histórias de Usuário Implementadas}
+
+Das várias histórias de usuário (HUs) mapeadas no \textit{backlog} do projeto no GitHub, boa parte de sua fundação estrutural já foi implementada e exaustivamente testada nesta fase. A Tabela \ref{tab:historias_usuario_implementadas} lista as HUs principais deste pacote e como elas se materializam no sistema.
+
+\begin{table}[H]
+    \centering
+    \caption{Histórias de Usuário Implementadas e Validadas}
+    \label{tab:historias_usuario_implementadas}
+    \begin{tabular}{|p{1.5cm}|p{6.5cm}|p{6cm}|}
+        \hline
+        \textbf{ID} & \textbf{Título da História} & \textbf{Validação / Interface} \\ \hline
+        \textbf{HU 2.1.2} & Consumir telemetria do backend para acompanhar posição real & Dashboard: painel principal com representação matricial do robô. \\ \hline
+        \textbf{HU 2.4} & Layout Adaptativo para Modo Alta Performance & Dashboard: botões de \textit{override} (Auto, Exploração, Alta Performance). \\ \hline
+        \textbf{HU 3.1b} & Monitoramento Dinâmico da FSM & Dashboard: \textit{badge} dinâmico exibindo IDLE, MAPPING, etc. \\ \hline
+        \textbf{HU 3.2} & Monitoramento de Tensão da Bateria & Dashboard: indicador numérico no \textit{header} com alerta crítico caso $V < 6.8$. \\ \hline
+        \textbf{HU 3.5} & Plotagem em Tempo Real do Erro Direcional (PID) & Dashboard: gráficos reativos no painel de desempenho. \\ \hline
+        \textbf{HU 3.6} & Alarme Imediato de Interrupção de Hardware & Dashboard: Modal \textit{pop-up} vermelho de ``Alarme Crítico''. \\ \hline
+        \textbf{HU 4.1} & Gravação Contínua no InfluxDB & \textit{Backend}: fluxo UDP contínuo garantindo persistência. \\ \hline
+        \textbf{HU 4.3} & Exportação de Histórico para Análise Externa & Página de Histórico: botão de \textit{Download CSV/JSON}. \\ \hline
+        \textbf{HU 4.4} & Filtragem e Comparação de Desempenho por Pista & Dashboard: métricas de ``Volta Atual'' e ``Melhor Volta''. \\ \hline
+        \textbf{HU 5.1.2} & Manter interface responsiva sem travamentos na queda de pacotes UDP & \textit{Frontend}: tratamento de jitter e tolerância a falhas na UI. \\ \hline
+        \textbf{HU 6.1.2} & Validar propagação de pesos no simulador (Flood Fill) & \textit{Firmware}: Testes unitários com a biblioteca \textit{Catch2}. \\ \hline
+    \end{tabular}
+\end{table}
+
+\subsection{Testes Unitários e Lógicos}
+
+A equipe focou também em certificar a base lógica do robô, de forma isolada e em \textit{software}, para evitar problemas difíceis de depurar em hardware.
+
+\subsubsection{Testes de Decodificação e Mapeamento (Backend)}
+O módulo responsável por receber dados binários compactados no formato \textit{MessagePack} possui testes isolados no \textit{Jest}.
+Foram validados pacotes corrompidos, decodificação correta de inteiros e valores em ponto flutuante, e tratativas de exceção (fallbacks de tempo) quando o robô envia métricas com chaves ausentes.
+
+\begin{figure}[H]
+    \centering
+    % Cole a imagem do resultado do teste MsgPack com o nome abaixo:
+    \includegraphics[width=0.8\textwidth]{imagens/teste_msgpack.png}
+    \caption{Resultado da execução dos testes unitários de decodificação e mapeamento dinâmico (MsgPack) no Node.js.}
+    \label{fig:teste_msgpack}
+\end{figure}
+
+\subsubsection{Testes Algorítmicos do Firmware (C++)}
+O algoritmo principal de exploração (\textit{Flood Fill}), embarcado na ESP32, é isolado do hardware físico. Para atestar sua confiabilidade nas decisões de rotação e navegação, foi utilizada a biblioteca \textbf{Catch2}. 
+O teste garante a corretude do recálculo da matriz de distâncias ao encontrar paredes e a lógica de prioridade de desempate (Frente > Direita > Esquerda > Trás).
+
+\begin{figure}[H]
+    \centering
+    % Cole a imagem do resultado do teste Catch2 com o nome abaixo:
+    \includegraphics[width=0.8\textwidth]{imagens/teste_catch2_floodfill.png}
+    \caption{Resultado dos testes unitários do algoritmo Flood Fill compilado e validado via \textit{framework} Catch2.}
+    \label{fig:teste_catch2}
+\end{figure}
+
+\subsection{Testes de Integração}
+
+Dada a arquitetura fortemente acoplada a fluxos de dados em tempo real, foram desenhados \textbf{Testes de Integração} garantindo a resiliência do \textit{backend}. A ferramenta escolhida foi o \textbf{Jest}. Os testes automatizados garantem que pacotes UDP malformados não derrubem o servidor e que os dados válidos sejam persistidos corretamente no banco de dados temporal (\textit{InfluxDB}).
+
+\begin{table}[H]
+    \centering
+    \caption{Casos de Teste de Integração (\textit{Backend})}
+    \begin{tabular}{|p{3.5cm}|p{11.5cm}|}
+        \hline
+        \textbf{Integração Testada} & Módulo Servidor UDP (Node.js) $\leftrightarrow$ Banco de Dados (InfluxDB) \\ \hline
+        \textbf{Ferramenta} & Jest (\texttt{integration.test.js}) \\ \hline
+        \textbf{Cenário (Exemplo 1)} & \textbf{Rajada de Pacotes (Stress Test):} Envio sequencial de 10 pacotes de alta frequência simulando o modo FAST\_RUN. \\ \hline
+        \textbf{Resultado Esperado} & O servidor deve \textit{flushar} os dados de forma assíncrona sem descartar pacotes (\textit{Zero Packet Loss}). \\ \hline
+        \textbf{Cenário (Exemplo 2)} & \textbf{Falha no InfluxDB (Resiliência):} Simulação de indisponibilidade do banco de dados ao tentar registrar telemetria. \\ \hline
+        \textbf{Resultado Esperado} & O \textit{backend} deve capturar a exceção e emitir log de erro sem fechar o processo Node.js (\textit{crash prevention}). \\ \hline
+        \textbf{Resultado Obtido} & \textbf{APROVADOS}. A cobertura deste fluxo atende $100\%$ das rotas críticas do servidor. \\ \hline
+    \end{tabular}
+\end{table}
+
+\begin{figure}[H]
+    \centering
+    % Cole a imagem do resultado do teste de integração com o nome abaixo:
+    \includegraphics[width=0.8\textwidth]{imagens/teste_integracao_udp.png}
+    \caption{Resultado da execução dos testes de integração garantindo o duto UDP e banco de dados InfluxDB.}
+    \label{fig:teste_integracao}
+\end{figure}
+
+\subsection{Testes de Sistema (End-to-End)}
+
+Para garantir a confiabilidade da interface gráfica sob a ótica do usuário, foram desenvolvidos testes funcionais automatizados (\textit{End-to-End}) utilizando o \textbf{Playwright}. Os testes replicam fluxos de interação reais no navegador web.
+
+\begin{table}[H]
+    \centering
+    \caption{Casos de Teste E2E Funcional (\textit{Frontend})}
+    \begin{tabular}{|p{3.5cm}|p{11.5cm}|}
+        \hline
+        \textbf{Fluxos Testados} & \textit{Dashboard} de Telemetria, Alertas Críticos, Navegação e Histórico. \\ \hline
+        \textbf{Ferramenta} & Playwright (\texttt{dashboard.spec.ts}, etc.) \\ \hline
+        \textbf{Cenário (Exemplo 1)} & \textbf{Renderização de Alerta de Hardware:} O sistema recebe um pacote cujo estado da FSM seja \texttt{ERROR}. \\ \hline
+        \textbf{Resultado Esperado} & A tela deve exibir o modal de ``Alarme Crítico de Hardware'' com a causa base (ex: Parada de Emergência). \\ \hline
+        \textbf{Cenário (Exemplo 2)} & \textbf{Troca de Modos de Operação:} O usuário clica no botão ``Alta Performance''. \\ \hline
+        \textbf{Resultado Esperado} & A interface deve adaptar-se, ocultando métricas irrelevantes e destacando ``Volta Atual'' e ``Melhor Volta''. \\ \hline
+        \textbf{Resultado Obtido} & \textbf{APROVADOS}. O sistema atendeu perfeitamente ao roteiro de testes visuais estabelecido. \\ \hline
+    \end{tabular}
+\end{table}
+
+\begin{figure}[H]
+    \centering
+    % Cole a imagem do resultado do teste do Playwright com o nome abaixo:
+    \includegraphics[width=0.8\textwidth]{imagens/teste_e2e_playwright.png}
+    \caption{Resultado da execução automatizada de fluxos do usuário via Playwright.}
+    \label{fig:teste_e2e}
+\end{figure}
+
+\section{Testes de Integração do Projeto (Hardware e Software)}
+
+Nesta seção é detalhado o teste final de integração global, onde os subsistemas de Estrutura, Eletrônica e Software operam em uníssono. O objetivo deste teste foi atestar a capacidade do Micromouse de ler estímulos físicos, processá-los e transmiti-los via rede para visualização remota, validando o conceito arquitetural do projeto.
+
+\textbf{Procedimento do Teste Global:}
+\begin{enumerate}
+    \item O robô foi posicionado em bancada/corredor teste e energizado.
+    \item A placa \textit{ESP32} realizou o \textit{boot}, efetuou a leitura inicial dos sensores e conectou-se com sucesso à rede Wi-Fi local.
+    \item Simultaneamente, o servidor Node.js e o \textit{frontend} React foram iniciados em uma máquina na mesma rede.
+    \item O robô começou a transmitir pacotes UDP estruturados contendo leituras simuladas/reais de odometria, estados da FSM e a tensão instantânea da bateria.
+\end{enumerate}
+
+\textbf{Resultados Alcançados:}
+O painel \textit{Dashboard} na aplicação web exibiu instantaneamente a telemetria enviada pelo robô. A variação de estados (IDLE, MAPPING, FAST\_RUN) foi refletida na interface gráfica em tempo real. Não houve descartes significativos de pacotes UDP ou gargalos de \textit{parsing} no servidor que afetassem a fluidez da \textit{UI}. A integração confirmou-se bem-sucedida, atestando que o duto de dados (Sensores $\rightarrow$ ESP32 $\rightarrow$ UDP $\rightarrow$ Node.js $\rightarrow$ InfluxDB/React) opera de maneira síncrona e responsiva.
