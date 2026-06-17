@@ -1,0 +1,29 @@
+243	OPEN	HU 6.5 — Gatilho de Fim de Corrida para Histórico		2026-06-08 15:38:54 +0000 UTC
+196	OPEN	HU 3.6.2: Detectar falha no stream UDP		2026-06-04 03:24:30 +0000 UTC
+194	OPEN	HU 3.2.2: Ler e transmitir tensão		2026-06-10 01:22:09 +0000 UTC
+172	OPEN	HU 2.1.3 — Visualizar dados de movimento provenientes do robô físico		2026-06-10 01:25:31 +0000 UTC
+167	OPEN	HU 2.2.3 — Validar escaneamento físico do ambiente		2026-05-25 20:04:38 +0000 UTC
+157	OPEN	Atividade: Validação da Autonomia e Distribuição Buck (LM2596)	atividade, Energia	2026-05-25 15:42:32 +0000 UTC
+154	OPEN	Subépico 3.8 — Implementação do Laço de Controle PID de Movimento	Software, HU	2026-05-25 20:03:54 +0000 UTC
+144	OPEN	Subépico 6.3: Traçado da Rota Rápida (Fast Run) na Interface	Épico, Software	2026-06-08 18:09:10 +0000 UTC
+143	OPEN	HU 6.2 — Navegar utilizando leitura sensorial do labirinto	Software, HU	2026-05-25 20:05:14 +0000 UTC
+141	OPEN	Épico 6: Implementação do algoritmo	Épico	2026-06-10 01:27:48 +0000 UTC
+140	OPEN	HU 4.7: Ingestão em Lote (Batch) para Buffer Offline	HU	2026-06-10 01:26:45 +0000 UTC
+134	OPEN	Atividade: 2.3 Validação e documentação		2026-06-10 01:29:40 +0000 UTC
+125	OPEN	Pacote de Trabalho 3: Prototipagem Eletrônica	pacote de trabalho, Eletrônica	2026-05-20 12:49:37 +0000 UTC
+124	OPEN	Pacote de Trabalho 2: Construção Física Inicial e Testes de validação e verificação	pacote de trabalho, Estruturas	2026-06-10 01:28:42 +0000 UTC
+120	OPEN	HU 5.2: Despacho Assíncrono de Buffer Pós-Queda	HU	2026-05-25 21:52:35 +0000 UTC
+119	OPEN	Subépico 5.1 — Retenção de Dados em Quedas de Conectividade	HU	2026-05-25 20:03:59 +0000 UTC
+117	OPEN	HU 4.4: Filtragem e Comparação de Desempenho por Pista	HU	2026-06-10 01:27:02 +0000 UTC
+113	OPEN	Épico 5: Resiliência e Tolerância a Falhas de Conexão	Épico	2026-06-10 01:28:33 +0000 UTC
+112	OPEN	Épico 4: Persistência e Gestão de Histórico (InfluxDB)	Épico	2026-06-10 01:27:13 +0000 UTC
+110	OPEN	HU 3.7: Auditoria de Força Motriz e Sinais PWM	HU	2026-05-25 15:24:15 +0000 UTC
+109	OPEN	HU 3.5: Plotagem em Tempo Real do Erro Direcional (PID)	HU	2026-05-22 13:39:23 +0000 UTC
+108	OPEN	HU 3.4: Sinalização Visual de Calibração Inicial	HU	2026-05-22 13:39:14 +0000 UTC
+107	OPEN	HU 3.3: Inspecionamento de Velocidade Linear e Encoders	HU	2026-05-22 13:39:03 +0000 UTC
+106	OPEN	HU 3.2: Monitoramento de Tensão da Bateria		2026-06-10 01:21:59 +0000 UTC
+104	OPEN	Épico 3: Monitorização de Hardware e Controle (FSM & PID)	documentation, Épico	2026-06-10 01:24:01 +0000 UTC
+102	OPEN	Subépico 2.2 — Mapeamento Dinâmico de Paredes	HU	2026-05-25 19:45:55 +0000 UTC
+99	OPEN	Épico 2: Visualização e Mapeamento em Tempo Real		2026-06-10 01:28:28 +0000 UTC
+98	OPEN	Tema: Sistema de Telemetria, Controle e Navegação		2026-05-25 15:24:13 +0000 UTC
+1	OPEN	Issue Teste		2026-04-14 02:19:52 +0000 UTC

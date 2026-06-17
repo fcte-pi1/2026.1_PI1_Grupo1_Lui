@@ -26,6 +26,7 @@ export interface DadosTelemetria {
   causa_erro?: string;
   velocidade_media?: number;
   rota_calculada?: { x: number; y: number }[];
+  id_corrida?: string;
 }
 
 export interface RegistoErro {
@@ -258,29 +259,41 @@ export function Dashboard() {
         paredes_atuais: paredesDecodificadas
       };
       
-      setTelemetriaAtual(novaTelemetria);
+      setTelemetriaAtual(prevTelemetria => {
+        // Se a corrida mudou (baseado no id_corrida) ou se for o primeiro pacote
+        const corridaMudou = prevTelemetria.id_corrida !== novaTelemetria.id_corrida;
+        
+        if (corridaMudou) {
+          setCelulasExploradas({
+            [`${novaTelemetria.posicao_x}-${novaTelemetria.posicao_y}`]: { x: novaTelemetria.posicao_x, y: novaTelemetria.posicao_y, paredes: novaTelemetria.paredes_atuais }
+          });
+          setHistoricoErros([]);
+        } else {
+          // Atualiza celulas exploradas normalmente
+          const chaveMapa = `${novaTelemetria.posicao_x}-${novaTelemetria.posicao_y}`;
+          setCelulasExploradas(prev => prev[chaveMapa] ? prev : {
+            ...prev,
+            [chaveMapa]: { x: novaTelemetria.posicao_x, y: novaTelemetria.posicao_y, paredes: novaTelemetria.paredes_atuais }
+          });
+        }
 
-      // Atualiza celulas exploradas
-      const chaveMapa = `${novaTelemetria.posicao_x}-${novaTelemetria.posicao_y}`;
-      setCelulasExploradas(prev => prev[chaveMapa] ? prev : {
-        ...prev,
-        [chaveMapa]: { x: novaTelemetria.posicao_x, y: novaTelemetria.posicao_y, paredes: novaTelemetria.paredes_atuais }
+        // Erro handling (com reset se corrida mudou)
+        if (novaTelemetria.estado_fsm === 'ERROR') {
+          setHistoricoErros(prev => {
+            if (prev.some(erro => erro.timestamp === novaTelemetria.timestamp)) return prev;
+            setIsLogAberto(true);
+            return [{
+              id: `${novaTelemetria.timestamp}-${Math.random()}`,
+              timestamp: novaTelemetria.timestamp,
+              causa: novaTelemetria.causa_erro || "Falha captada em tempo real.",
+              posicao_x: novaTelemetria.posicao_x,
+              posicao_y: novaTelemetria.posicao_y
+            }, ...prev];
+          });
+        }
+
+        return novaTelemetria;
       });
-
-      // Erro handling
-      if (novaTelemetria.estado_fsm === 'ERROR') {
-        setHistoricoErros(prev => {
-          if (prev.some(erro => erro.timestamp === novaTelemetria.timestamp)) return prev;
-          setIsLogAberto(true);
-          return [{
-            id: `${novaTelemetria.timestamp}-${Math.random()}`,
-            timestamp: novaTelemetria.timestamp,
-            causa: novaTelemetria.causa_erro || "Falha captada em tempo real.",
-            posicao_x: novaTelemetria.posicao_x,
-            posicao_y: novaTelemetria.posicao_y
-          }, ...prev];
-        });
-      }
     });
 
     return () => {

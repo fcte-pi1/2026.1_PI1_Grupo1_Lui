@@ -48,7 +48,10 @@ mock:
 run:
 	@echo "=> Iniciando todos os serviços (Backend, Frontend e Mock)..."
 	@echo "=> Pressione Ctrl+C para encerrar todos."
-	@$(MAKE) -j3 backend frontend mock
+	@npx concurrently -n "BACKEND,FRONT,MOCK" -c "bgBlue.bold,bgGreen.bold,bgMagenta.bold" \
+		"node src/backend/src/services/telemetryService.js" \
+		"cd src/frontend && npm run dev" \
+		"node src/backend/mock_sender.js"
 
 clean:
 	@echo "=> Limpando arquivos temporários e compilados..."
