@@ -45,7 +45,58 @@ if (!fs.existsSync(MAZE_RUNS_DIR)) {
 // -----------------------------------
 
 // Cria servidor HTTP e WebSocket
-export const httpServer = createServer();
+export const httpServer = createServer((req, res) => {
+  // Endpoint REST para listar e servir arquivos maze_runs
+  // Isso funciona tanto em dev quanto em produção (Docker)
+  if (req.url?.startsWith('/api/maze_runs')) {
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+
+    const pathParts = req.url.replace('/api/maze_runs', '').replace(/^\//, '');
+    
+    // GET /api/maze_runs → lista os arquivos
+    if (!pathParts || pathParts === '') {
+      try {
+        const files = fs.readdirSync(MAZE_RUNS_DIR)
+          .filter(f => f.endsWith('.json'))
+          .sort()
+          .reverse();
+        res.end(JSON.stringify(files));
+      } catch {
+        res.statusCode = 500;
+        res.end(JSON.stringify({ error: 'Erro ao listar maze_runs' }));
+      }
+      return;
+    }
+
+    // GET /api/maze_runs/arquivo.json → serve o arquivo
+    if (pathParts.endsWith('.json')) {
+      const filePath = path.join(MAZE_RUNS_DIR, pathParts);
+      try {
+        if (fs.existsSync(filePath)) {
+          const content = fs.readFileSync(filePath, 'utf-8');
+          res.end(content);
+        } else {
+          res.statusCode = 404;
+          res.end(JSON.stringify({ error: 'Arquivo não encontrado' }));
+        }
+      } catch {
+        res.statusCode = 500;
+        res.end(JSON.stringify({ error: 'Erro ao ler arquivo' }));
+      }
+      return;
+    }
+
+    res.statusCode = 400;
+    res.end(JSON.stringify({ error: 'Formato inválido' }));
+    return;
+  }
+
+  // Para outras rotas, retorna 404
+  res.statusCode = 404;
+  res.end('Not Found');
+});
+
 export const io = new Server(httpServer, {
   cors: {
     origin: "*",
@@ -148,6 +199,7 @@ server.on('message', (msg, rinfo) => {
           id_labirinto,
           tamanho: { larg, alt },
           mapping,
+          goalReached: false,
           historico: []
         };
       }
@@ -175,6 +227,9 @@ server.on('message', (msg, rinfo) => {
       if (estado_robo === 'GOAL_REACHED') {
         console.log(`[JSON Automático] Gatilho de fim recebido para corrida: ${id_corrida}`);
         if (sessoesAtivas[id_corrida] && sessoesAtivas[id_corrida].historico.length > 0) {
+          // Marca explicitamente que o objetivo foi atingido
+          sessoesAtivas[id_corrida].goalReached = true;
+          
           const dataAtual = new Date();
           const dataFormatada = dataAtual.toISOString().replace(/[:.]/g, '-').substring(0, 19);
           const filename = `corrida_${id_corrida}_${dataFormatada}.json`;

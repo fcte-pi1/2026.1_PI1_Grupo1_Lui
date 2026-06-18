@@ -12,6 +12,61 @@ const client = dgram.createSocket('udp4');
 // Definições de corridas diferentes para simular comportamentos variados
 const runs = [
   {
+    id_corrida: "run_test_04_demo_8x8",
+    id_labirinto: "8x8_demo",
+    mazeSize: 8,
+    mapping: true,
+    stream: [
+      // ═══ INÍCIO: (0,7) facing NORTE ═══
+      { estado_fsm: "CALIBRATING", bateria_v: 7.42, posicao_x: 0, posicao_y: 7, orientacao: "NORTE", erro_pid: 0.00, dist_frontal: 150, paredes: 9  },  // OESTE+SUL
+      { estado_fsm: "MAPPING",     bateria_v: 7.40, posicao_x: 0, posicao_y: 6, orientacao: "NORTE", erro_pid: 0.02, dist_frontal: 145, paredes: 8  },  // OESTE
+      { estado_fsm: "MAPPING",     bateria_v: 7.38, posicao_x: 0, posicao_y: 5, orientacao: "NORTE", erro_pid: -0.01, dist_frontal: 140, paredes: 8  },  // OESTE
+      { estado_fsm: "MAPPING",     bateria_v: 7.36, posicao_x: 0, posicao_y: 4, orientacao: "NORTE", erro_pid: 0.03, dist_frontal: 135, paredes: 10 },  // OESTE+LESTE
+      // ═══ Vira LESTE na linha 4 ═══
+      { estado_fsm: "MAPPING",     bateria_v: 7.34, posicao_x: 1, posicao_y: 4, orientacao: "LESTE", erro_pid: 0.00, dist_frontal: 130, paredes: 4  },  // SUL
+      { estado_fsm: "MAPPING",     bateria_v: 7.32, posicao_x: 2, posicao_y: 4, orientacao: "LESTE", erro_pid: 0.01, dist_frontal: 125, paredes: 0  },
+      { estado_fsm: "MAPPING",     bateria_v: 7.30, posicao_x: 3, posicao_y: 4, orientacao: "LESTE", erro_pid: -0.02, dist_frontal: 120, paredes: 0  },
+      // ═══ Entra na região central: (3,4) ═══
+      { estado_fsm: "MAPPING",     bateria_v: 7.28, posicao_x: 4, posicao_y: 4, orientacao: "LESTE", erro_pid: 0.02, dist_frontal: 115, paredes: 5  },  // NORTE
+      // ═══ Sobe para linha 5 ═══
+      { estado_fsm: "MAPPING",     bateria_v: 7.26, posicao_x: 4, posicao_y: 5, orientacao: "NORTE", erro_pid: 0.00, dist_frontal: 110, paredes: 0  },
+      { estado_fsm: "MAPPING",     bateria_v: 7.24, posicao_x: 4, posicao_y: 6, orientacao: "NORTE", erro_pid: -0.01, dist_frontal: 105, paredes: 1  },  // NORTE
+      // ═══ Vai para LESTE, explora lado direito ═══
+      { estado_fsm: "MAPPING",     bateria_v: 7.22, posicao_x: 5, posicao_y: 6, orientacao: "LESTE", erro_pid: 0.03, dist_frontal: 100, paredes: 0  },
+      { estado_fsm: "MAPPING",     bateria_v: 7.20, posicao_x: 6, posicao_y: 6, orientacao: "LESTE", erro_pid: 0.00, dist_frontal: 95,  paredes: 0  },
+      { estado_fsm: "MAPPING",     bateria_v: 7.18, posicao_x: 7, posicao_y: 6, orientacao: "LESTE", erro_pid: -0.02, dist_frontal: 90,  paredes: 6  },  // LESTE+SUL
+      // ═══ Desce pela borda LESTE ═══
+      { estado_fsm: "MAPPING",     bateria_v: 7.16, posicao_x: 7, posicao_y: 5, orientacao: "SUL",   erro_pid: 0.01, dist_frontal: 85,  paredes: 0  },
+      { estado_fsm: "MAPPING",     bateria_v: 7.14, posicao_x: 7, posicao_y: 4, orientacao: "SUL",   erro_pid: 0.02, dist_frontal: 80,  paredes: 0  },
+      { estado_fsm: "MAPPING",     bateria_v: 7.12, posicao_x: 7, posicao_y: 3, orientacao: "SUL",   erro_pid: -0.01, dist_frontal: 75,  paredes: 0  },
+      { estado_fsm: "MAPPING",     bateria_v: 7.10, posicao_x: 7, posicao_y: 2, orientacao: "SUL",   erro_pid: 0.00, dist_frontal: 70,  paredes: 12 },  // SUL+OESTE
+      // ═══ Anda para OESTE na linha 2 ═══
+      { estado_fsm: "MAPPING",     bateria_v: 7.08, posicao_x: 6, posicao_y: 2, orientacao: "OESTE", erro_pid: 0.03, dist_frontal: 65,  paredes: 0  },
+      { estado_fsm: "MAPPING",     bateria_v: 7.06, posicao_x: 5, posicao_y: 2, orientacao: "OESTE", erro_pid: 0.00, dist_frontal: 60,  paredes: 0  },
+      { estado_fsm: "MAPPING",     bateria_v: 7.04, posicao_x: 4, posicao_y: 2, orientacao: "OESTE", erro_pid: -0.02, dist_frontal: 55,  paredes: 0  },
+      { estado_fsm: "MAPPING",     bateria_v: 7.02, posicao_x: 3, posicao_y: 2, orientacao: "OESTE", erro_pid: 0.01, dist_frontal: 50,  paredes: 0  },
+      { estado_fsm: "MAPPING",     bateria_v: 7.00, posicao_x: 2, posicao_y: 2, orientacao: "OESTE", erro_pid: 0.00, dist_frontal: 45,  paredes: 0  },
+      { estado_fsm: "MAPPING",     bateria_v: 6.98, posicao_x: 1, posicao_y: 2, orientacao: "OESTE", erro_pid: -0.01, dist_frontal: 40,  paredes: 9  },  // OESTE+SUL
+      // ═══ Sobe pela borda OESTE ═══
+      { estado_fsm: "MAPPING",     bateria_v: 6.96, posicao_x: 1, posicao_y: 3, orientacao: "NORTE", erro_pid: 0.02, dist_frontal: 35,  paredes: 0  },
+      { estado_fsm: "MAPPING",     bateria_v: 6.94, posicao_x: 1, posicao_y: 4, orientacao: "NORTE", erro_pid: 0.00, dist_frontal: 30,  paredes: 0  },
+      { estado_fsm: "MAPPING",     bateria_v: 6.92, posicao_x: 1, posicao_y: 5, orientacao: "NORTE", erro_pid: -0.03, dist_frontal: 25,  paredes: 1  },  // NORTE
+      // ═══ Explora topo do labirinto ═══
+      { estado_fsm: "MAPPING",     bateria_v: 6.90, posicao_x: 2, posicao_y: 5, orientacao: "LESTE", erro_pid: 0.01, dist_frontal: 20,  paredes: 0  },
+      { estado_fsm: "MAPPING",     bateria_v: 6.88, posicao_x: 3, posicao_y: 5, orientacao: "LESTE", erro_pid: 0.00, dist_frontal: 18,  paredes: 0  },
+      { estado_fsm: "MAPPING",     bateria_v: 6.86, posicao_x: 4, posicao_y: 5, orientacao: "LESTE", erro_pid: -0.01, dist_frontal: 16,  paredes: 2  },  // LESTE
+      // ═══ Volta para baixo em direção ao centro ═══
+      { estado_fsm: "MAPPING",     bateria_v: 6.84, posicao_x: 4, posicao_y: 4, orientacao: "SUL",   erro_pid: 0.02, dist_frontal: 14,  paredes: 0  },
+      { estado_fsm: "MAPPING",     bateria_v: 6.82, posicao_x: 4, posicao_y: 3, orientacao: "SUL",   erro_pid: 0.00, dist_frontal: 12,  paredes: 0  },
+      // ═══ REGIÃO CENTRAL: (4,3) ═══
+      { estado_fsm: "MAPPING",     bateria_v: 6.80, posicao_x: 3, posicao_y: 3, orientacao: "OESTE", erro_pid: -0.01, dist_frontal: 10,  paredes: 0  },
+      // ═══ CENTRO: (3,3) ═══
+      { estado_fsm: "MAPPING",     bateria_v: 6.78, posicao_x: 3, posicao_y: 4, orientacao: "NORTE", erro_pid: 0.01, dist_frontal: 8,   paredes: 0  },
+      // ═══ OBJETIVO ATINGIDO ═══
+      { estado_fsm: "GOAL_REACHED", bateria_v: 6.75, posicao_x: 3, posicao_y: 4, orientacao: "NORTE", erro_pid: 0.00, dist_frontal: 8,   paredes: 9  }
+    ]
+  },
+  {
     id_corrida: "run_test_01_sucesso",
     id_labirinto: "16x16_standard",
     mazeSize: 16,

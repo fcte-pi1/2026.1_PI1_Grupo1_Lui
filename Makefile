@@ -1,15 +1,18 @@
-.PHONY: help setup install build run backend frontend mock clean test test-backend test-frontend test-firmware check-deps infra down docker-up
+.PHONY: help setup install build run dev full backend frontend mock clean test test-backend test-frontend test-firmware check-deps infra down docker-up
 
 help:
 	@echo "Comandos disponíveis:"
 	@echo "  make setup      - Instala dependências e compila o Frontend (preparação inicial)"
 	@echo "  make install    - Instala as dependências do Backend e Frontend"
 	@echo "  make build      - Compila a versão de produção do Frontend"
-	@echo "  make run        - Sobe o Backend, Frontend e Mock localmente em paralelo (Para Dev)"
+	@echo "  make run        - Sobe Backend, Frontend (dev) e Mock localmente (Hot-reload)"
+	@echo "  make prod       - Sobe stack Docker + Mock (produção). Frontend em http://localhost:8080"
+	@echo "  make dev        - Sobe Backend, Frontend (dev) e Mock localmente (Hot-reload)"
+	@echo "  make full       - Sobe InfluxDB/Grafana (Docker) + Backend + Frontend + Mock (tudo)"
 	@echo "  make docker-up  - Sobe TODA a stack via Docker em background (Produção)"
 	@echo "  make docker-run - Sobe a stack Docker interativamente COM o mock rodando (Para ver logs)"
-	@echo "  make backend    - Sobe apenas o Backend"
-	@echo "  make frontend   - Sobe apenas o Frontend"
+	@echo "  make backend    - Sobe apenas o Backend (porta 3001)"
+	@echo "  make frontend   - Sobe apenas o Frontend dev (porta 5173)"
 	@echo "  make mock       - Sobe apenas o Mock Sender"
 	@echo "  make clean      - Remove as pastas node_modules e diretórios de build"
 	@echo "  make infra      - Sobe apenas os bancos e ferramentas (InfluxDB e Grafana) via Docker"
@@ -79,14 +82,27 @@ mock: check-deps
 
 dev: check-deps
 	@echo "=> Iniciando todos os serviços (Backend, Frontend e Mock) localmente (Hot-reload)..."
+	@echo "=> Frontend: http://localhost:5173 | Backend WS: http://localhost:3001"
 	@echo "=> Pressione Ctrl+C para encerrar todos."
 	@npx concurrently -n "BACKEND,FRONT,MOCK" -c "bgBlue.bold,bgGreen.bold,bgMagenta.bold" \
 		"cd src/backend && npm start" \
 		"cd src/frontend && npm run dev" \
 		"cd src/backend && npm run mock"
 
-run: check-deps
+full: infra
+	@echo "=> Aguardando InfluxDB iniciar (10s)..."
+	@sleep 10
+	@echo "=> Iniciando serviços (Backend + Frontend + Mock)..."
+	@npx concurrently -n "BACKEND,FRONT,MOCK" -c "bgBlue.bold,bgGreen.bold,bgMagenta.bold" \
+		"cd src/backend && npm start" \
+		"cd src/frontend && npm run dev" \
+		"cd src/backend && npm run mock"
+
+run: dev
+
+prod: check-deps
 	@echo "=> Iniciando stack Docker e Mock Sender..."
+	@echo "=> Acesse o frontend em http://localhost:8080"
 	@echo "=> Pressione Ctrl+C para encerrar tudo (Mock e Dockers)."
 	@npx concurrently -n "DOCKER,MOCK" -c "bgBlue.bold,bgMagenta.bold" \
 		"cd src/backend && docker compose up --build" \

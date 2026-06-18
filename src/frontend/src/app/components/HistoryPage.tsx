@@ -141,24 +141,56 @@ export function HistoryPage() {
   useEffect(() => {
     fetch('/api/maze_runs')
       .then(res => res.json())
-      .then((arquivos: string[]) => {
-        const mapeados = arquivos.map((arq, idx) => criarMetadadosCorrida(arq, idx + 1, 'api'));
+      .then(async (arquivos: string[]) => {
+        // Carrega os dados reais de cada arquivo em paralelo
+        const resultados = await Promise.allSettled(
+          arquivos.map(async (arq) => {
+            const res = await fetch(`/api/maze_runs/${arq}`);
+            const dados = await res.json();
+            return { arquivo: arq, dados };
+          })
+        );
+
+        const mapeados = resultados.map((resultado, idx) => {
+          if (resultado.status === 'fulfilled') {
+            return criarMetadadosCorrida(resultado.value.arquivo, idx + 1, 'api', resultado.value.dados);
+          }
+          // Se falhou, usa fallback com metadados do nome do arquivo
+          return criarMetadadosCorrida(arquivos[idx], idx + 1, 'api');
+        });
+
         setCorridas(mapeados);
       })
       .catch(() => setErro("Não foi possível conectar à API de histórico."));
   }, []);
 
-  // Metadados flexíveis: tenta adivinhar, mas se vierem os dados reais (Upload), calcula a realidade
+  // Detecta se o objetivo foi atingido a partir dos dados brutos
+  function detectarGoalReached(dadosBrutos: unknown, passos: PassoExploracao[], larg: number, alt: number): boolean {
+    // 1. Se o JSON tiver o campo explícito goalReached, usa ele
+    const data = dadosBrutos as { goalReached?: boolean };
+    if (data.goalReached === true) return true;
+
+    // 2. Fallback: verifica se o último passo está na região central
+    if (passos.length === 0) return false;
+    const ultimo = passos[passos.length - 1];
+    const cx = Math.floor(larg / 2);
+    const cy = Math.floor(alt / 2);
+    const centro = [
+      { x: cx - 1, y: cy - 1 },
+      { x: cx, y: cy - 1 },
+      { x: cx - 1, y: cy },
+      { x: cx, y: cy },
+    ];
+    return centro.some(c => c.x === ultimo.x && c.y === ultimo.y);
+  }
+
+  // Constrói metadados da corrida. Se dadosBrutos for fornecido, usa dados reais.
   function criarMetadadosCorrida(id: string, numero: number, origem: 'api' | 'local', dadosBrutos?: unknown): CorridaRow {
-    const semente = id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    const atingiuObjetivo = semente % 3 !== 0;
-    
-    let tempoS = 40 + (semente % 180);
-    let grade = semente % 2 === 0 ? "16×16" : "8×8";
-
+    let grade = '—';
+    let tempoS = 0;
     let mapping = true;
+    let objetivo = false;
 
-    // CORREÇÃO: Se os dados brutos já existirem (Upload Local), calcula exatamente a grade e o tempo
     if (dadosBrutos) {
       try {
         const passos = extrairPassos(dadosBrutos);
@@ -167,9 +199,15 @@ export function HistoryPage() {
         grade = `${tam.larg}×${tam.alt}`;
         if (dados.mapping !== undefined) mapping = dados.mapping;
         tempoS = Math.max(10, Math.floor(passos.length * 1.5));
+        objetivo = detectarGoalReached(dadosBrutos, passos, tam.larg, tam.alt);
       } catch {
         // Fallback silencioso
       }
+    } else {
+      // Sem dados: usa placeholders até o carregamento real
+      grade = '—';
+      tempoS = 0;
+      objetivo = false;
     }
 
     const min = Math.floor(tempoS / 60);
@@ -180,11 +218,11 @@ export function HistoryPage() {
     return {
       id, numero,
       grade,
-      tempo: `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`,
+      tempo: tempoS > 0 ? `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}` : '—',
       tempoS,
-      objetivo: atingiuObjetivo,
+      objetivo,
       date: dataStr,
-      seed: semente,
+      seed: 0,
       origem,
       mapping,
       dadosBrutos
@@ -231,12 +269,14 @@ export function HistoryPage() {
 
       // CORREÇÃO: Atualiza silenciosamente os metadados da tabela agora que temos os dados absolutos da API
       const jsonTyped = jsonReal as { mapping?: boolean };
+      const goalReached = detectarGoalReached(jsonReal, passos, tam.larg, tam.alt);
       setCorridas(prev => prev.map(c => c.id === corrida.id ? {
         ...c,
         grade: `${tam.larg}×${tam.alt}`,
         tempoS: tempoSReal,
         tempo: `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`,
         mapping: jsonTyped.mapping !== undefined ? jsonTyped.mapping : true,
+        objetivo: goalReached,
         dadosBrutos: jsonReal
       } : c));
 
