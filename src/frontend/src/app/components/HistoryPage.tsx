@@ -54,8 +54,10 @@ interface CorridaRow {
   tempoS: number;
   objetivo: boolean;
   date: string;
+  timestamp: number; // timestamp Unix para ordenação
   seed: number;
   origem: 'api' | 'local';
+  mapping?: boolean;
   dadosBrutos?: unknown;
 }
 
@@ -140,48 +142,105 @@ export function HistoryPage() {
   useEffect(() => {
     fetch('/api/maze_runs')
       .then(res => res.json())
-      .then((arquivos: string[]) => {
-        const mapeados = arquivos.map((arq, idx) => criarMetadadosCorrida(arq, idx + 1, 'api'));
+      .then(async (arquivos: string[]) => {
+        // Carrega os dados reais de cada arquivo em paralelo
+        const resultados = await Promise.allSettled(
+          arquivos.map(async (arq) => {
+            const res = await fetch(`/api/maze_runs/${arq}`);
+            const dados = await res.json();
+            return { arquivo: arq, dados };
+          })
+        );
+
+        const mapeados = resultados.map((resultado, idx) => {
+          if (resultado.status === 'fulfilled') {
+            return criarMetadadosCorrida(resultado.value.arquivo, idx + 1, 'api', resultado.value.dados);
+          }
+          return criarMetadadosCorrida(arquivos[idx], idx + 1, 'api');
+        });
+
+        // Ordena por data de salvamento (mais recente primeiro)
+        mapeados.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+        // Reenumera na ordem de exibicao
+        mapeados.forEach((c, i) => { c.numero = i + 1; });
+
         setCorridas(mapeados);
       })
       .catch(() => setErro("Não foi possível conectar à API de histórico."));
   }, []);
 
-  // Metadados flexíveis: tenta adivinhar, mas se vierem os dados reais (Upload), calcula a realidade
-  function criarMetadadosCorrida(id: string, numero: number, origem: 'api' | 'local', dadosBrutos?: unknown): CorridaRow {
-    const semente = id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    const atingiuObjetivo = semente % 3 !== 0;
-    
-    let tempoS = 40 + (semente % 180);
-    let grade = semente % 2 === 0 ? "16×16" : "8×8";
+  // Detecta se o objetivo foi atingido a partir dos dados brutos
+  function detectarGoalReached(dadosBrutos: unknown, passos: PassoExploracao[], larg: number, alt: number): boolean {
+    // 1. Se o JSON tiver o campo explícito goalReached, usa ele
+    const data = dadosBrutos as { goalReached?: boolean };
+    if (data.goalReached === true) return true;
 
-    // CORREÇÃO: Se os dados brutos já existirem (Upload Local), calcula exatamente a grade e o tempo
+    // 2. Fallback: verifica se o último passo está na região central
+    if (passos.length === 0) return false;
+    const ultimo = passos[passos.length - 1];
+    const cx = Math.floor(larg / 2);
+    const cy = Math.floor(alt / 2);
+    const centro = [
+      { x: cx - 1, y: cy - 1 },
+      { x: cx, y: cy - 1 },
+      { x: cx - 1, y: cy },
+      { x: cx, y: cy },
+    ];
+    return centro.some(c => c.x === ultimo.x && c.y === ultimo.y);
+  }
+
+  // Constrói metadados da corrida. Se dadosBrutos for fornecido, usa dados reais.
+  function criarMetadadosCorrida(id: string, numero: number, origem: 'api' | 'local', dadosBrutos?: unknown): CorridaRow {
+    let grade = '—';
+    let tempoS = 0;
+    let mapping = true;
+    let objetivo = false;
+
     if (dadosBrutos) {
       try {
         const passos = extrairPassos(dadosBrutos);
-        const dados = dadosBrutos as { tamanho?: { larg: number, alt: number } };
+        const dados = dadosBrutos as { tamanho?: { larg: number, alt: number }, mapping?: boolean };
         const tam = dados.tamanho ? { larg: dados.tamanho.larg, alt: dados.tamanho.alt } : detectarTamanho(passos);
         grade = `${tam.larg}×${tam.alt}`;
+        if (dados.mapping !== undefined) mapping = dados.mapping;
         tempoS = Math.max(10, Math.floor(passos.length * 1.5));
+        objetivo = detectarGoalReached(dadosBrutos, passos, tam.larg, tam.alt);
       } catch {
         // Fallback silencioso
       }
+    } else {
+      // Sem dados: usa placeholders até o carregamento real
+      grade = '—';
+      tempoS = 0;
+      objetivo = false;
+    }
+
+    // Extrai timestamp do nome do arquivo para ordenação
+    // Formato: ..._2026-06-17T18-33-01.json
+    let timestamp = 0;
+    const matchTs = id.match(/(\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2})/);
+    if (matchTs) {
+      // Substitui os últimos 2 hífens por ":" para formar ISO válido: 2026-06-17T18:33:01
+      timestamp = new Date(matchTs[1].replace(/-(\d{2})-(\d{2})$/, ':$1:$2')).getTime();
+    } else {
+      timestamp = Date.now();
     }
 
     const min = Math.floor(tempoS / 60);
     const sec = tempoS % 60;
-    const matchData = id.match(/(\d+)/);
-    const dataStr = matchData ? formatarTimestamp(matchData[1]) : formatarTimestamp(Date.now().toString());
+    const dataStr = timestamp ? formatarTimestamp(String(Math.floor(timestamp / 1000))) : formatarTimestamp(Date.now().toString());
     
     return {
       id, numero,
       grade,
-      tempo: `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`,
+      tempo: tempoS > 0 ? `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}` : '—',
       tempoS,
-      objetivo: atingiuObjetivo,
+      objetivo,
       date: dataStr,
-      seed: semente,
+      timestamp,
+      seed: 0,
       origem,
+      mapping,
       dadosBrutos
     };
   }
@@ -225,11 +284,15 @@ export function HistoryPage() {
       const sec = tempoSReal % 60;
 
       // CORREÇÃO: Atualiza silenciosamente os metadados da tabela agora que temos os dados absolutos da API
+      const jsonTyped = jsonReal as { mapping?: boolean };
+      const goalReached = detectarGoalReached(jsonReal, passos, tam.larg, tam.alt);
       setCorridas(prev => prev.map(c => c.id === corrida.id ? {
         ...c,
         grade: `${tam.larg}×${tam.alt}`,
         tempoS: tempoSReal,
         tempo: `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`,
+        mapping: jsonTyped.mapping !== undefined ? jsonTyped.mapping : true,
+        objetivo: goalReached,
         dadosBrutos: jsonReal
       } : c));
 
@@ -347,9 +410,16 @@ export function HistoryPage() {
               <div key={run.id} className="border-b border-slate-50 last:border-b-0">
                 
                 <button onClick={() => abrirCorrida(run)} className="w-full text-left hover:bg-slate-50/80 transition-colors">
-                  <div className="grid items-center px-5 py-3.5" style={{ gridTemplateColumns: "40px 90px 80px 1fr 160px 140px 40px" }}>
+                  <div className="grid items-center px-5 py-3.5" style={{ gridTemplateColumns: "40px 160px 80px 1fr 160px 140px 40px" }}>
                     <span className="text-slate-400 tabular-nums" style={{ fontSize: "0.85rem" }}>{run.numero}</span>
-                    <span><span className="bg-slate-100 text-slate-700 rounded-md px-2 py-0.5 tabular-nums" style={{ fontSize: "0.8rem", fontWeight: 500 }}>{run.grade}</span></span>
+                    <span className="flex items-center gap-2">
+                      <span className="bg-slate-100 text-slate-700 rounded-md px-2 py-0.5 tabular-nums" style={{ fontSize: "0.8rem", fontWeight: 500 }}>{run.grade}</span>
+                      {run.dadosBrutos ? (
+                        <span className={`px-2 py-0.5 rounded text-[9px] font-bold tracking-widest uppercase text-white ${run.mapping !== false ? 'bg-indigo-500' : 'bg-slate-600'}`}>
+                          {run.mapping !== false ? 'Mapeamento' : 'Salvo'}
+                        </span>
+                      ) : null}
+                    </span>
                     <span className="text-slate-800 tabular-nums" style={{ fontSize: "0.88rem", fontWeight: 600 }}>{run.tempo}</span>
                     <span>
                       {run.objetivo ? (

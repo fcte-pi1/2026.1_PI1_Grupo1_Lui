@@ -12,9 +12,13 @@ export interface PassoExploracao {
   paredes: ParedeDescoberta[];
 }
 
-// Formato do JSON: pode ser array direto OU objeto { id_corrida, historico }
+// Formato do JSON: pode ser array direto OU objeto com metadados
 export interface CorridaJSON {
   id_corrida?: string;
+  id_labirinto?: string;
+  tamanho?: { larg: number; alt: number };
+  mapping?: boolean;
+  goalReached?: boolean;
   historico?: PassoExploracao[];
 }
 

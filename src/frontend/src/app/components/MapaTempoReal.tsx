@@ -31,8 +31,10 @@ export function RobotMap({ telemetria, celulasExploradas, trajetoRapido, mostrar
             gridTemplateRows: `repeat(${tamanho}, minmax(0, 1fr))` 
           }}
         >
-          {Array.from({ length: tamanho }).map((_, y) => (
-            Array.from({ length: tamanho }).map((_, x) => {
+          {Array.from({ length: tamanho }).map((_, i) => {
+            // y invertido: 0 fica embaixo (plano cartesiano)
+            const y = tamanho - 1 - i;
+            return Array.from({ length: tamanho }).map((_, x) => {
               
               const chave = `${x}-${y}`;
               const celula = celulasExploradas[chave];
@@ -79,7 +81,7 @@ export function RobotMap({ telemetria, celulasExploradas, trajetoRapido, mostrar
                 </div>
               );
             })
-          ))}
+          })}
         </div>
       </div>
     </div>

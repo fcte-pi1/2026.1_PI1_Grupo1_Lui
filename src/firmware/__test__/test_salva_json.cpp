@@ -45,9 +45,9 @@ TEST_CASE("salva_json - Arquivo e criado na pasta maze_runs", "[salva_json][arqu
     historico_exploracao.push_back(p);
 
     #ifdef PROJECT_ROOT_DIR
-        string diretorio = string(PROJECT_ROOT_DIR) + "/maze_runs";
+        string diretorio = string(PROJECT_ROOT_DIR) + "/src/maze_runs";
     #else
-        string diretorio = "../../maze_runs";
+        string diretorio = "../../src/maze_runs";
     #endif
     garantir_diretorio(diretorio);
     string caminho_esperado = diretorio + "/corrida_9999999999999.json";
@@ -85,9 +85,9 @@ TEST_CASE("salva_json - JSON e parseavel sem erros de sintaxe", "[salva_json][pa
     historico_exploracao.push_back(p);
 
     #ifdef PROJECT_ROOT_DIR
-        string diretorio = string(PROJECT_ROOT_DIR) + "/maze_runs";
+        string diretorio = string(PROJECT_ROOT_DIR) + "/src/maze_runs";
     #else
-        string diretorio = "../../maze_runs";
+        string diretorio = "../../src/maze_runs";
     #endif
     garantir_diretorio(diretorio);
     string caminho = diretorio + "/corrida_8888888888888.json";
@@ -112,6 +112,8 @@ TEST_CASE("salva_json - JSON e parseavel sem erros de sintaxe", "[salva_json][pa
     SECTION("JSON contem as chaves esperadas") {
         string conteudo = ler_arquivo(caminho);
         REQUIRE(conteudo.find("\"id_corrida\"") != string::npos);
+        REQUIRE(conteudo.find("\"tamanho\"") != string::npos);
+        REQUIRE(conteudo.find("\"goalReached\"") != string::npos);
         REQUIRE(conteudo.find("\"historico\"") != string::npos);
         REQUIRE(conteudo.find("\"x\"") != string::npos);
         REQUIRE(conteudo.find("\"y\"") != string::npos);
@@ -135,9 +137,9 @@ TEST_CASE("salva_json - Campo id_corrida e string nao vazia", "[salva_json][id_c
     historico_exploracao.push_back(p);
 
     #ifdef PROJECT_ROOT_DIR
-        string diretorio = string(PROJECT_ROOT_DIR) + "/maze_runs";
+        string diretorio = string(PROJECT_ROOT_DIR) + "/src/maze_runs";
     #else
-        string diretorio = "../../maze_runs";
+        string diretorio = "../../src/maze_runs";
     #endif
     garantir_diretorio(diretorio);
     string caminho = diretorio + "/corrida_1234567890123.json";
@@ -176,9 +178,9 @@ TEST_CASE("salva_json - Campo historico e array", "[salva_json][historico]") {
     historico_exploracao.push_back(p2);
 
     #ifdef PROJECT_ROOT_DIR
-        string diretorio = string(PROJECT_ROOT_DIR) + "/maze_runs";
+        string diretorio = string(PROJECT_ROOT_DIR) + "/src/maze_runs";
     #else
-        string diretorio = "../../maze_runs";
+        string diretorio = "../../src/maze_runs";
     #endif
     garantir_diretorio(diretorio);
     string caminho = diretorio + "/corrida_7777777777777.json";
@@ -219,9 +221,9 @@ TEST_CASE("salva_json - Cada passo tem x, y, orientacao, paredes", "[salva_json]
     historico_exploracao.push_back(p);
 
     #ifdef PROJECT_ROOT_DIR
-        string diretorio = string(PROJECT_ROOT_DIR) + "/maze_runs";
+        string diretorio = string(PROJECT_ROOT_DIR) + "/src/maze_runs";
     #else
-        string diretorio = "../../maze_runs";
+        string diretorio = "../../src/maze_runs";
     #endif
     garantir_diretorio(diretorio);
     string caminho = diretorio + "/corrida_6666666666666.json";
@@ -267,9 +269,9 @@ TEST_CASE("salva_json - Campo paredes tem objetos com x, y, dir", "[salva_json][
     historico_exploracao.push_back(p);
 
     #ifdef PROJECT_ROOT_DIR
-        string diretorio = string(PROJECT_ROOT_DIR) + "/maze_runs";
+        string diretorio = string(PROJECT_ROOT_DIR) + "/src/maze_runs";
     #else
-        string diretorio = "../../maze_runs";
+        string diretorio = "../../src/maze_runs";
     #endif
     garantir_diretorio(diretorio);
     string caminho = diretorio + "/corrida_5555555555555.json";
@@ -308,9 +310,9 @@ TEST_CASE("salva_json - Historico vazio gera JSON valido", "[salva_json][vazio]"
     historico_exploracao.clear(); // vazio!
 
     #ifdef PROJECT_ROOT_DIR
-        string diretorio = string(PROJECT_ROOT_DIR) + "/maze_runs";
+        string diretorio = string(PROJECT_ROOT_DIR) + "/src/maze_runs";
     #else
-        string diretorio = "../../maze_runs";
+        string diretorio = "../../src/maze_runs";
     #endif
     garantir_diretorio(diretorio);
     string caminho = diretorio + "/corrida_4444444444444.json";
@@ -353,9 +355,9 @@ TEST_CASE("salva_json - ID de corrida especial (contem caracteres alfanumericos)
     historico_exploracao.push_back(p);
 
     #ifdef PROJECT_ROOT_DIR
-        string diretorio = string(PROJECT_ROOT_DIR) + "/maze_runs";
+        string diretorio = string(PROJECT_ROOT_DIR) + "/src/maze_runs";
     #else
-        string diretorio = "../../maze_runs";
+        string diretorio = "../../src/maze_runs";
     #endif
     garantir_diretorio(diretorio);
     string caminho = diretorio + "/corrida_abc123_XYZ-456.json";
