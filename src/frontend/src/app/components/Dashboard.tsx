@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   BatteryFull, BatteryMedium, BatteryLow,
   Gauge, Clock, Target, MapPin, Activity, Wifi, AlertTriangle, ShieldAlert
@@ -108,7 +108,7 @@ export function Dashboard() {
   const [celulasExploradas, setCelulasExploradas] = useState<Record<string, CelulaMapa>>({});
   const [historicoErros, setHistoricoErros] = useState<RegistoErro[]>([]);
   const [isLogAberto, setIsLogAberto] = useState(false);
-  const [isSimulation, setIsSimulation] = useState(true);
+  const [isSimulation, setIsSimulation] = useState(false); // Padrão: Tempo Real (WebSocket)
 
   // Override de layout para desenvolvimento (AUTO | EXPLORACAO | PERFORMANCE)
   const [overrideModo, setOverrideModo] = useState<'AUTO' | 'EXPLORACAO' | 'PERFORMANCE'>('AUTO');
@@ -233,6 +233,8 @@ export function Dashboard() {
   }, [overrideModo, isSimulation]);
 
   // Efeito do Socket.io para Tempo Real
+  const lastRunIdRef = useRef('');
+
   useEffect(() => {
     if (isSimulation) return;
 
@@ -243,6 +245,15 @@ export function Dashboard() {
     });
 
     socket.on('telemetry', (dadosDecodificados) => {
+      // Detecta mudança de corrida pelo id_corrida
+      const currentRunId = dadosDecodificados.id_corrida || '';
+      const corridaMudou = currentRunId !== lastRunIdRef.current;
+      if (corridaMudou) {
+        lastRunIdRef.current = currentRunId;
+        setCelulasExploradas({});
+        setHistoricoErros([]);
+      }
+
       // Decodifica a Bitmask (número) para o objeto de booleanos que o MapaTempoReal.tsx usa
       const p = dadosDecodificados.paredes;
       const bitmask = typeof p === 'number' ? p : 0;
@@ -256,46 +267,40 @@ export function Dashboard() {
       // Atualiza telemetria base
       const novaTelemetria: DadosTelemetria = {
         ...dadosDecodificados,
+        posicao_x: dadosDecodificados.posicao_x ?? dadosDecodificados.pos_x ?? 0,
+        posicao_y: dadosDecodificados.posicao_y ?? dadosDecodificados.pos_y ?? 0,
+        bateria_v: dadosDecodificados.bateria_v ?? dadosDecodificados.bateria ?? 0,
+        orientacao: dadosDecodificados.orientacao || 'NORTE',
+        estado_fsm: dadosDecodificados.estado_fsm || 'IDLE',
+        id_corrida: currentRunId,
         timestamp: Math.floor(Date.now() / 1000),
         tamanho_grade: dadosDecodificados.tamanho_grade || telemetriaAtual.tamanho_grade,
         paredes_atuais: paredesDecodificadas
       };
       
-      setTelemetriaAtual(prevTelemetria => {
-        // Se a corrida mudou (baseado no id_corrida) ou se for o primeiro pacote
-        const corridaMudou = prevTelemetria.id_corrida !== novaTelemetria.id_corrida;
-        
-        if (corridaMudou) {
-          setCelulasExploradas({
-            [`${novaTelemetria.posicao_x}-${novaTelemetria.posicao_y}`]: { x: novaTelemetria.posicao_x, y: novaTelemetria.posicao_y, paredes: novaTelemetria.paredes_atuais }
-          });
-          setHistoricoErros([]);
-        } else {
-          // Atualiza celulas exploradas normalmente
-          const chaveMapa = `${novaTelemetria.posicao_x}-${novaTelemetria.posicao_y}`;
-          setCelulasExploradas(prev => prev[chaveMapa] ? prev : {
-            ...prev,
-            [chaveMapa]: { x: novaTelemetria.posicao_x, y: novaTelemetria.posicao_y, paredes: novaTelemetria.paredes_atuais }
-          });
-        }
+      setTelemetriaAtual(novaTelemetria);
 
-        // Erro handling (com reset se corrida mudou)
-        if (novaTelemetria.estado_fsm === 'ERROR') {
-          setHistoricoErros(prev => {
-            if (prev.some(erro => erro.timestamp === novaTelemetria.timestamp)) return prev;
-            setIsLogAberto(true);
-            return [{
-              id: `${novaTelemetria.timestamp}-${Math.random()}`,
-              timestamp: novaTelemetria.timestamp,
-              causa: novaTelemetria.causa_erro || "Falha captada em tempo real.",
-              posicao_x: novaTelemetria.posicao_x,
-              posicao_y: novaTelemetria.posicao_y
-            }, ...prev];
-          });
-        }
-
-        return novaTelemetria;
+      // Atualiza celulas exploradas
+      const chaveMapa = `${novaTelemetria.posicao_x}-${novaTelemetria.posicao_y}`;
+      setCelulasExploradas(prev => prev[chaveMapa] ? prev : {
+        ...prev,
+        [chaveMapa]: { x: novaTelemetria.posicao_x, y: novaTelemetria.posicao_y, paredes: novaTelemetria.paredes_atuais }
       });
+
+      // Erro handling
+      if (novaTelemetria.estado_fsm === 'ERROR') {
+        setHistoricoErros(prev => {
+          if (prev.some(erro => erro.timestamp === novaTelemetria.timestamp)) return prev;
+          setIsLogAberto(true);
+          return [{
+            id: `${novaTelemetria.timestamp}-${Math.random()}`,
+            timestamp: novaTelemetria.timestamp,
+            causa: novaTelemetria.causa_erro || "Falha captada em tempo real.",
+            posicao_x: novaTelemetria.posicao_x,
+            posicao_y: novaTelemetria.posicao_y
+          }, ...prev];
+        });
+      }
     });
 
     return () => {

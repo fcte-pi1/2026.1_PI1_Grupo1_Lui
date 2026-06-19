@@ -54,6 +54,7 @@ interface CorridaRow {
   tempoS: number;
   objetivo: boolean;
   date: string;
+  timestamp: number; // timestamp Unix para ordenação
   seed: number;
   origem: 'api' | 'local';
   mapping?: boolean;
@@ -155,9 +156,13 @@ export function HistoryPage() {
           if (resultado.status === 'fulfilled') {
             return criarMetadadosCorrida(resultado.value.arquivo, idx + 1, 'api', resultado.value.dados);
           }
-          // Se falhou, usa fallback com metadados do nome do arquivo
           return criarMetadadosCorrida(arquivos[idx], idx + 1, 'api');
         });
+
+        // Ordena por data de salvamento (mais recente primeiro)
+        mapeados.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+        // Reenumera na ordem de exibicao
+        mapeados.forEach((c, i) => { c.numero = i + 1; });
 
         setCorridas(mapeados);
       })
@@ -210,10 +215,20 @@ export function HistoryPage() {
       objetivo = false;
     }
 
+    // Extrai timestamp do nome do arquivo para ordenação
+    // Formato: ..._2026-06-17T18-33-01.json
+    let timestamp = 0;
+    const matchTs = id.match(/(\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2})/);
+    if (matchTs) {
+      // Substitui os últimos 2 hífens por ":" para formar ISO válido: 2026-06-17T18:33:01
+      timestamp = new Date(matchTs[1].replace(/-(\d{2})-(\d{2})$/, ':$1:$2')).getTime();
+    } else {
+      timestamp = Date.now();
+    }
+
     const min = Math.floor(tempoS / 60);
     const sec = tempoS % 60;
-    const matchData = id.match(/(\d+)/);
-    const dataStr = matchData ? formatarTimestamp(matchData[1]) : formatarTimestamp(Date.now().toString());
+    const dataStr = timestamp ? formatarTimestamp(String(Math.floor(timestamp / 1000))) : formatarTimestamp(Date.now().toString());
     
     return {
       id, numero,
@@ -222,6 +237,7 @@ export function HistoryPage() {
       tempoS,
       objetivo,
       date: dataStr,
+      timestamp,
       seed: 0,
       origem,
       mapping,
