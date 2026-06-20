@@ -10,6 +10,7 @@ struct PacoteTelemetria {
     int dist_frontal;
     uint8_t paredes;
     uint32_t timestamp;
+    float velocidade_media;
 };
 
 // Exportação de handlers globais e protótipos

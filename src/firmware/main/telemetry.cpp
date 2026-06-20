@@ -114,7 +114,7 @@ void TaskTelemetria(void *parametrospv) {
                     obj["dist_frontal"] = p_lote.dist_frontal;
                     obj["paredes"] = p_lote.paredes;
                     obj["timestamp"] = p_lote.timestamp;
-                    
+                    obj["velocidade_media"] = p_lote.velocidade_media;
                     obj["id_labirinto"] = "Wokwi_Maze";
                     obj["id_corrida"] = "Simulated_Run";
                     obj["objetivo"] = "Center";
@@ -139,7 +139,7 @@ void TaskTelemetria(void *parametrospv) {
                 doc["dist_frontal"] = pacote.dist_frontal;
                 doc["paredes"] = pacote.paredes;
                 doc["timestamp"] = pacote.timestamp;
-                
+                doc["velocidade_media"] = pacote.velocidade_media;
                 doc["id_labirinto"] = "Wokwi_Maze";
                 doc["id_corrida"] = "Simulated_Run";
                 doc["objetivo"] = "Center";

@@ -5,6 +5,7 @@
 #include "telemetry.hpp"
 #include "tof_sensor.hpp"
 #include "wifi_manager.hpp"
+#include "encoder.hpp"
 
 // Task de simulação de queda de conectividade para testes do ring buffer
 void TaskSimularQuedaRede(void *pvParameters) {
@@ -27,6 +28,8 @@ extern "C" void app_main(void) {
 
     // inicializar wi fi
     wifi_init_sta();
+    // inicializa encoder
+    encoder_init();
     // 1. Inicializa a Fila global definida em telemetry.hpp
     FilaTelemetria = xQueueCreate(10, sizeof(PacoteTelemetria));
     if (FilaTelemetria == NULL) {

@@ -4,6 +4,7 @@
 #include "ina219.hpp"
 #include <string.h>
 #include <stdio.h>
+#include "encoder.hpp"
 
 void MoveTask(void *parametrospv) {
     PacoteTelemetria pacote;
@@ -33,6 +34,7 @@ void MoveTask(void *parametrospv) {
         pacote.pos_x += 1;
 
         // Envia telemetria para processamento assíncrono
+        pacote.velocidade_media = encoder_get_velocity_ms();
         xQueueSend(FilaTelemetria, &pacote, 0);
         printf("Core 0 -> Enviou telemetria para a fila (X: %d | ToF: %d mm)\n",
                pacote.pos_x,
