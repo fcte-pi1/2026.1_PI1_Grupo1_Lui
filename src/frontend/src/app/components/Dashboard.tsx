@@ -1,12 +1,26 @@
 import React, { useState, useEffect } from "react";
 import {
   BatteryFull, BatteryMedium, BatteryLow,
-  Gauge, Clock, Target, MapPin, Activity, Wifi, AlertTriangle, ShieldAlert
+  Gauge, Clock, Target, MapPin, Activity, Wifi, AlertTriangle, ShieldAlert, Zap
 } from "lucide-react";
 import { RobotMap } from "./MapaTempoReal";
 import { io } from "socket.io-client";
 
 const SOCKET_URL = "http://localhost:3001";
+
+// --- CONFIGURAÇÃO DE PWM (Issue: Inspeção de sinais de ciclo de trabalho) ---
+// TODO: Substituir pelo valor real de resolução do PWM usado no firmware do robô.
+// Placeholder atual: 0–255 (8 bits). O firmware de exemplo (gpio_pwm_example) usa
+// LEDC_TIMER_13_BIT (0–8191), mas o mock_sender.js hoje envia valores na faixa
+// 120–220, o que não bate com nenhum dos dois. Ajustar PWM_MAX assim que a
+// faixa real do hardware for confirmada.
+const PWM_MAX = 255;
+// Diferença mínima entre pwm_esq e pwm_dir (em valor absoluto) para considerar
+// que há assimetria significativa entre os motores.
+const PWM_ASSIMETRIA_LIMIAR = 30;
+// Percentual do PWM_MAX a partir do qual consideramos o motor saturado.
+const PWM_SATURACAO_PERCENTUAL = 0.95;
+// -----------------------------------------------------------------------------
 
 export interface CelulaMapa {
   x: number;
@@ -25,6 +39,10 @@ export interface DadosTelemetria {
   paredes_atuais: { norte: boolean; sul: boolean; leste: boolean; oeste: boolean };
   causa_erro?: string;
   velocidade_media?: number;
+  // Ciclo de trabalho (duty cycle) enviado a cada motor pela ponte H.
+  // Só populado no modo TEMPO REAL (vem do payload bruto do ESP32 via WebSocket).
+  pwm_esq?: number;
+  pwm_dir?: number;
 }
 
 export interface RegistoErro {
@@ -306,6 +324,24 @@ export function Dashboard() {
   const estiloBateria = obterCorBateria(telemetriaAtual.bateria_v);
   const bestLap = historicoVoltas.length > 0 ? Math.min(...historicoVoltas) : null;
 
+  // --- Diagnóstico de PWM (assimetria entre motores / saturação na ponte H) ---
+  const temDadosPwm = telemetriaAtual.pwm_esq !== undefined && telemetriaAtual.pwm_dir !== undefined;
+  const pwmEsq = telemetriaAtual.pwm_esq ?? 0;
+  const pwmDir = telemetriaAtual.pwm_dir ?? 0;
+  const diferencaPwm = Math.abs(pwmEsq - pwmDir);
+  const limiarSaturacao = PWM_MAX * PWM_SATURACAO_PERCENTUAL;
+
+  const isPwmEsqSaturado = temDadosPwm && pwmEsq >= limiarSaturacao;
+  const isPwmDirSaturado = temDadosPwm && pwmDir >= limiarSaturacao;
+  const isPwmAssimetrico = temDadosPwm && diferencaPwm >= PWM_ASSIMETRIA_LIMIAR;
+
+  const obterSubLabelPwm = (saturado: boolean) => {
+    if (saturado) return "Saturado (limite da ponte H)";
+    if (isPwmAssimetrico) return `Assimetria de ${diferencaPwm} entre motores`;
+    return "Ciclo de trabalho instantâneo";
+  };
+  // -----------------------------------------------------------------------------
+
   return (
     <div className="h-full flex flex-col bg-[#F8FAFC] font-sans relative overflow-hidden">
       
@@ -408,7 +444,7 @@ export function Dashboard() {
       </div>
 
       {/* Grid de Cartões Analíticos Adaptativo (HU 2.4 e HU 3.2.1) */}
-      <div className="px-8 pt-6 pb-4 grid grid-cols-2 xl:grid-cols-6 gap-4 shrink-0">
+      <div className="px-8 pt-6 pb-4 grid grid-cols-2 xl:grid-cols-8 gap-4 shrink-0">
         {isFastRun ? (
           <>
             {/* Volta Atual (Em destaque, col-span-2) */}
@@ -453,6 +489,26 @@ export function Dashboard() {
               iconBg="bg-emerald-50" 
               icon={<MapPin className="w-5 h-5 text-emerald-500" strokeWidth={2} />} 
             />
+            {/* PWM Esquerdo (Issue: Inspeção de sinais de ciclo de trabalho) */}
+            <CartaoEstatistica
+              label="PWM Esquerdo"
+              value={temDadosPwm ? pwmEsq : "---"}
+              sub={temDadosPwm ? obterSubLabelPwm(isPwmEsqSaturado) : "Disponível em Tempo Real"}
+              iconBg="bg-orange-50"
+              icon={<Zap className="w-5 h-5 text-orange-500" strokeWidth={2} />}
+              critical={isPwmEsqSaturado}
+              highlight={!isPwmEsqSaturado && isPwmAssimetrico}
+            />
+            {/* PWM Direito (Issue: Inspeção de sinais de ciclo de trabalho) */}
+            <CartaoEstatistica
+              label="PWM Direito"
+              value={temDadosPwm ? pwmDir : "---"}
+              sub={temDadosPwm ? obterSubLabelPwm(isPwmDirSaturado) : "Disponível em Tempo Real"}
+              iconBg="bg-orange-50"
+              icon={<Zap className="w-5 h-5 text-orange-500" strokeWidth={2} />}
+              critical={isPwmDirSaturado}
+              highlight={!isPwmDirSaturado && isPwmAssimetrico}
+            />
           </>
         ) : (
           <>
@@ -476,6 +532,26 @@ export function Dashboard() {
               iconBg={possuiErroCritico ? "bg-red-100" : "bg-emerald-50"} 
               icon={<Activity className={`w-5 h-5 ${possuiErroCritico ? "text-red-500" : "text-emerald-500"}`} strokeWidth={2} />} 
               highlight={possuiErroCritico} 
+            />
+            {/* PWM Esquerdo (Issue: Inspeção de sinais de ciclo de trabalho) */}
+            <CartaoEstatistica
+              label="PWM Esquerdo"
+              value={temDadosPwm ? pwmEsq : "---"}
+              sub={temDadosPwm ? obterSubLabelPwm(isPwmEsqSaturado) : "Disponível em Tempo Real"}
+              iconBg="bg-orange-50"
+              icon={<Zap className="w-5 h-5 text-orange-500" strokeWidth={2} />}
+              critical={isPwmEsqSaturado}
+              highlight={!isPwmEsqSaturado && isPwmAssimetrico}
+            />
+            {/* PWM Direito (Issue: Inspeção de sinais de ciclo de trabalho) */}
+            <CartaoEstatistica
+              label="PWM Direito"
+              value={temDadosPwm ? pwmDir : "---"}
+              sub={temDadosPwm ? obterSubLabelPwm(isPwmDirSaturado) : "Disponível em Tempo Real"}
+              iconBg="bg-orange-50"
+              icon={<Zap className="w-5 h-5 text-orange-500" strokeWidth={2} />}
+              critical={isPwmDirSaturado}
+              highlight={!isPwmDirSaturado && isPwmAssimetrico}
             />
           </>
         )}
