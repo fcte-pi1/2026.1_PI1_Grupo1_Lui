@@ -10,13 +10,12 @@ export default defineConfig({
     react(),
     tailwindcss(),
     // Plugin para listar e servir os JSONs de maze_runs
-    // Agora suporta dois diretórios: src/maze_runs/ (backend) e maze_runs/ (firmware)
+    // Diretório único compartilhado por backend e firmware: src/maze_runs/
     {
       name: 'maze-runs-api',
       configureServer(server) {
         const mazeRunsDirs = [
-          path.resolve(__dirname, '../maze_runs'),       // src/maze_runs (backend)
-          path.resolve(__dirname, '../../maze_runs'),     // maze_runs (firmware)
+          path.resolve(__dirname, '../maze_runs'),       // src/maze_runs
         ];
 
         // GET /api/maze_runs → lista os arquivos JSON disponíveis

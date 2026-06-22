@@ -112,9 +112,9 @@ TEST_CASE("JSON - numero de passos bate com historico_exploracao", "[integracao]
 
     id_corrida = "teste_contagem";
     #ifdef PROJECT_ROOT_DIR
-        string diretorio = string(PROJECT_ROOT_DIR) + "/maze_runs";
+        string diretorio = string(PROJECT_ROOT_DIR) + "/src/maze_runs";
     #else
-        string diretorio = "../../maze_runs";
+        string diretorio = "../../src/maze_runs";
     #endif
     #ifndef _WIN32
         mkdir(diretorio.c_str(), 0755);
@@ -156,9 +156,9 @@ TEST_CASE("JSON - parede registrada bate com labirinto mockado", "[integracao][j
 
     id_corrida = "teste_parede";
     #ifdef PROJECT_ROOT_DIR
-        string diretorio = string(PROJECT_ROOT_DIR) + "/maze_runs";
+        string diretorio = string(PROJECT_ROOT_DIR) + "/src/maze_runs";
     #else
-        string diretorio = "../../maze_runs";
+        string diretorio = "../../src/maze_runs";
     #endif
     #ifndef _WIN32
         mkdir(diretorio.c_str(), 0755);
@@ -204,9 +204,9 @@ TEST_CASE("Gera json persistente para pipeline", "[integracao][pipeline]") {
 
     id_corrida = "pipeline_preview";
     #ifdef PROJECT_ROOT_DIR
-        string diretorio = string(PROJECT_ROOT_DIR) + "/maze_runs";
+        string diretorio = string(PROJECT_ROOT_DIR) + "/src/maze_runs";
     #else
-        string diretorio = "../../maze_runs";
+        string diretorio = "../../src/maze_runs";
     #endif
     #ifndef _WIN32
         mkdir(diretorio.c_str(), 0755);
