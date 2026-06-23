@@ -4,6 +4,8 @@ idf_component_register(SRCS "main.cpp"
                             "wifi_manager.cpp"
                             "tof_sensor.cpp"
                             "ina219.cpp"
+                            "pid.cpp"
+                            "encoder.cpp"
                     INCLUDE_DIRS "."
                     REQUIRES ESP32_VL53L0X
                              bblanchon__arduinojson
