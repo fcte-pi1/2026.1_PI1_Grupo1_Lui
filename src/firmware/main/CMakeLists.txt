@@ -6,6 +6,7 @@ idf_component_register(SRCS "main.cpp"
                             "ina219.cpp"
                             "pid.cpp"
                             "encoder.cpp"
+                            "motor_driver.cpp"
                     INCLUDE_DIRS "."
                     REQUIRES ESP32_VL53L0X
                              bblanchon__arduinojson
