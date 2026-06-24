@@ -37,6 +37,13 @@ void motor_init() {
     };
     gpio_config(&io_conf);
 
+    // Configurar pino de ENABLE (se aplicável)
+    if (PIN_MOTOR_ENABLE != GPIO_NUM_MAX) {
+        gpio_set_direction((gpio_num_t)PIN_MOTOR_ENABLE, GPIO_MODE_OUTPUT);
+        gpio_set_level((gpio_num_t)PIN_MOTOR_ENABLE, 1); // Liga a ponte H
+    }
+
+
     // 2. Configurar o Timer do PWM (Comum para os dois motores)
     ledc_timer_config_t timer_conf = {
         .speed_mode       = PWM_MODE,
@@ -84,5 +91,24 @@ void motor_set_speed(MotorSide side, int pwm_value) {
         gpio_set_level(PIN_MOTOR_R_IN2, forward ? 0 : 1);
         ledc_set_duty(PWM_MODE, PWM_CHANNEL_RIGHT, duty_cycle);
         ledc_update_duty(PWM_MODE, PWM_CHANNEL_RIGHT);
+    }
+}
+
+void motor_disable() {
+    // 1. Zera o PWM de ambos os motores
+    ledc_set_duty(PWM_MODE, PWM_CHANNEL_LEFT, 0);
+    ledc_update_duty(PWM_MODE, PWM_CHANNEL_LEFT);
+    ledc_set_duty(PWM_MODE, PWM_CHANNEL_RIGHT, 0);
+    ledc_update_duty(PWM_MODE, PWM_CHANNEL_RIGHT);
+
+    // 2. Desliga os pinos de direção (freio passivo/costing)
+    gpio_set_level(PIN_MOTOR_L_IN3, 0);
+    gpio_set_level(PIN_MOTOR_L_IN4, 0);
+    gpio_set_level(PIN_MOTOR_R_IN1, 0);
+    gpio_set_level(PIN_MOTOR_R_IN2, 0);
+
+    // 3. Corta o ENABLE físico da ponte H se estiver configurado
+    if (PIN_MOTOR_ENABLE != GPIO_NUM_MAX) {
+        gpio_set_level((gpio_num_t)PIN_MOTOR_ENABLE, 0); 
     }
 }

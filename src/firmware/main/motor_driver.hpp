@@ -1,6 +1,12 @@
 #pragma once
 
 #include <stdint.h>
+#include "driver/gpio.h"
+
+// Substitua pelo pino físico do ENABLE/STBY da ponte H. 
+// Caso não possua, deixe como GPIO_NUM_MAX
+#define PIN_MOTOR_ENABLE GPIO_NUM_MAX 
+
 
 // Enum para identificar os motores
 enum MotorSide {
@@ -21,3 +27,10 @@ void motor_init();
  *        Valores positivos giram para frente, negativos para trás. 0 é parada.
  */
 void motor_set_speed(MotorSide side, int pwm_value);
+
+/**
+ * Desliga completamente a ponte H.
+ * Usado para o estado de ERRO ou parada de emergência.
+ * Zera o PWM e, se PIN_MOTOR_ENABLE for configurado, puxa ele para LOW.
+ */
+void motor_disable();
