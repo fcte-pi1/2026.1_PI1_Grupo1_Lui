@@ -8,6 +8,8 @@ struct PacoteTelemetria {
     int pos_y;
     char estado_fsm[16];
     int dist_frontal;
+    int dist_esq;
+    int dist_dir;
     uint8_t paredes;
     uint32_t timestamp;
 };

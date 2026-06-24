@@ -1,4 +1,5 @@
 #pragma once
 
 void ToFTask(void *parametrospv);
-bool tof_get_latest_distance_mm(int *distancia_mm);
+bool tof_get_distances_mm(int *frontal, int *esquerdo, int *direito);
+
