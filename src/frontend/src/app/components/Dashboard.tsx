@@ -121,6 +121,13 @@ export function Dashboard() {
   const [isLapRunning, setIsLapRunning] = useState(false);
   const lapStartTimeRef = React.useRef<number>(0);
 
+  // Buffer circular das últimas 8 leituras brutas por sensor ToF (para visualização de convergência)
+  const [tofSamples, setTofSamples] = useState<{
+    frontal: number[];
+    esq: number[];
+    dir: number[];
+  }>({ frontal: [], esq: [], dir: [] });
+
   const possuiErroCritico = telemetriaAtual.estado_fsm === 'ERROR';
   const isBateriaCritica = telemetriaAtual.bateria_v < 6.8; // HU 3.2.1
   const isFastRunReal = telemetriaAtual.estado_fsm === 'FAST_RUN'; // HU 2.4
@@ -285,6 +292,20 @@ export function Dashboard() {
       
       setTelemetriaAtual(novaTelemetria);
 
+      // Acumula as últimas 8 leituras brutas por sensor durante CALIBRATING
+      if (novaTelemetria.estado_fsm === 'CALIBRATING') {
+        const pushSample = (arr: number[], val: number) =>
+          val > 0 ? [...arr, val].slice(-8) : arr;
+        setTofSamples(prev => ({
+          frontal: pushSample(prev.frontal, dadosDecodificados.dist_frontal ?? 0),
+          esq:     pushSample(prev.esq,     dadosDecodificados.dist_esquerda ?? dadosDecodificados.dist_esq ?? 0),
+          dir:     pushSample(prev.dir,     dadosDecodificados.dist_direita  ?? dadosDecodificados.dist_dir  ?? 0),
+        }));
+      } else {
+        // Limpa buffer ao sair da calibração
+        setTofSamples({ frontal: [], esq: [], dir: [] });
+      }
+
       // Atualiza celulas exploradas
       const chaveMapa = `${novaTelemetria.posicao_x}-${novaTelemetria.posicao_y}`;
       setCelulasExploradas(prev => prev[chaveMapa] ? prev : {
@@ -336,12 +357,15 @@ export function Dashboard() {
           ? 'translate-y-0 opacity-100'
           : '-translate-y-full opacity-0'
       }`}>
-        <div className="animate-calibrating-pulse bg-amber-500 text-white px-8 py-3 flex items-center justify-center gap-6 shadow-xl shadow-amber-500/30">
+        <div className="animate-calibrating-pulse bg-amber-500 text-white px-6 py-3 flex items-center justify-center gap-6 shadow-xl shadow-amber-500/30">
           <Settings className="w-6 h-6 animate-spin shrink-0" />
-          <div className="flex flex-col items-center gap-1.5">
+
+          <div className="flex flex-col items-center gap-2">
             <span className="font-bold text-sm tracking-wider uppercase">
               Calibração em andamento — Aguarde antes de iniciar a prova
             </span>
+
+            {/* Indicadores de status por sensor */}
             <div className="flex items-center gap-4 text-amber-100 text-xs font-semibold">
               <span>Progresso: {calibProgress}%</span>
               <span className="flex items-center gap-1.5">
@@ -369,9 +393,79 @@ export function Dashboard() {
                 IMU {calibProgress >= 100 ? '✓' : '…'}
               </span>
             </div>
+
+            {/* Leituras brutas das amostras de convergência */}
+            <div className="flex gap-5 mt-0.5">
+              {([
+                { label: 'Frontal', samples: tofSamples.frontal, bit: 1 },
+                { label: 'Esq.',    samples: tofSamples.esq,     bit: 2 },
+                { label: 'Dir.',    samples: tofSamples.dir,     bit: 4 },
+              ] as { label: string; samples: number[]; bit: number }[]).map(({ label, samples, bit }) => {
+                // Calcula desvio entre primeira e última amostra para indicar convergência
+                const spread = samples.length >= 2
+                  ? Math.abs(samples[samples.length - 1] - samples[0])
+                  : null;
+                const estavel = !!(tofStatus & bit);
+                return (
+                  <div key={label} className="flex flex-col items-center gap-0.5">
+                    <span className={`text-[9px] font-bold uppercase tracking-widest ${
+                      estavel ? 'text-green-300' : 'text-amber-200'
+                    }`}>
+                      {label} {estavel ? '✓' : `${samples.length}/8`}
+                    </span>
+                    <div className="flex items-end gap-[3px] h-7">
+                      {Array.from({ length: 8 }, (_, i) => {
+                        const val = samples[i];
+                        const isLast = i === samples.length - 1;
+                        const hasVal = val !== undefined;
+                        // Altura proporcional ao valor (entre 4px e 28px) para efeito de sparkline
+                        const allVals = samples.filter(v => v > 0);
+                        const minV = allVals.length ? Math.min(...allVals) : 0;
+                        const maxV = allVals.length ? Math.max(...allVals) : 1;
+                        const range = maxV - minV || 1;
+                        const barH = hasVal ? Math.round(4 + ((val - minV) / range) * 24) : 4;
+                        return (
+                          <div key={i} className="flex flex-col items-center gap-0.5">
+                            <span className={`text-[8px] font-mono leading-none transition-all duration-300 ${
+                              !hasVal
+                                ? 'text-amber-700/40'
+                                : isLast
+                                  ? 'text-white font-bold'
+                                  : 'text-amber-200/70'
+                            }`}>
+                              {hasVal ? val : '—'}
+                            </span>
+                            <div
+                              className={`w-3 rounded-sm transition-all duration-300 ${
+                                !hasVal
+                                  ? 'bg-amber-700/20'
+                                  : estavel
+                                    ? 'bg-green-400'
+                                    : isLast
+                                      ? 'bg-white'
+                                      : 'bg-amber-300/60'
+                              }`}
+                              style={{ height: `${hasVal ? barH : 4}px` }}
+                            />
+                          </div>
+                        );
+                      })}
+                    </div>
+                    {spread !== null && (
+                      <span className={`text-[8px] font-mono ${
+                        spread <= 5 ? 'text-green-300' : spread <= 15 ? 'text-amber-200' : 'text-red-300'
+                      }`}>
+                        Δ {spread} mm
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
+
           {/* Barra de progresso */}
-          <div className="w-32 h-2 bg-amber-700/40 rounded-full overflow-hidden shrink-0">
+          <div className="w-28 h-2 bg-amber-700/40 rounded-full overflow-hidden shrink-0">
             <div
               className="h-full bg-white rounded-full transition-all duration-500"
               style={{ width: `${calibProgress}%` }}
