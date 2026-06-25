@@ -11,6 +11,9 @@ QueueHandle_t FilaTelemetria;
 
 #define UDP_DEST_PORT 41234
 
+// Configurações fonte da verdade definidas pelo Firmware na inicialização
+int global_maze_size = 16;
+bool global_mapping_mode = true;
 
 
 RingBufferTelemetria bufferOffline = {{}, 0, 0, 0};
@@ -112,10 +115,14 @@ void TaskTelemetria(void *parametrospv) {
                     obj["posicao_y"] = p_lote.pos_y;
                     obj["estado_fsm"] = p_lote.estado_fsm;
                     obj["dist_frontal"] = p_lote.dist_frontal;
+                    obj["dist_esquerda"] = p_lote.dist_esq;
+                    obj["dist_direita"] = p_lote.dist_dir;
                     obj["paredes"] = p_lote.paredes;
                     obj["timestamp"] = p_lote.timestamp;
                     
-                    obj["id_labirinto"] = "Wokwi_Maze";
+                    obj["mazeSize"] = global_maze_size;
+                    obj["mapping"] = global_mapping_mode;
+                    obj["id_labirinto"] = "Wokwi_Maze"; // Mantido por compatibilidade
                     obj["id_corrida"] = "Simulated_Run";
                     obj["objetivo"] = "Center";
                 }
@@ -137,10 +144,14 @@ void TaskTelemetria(void *parametrospv) {
                 doc["posicao_y"] = pacote.pos_y;
                 doc["estado_fsm"] = pacote.estado_fsm;
                 doc["dist_frontal"] = pacote.dist_frontal;
+                doc["dist_esquerda"] = pacote.dist_esq;
+                doc["dist_direita"] = pacote.dist_dir;
                 doc["paredes"] = pacote.paredes;
                 doc["timestamp"] = pacote.timestamp;
                 
-                doc["id_labirinto"] = "Wokwi_Maze";
+                doc["mazeSize"] = global_maze_size;
+                doc["mapping"] = global_mapping_mode;
+                doc["id_labirinto"] = "Wokwi_Maze"; // Mantido por compatibilidade
                 doc["id_corrida"] = "Simulated_Run";
                 doc["objetivo"] = "Center";
 

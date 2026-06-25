@@ -9,11 +9,31 @@
       "top": 0,
       "left": 0,
       "attrs": {}
+    },
+    {
+      "type": "wokwi-ky-040",
+      "id": "encoder_esq",
+      "top": 50,
+      "left": -120,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-ky-040",
+      "id": "encoder_dir",
+      "top": 150,
+      "left": -120,
+      "attrs": {}
     }
   ],
   "connections": [
     [ "esp:TX", "$serialMonitor:RX", "", [] ],
-    [ "esp:RX", "$serialMonitor:TX", "", [] ]
+    [ "esp:RX", "$serialMonitor:TX", "", [] ],
+    [ "encoder_esq:CLK", "esp:18", "green", [ "v0" ] ],
+    [ "encoder_esq:DT", "esp:5", "yellow", [ "v0" ] ],
+    [ "encoder_esq:GND", "esp:GND.1", "black", [ "v0" ] ],
+    [ "encoder_dir:CLK", "esp:17", "blue", [ "v0" ] ],
+    [ "encoder_dir:DT", "esp:16", "orange", [ "v0" ] ],
+    [ "encoder_dir:GND", "esp:GND.2", "black", [ "v0" ] ]
   ],
   "dependencies": {}
 }

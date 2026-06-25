@@ -93,6 +93,7 @@ describe('Integration Tests: UDP -> Backend -> InfluxDB', () => {
         posicao_y: 0,
         orientacao: 'LESTE'
       });
+      await delay(10); // Evita drop de UDP no loopback
     }
 
     await delay(1000); // Aguarda todas as writes (flush async)

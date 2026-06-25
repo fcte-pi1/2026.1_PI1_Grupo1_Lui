@@ -70,7 +70,7 @@ extern "C" void app_main(void) {
     // 5. Cria a tarefa de simulação de conectividade instável
     xTaskCreate(
         TaskSimularQuedaRede,
-        "SimuladorQueda",
+        "   ",
         2048,
         NULL,
         2,                   // Prioridade mais baixa
