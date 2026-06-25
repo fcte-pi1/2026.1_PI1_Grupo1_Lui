@@ -115,6 +115,8 @@ void TaskTelemetria(void *parametrospv) {
                     obj["posicao_y"] = p_lote.pos_y;
                     obj["estado_fsm"] = p_lote.estado_fsm;
                     obj["dist_frontal"] = p_lote.dist_frontal;
+                    obj["dist_esquerda"] = p_lote.dist_esq;
+                    obj["dist_direita"] = p_lote.dist_dir;
                     obj["paredes"] = p_lote.paredes;
                     obj["timestamp"] = p_lote.timestamp;
                     
@@ -142,6 +144,8 @@ void TaskTelemetria(void *parametrospv) {
                 doc["posicao_y"] = pacote.pos_y;
                 doc["estado_fsm"] = pacote.estado_fsm;
                 doc["dist_frontal"] = pacote.dist_frontal;
+                doc["dist_esquerda"] = pacote.dist_esq;
+                doc["dist_direita"] = pacote.dist_dir;
                 doc["paredes"] = pacote.paredes;
                 doc["timestamp"] = pacote.timestamp;
                 
