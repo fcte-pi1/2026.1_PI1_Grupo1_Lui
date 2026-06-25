@@ -160,4 +160,19 @@
 
 .animate-text-flash {
   animation: text-flash 1s infinite ease-in-out;
-}
+}
+
+@keyframes calibrating-pulse {
+  0%, 100% {
+    background-color: rgb(245 158 11); /* amber-500 */
+    box-shadow: 0 0 0px rgba(245, 158, 11, 0);
+  }
+  50% {
+    background-color: rgb(217 119 6);  /* amber-600 */
+    box-shadow: 0 0 20px rgba(245, 158, 11, 0.45);
+  }
+}
+
+.animate-calibrating-pulse {
+  animation: calibrating-pulse 1.5s infinite ease-in-out;
+}

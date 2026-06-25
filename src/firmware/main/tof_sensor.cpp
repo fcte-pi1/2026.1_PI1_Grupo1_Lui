@@ -5,6 +5,7 @@
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include <cmath>  // fabsf
 
 namespace {
 
@@ -108,17 +109,69 @@ int latest_dist_esquerdo = -1;
 int latest_dist_direito = -1;
 bool latest_distances_valid = false;
 
+// --- Estabilidade dos sensores ToF ---
+constexpr int   kStableSamples  = 8;     // 8 leituras a 10Hz = 800ms → EMA converge ≥ 99.6%
+constexpr float kStableThreshMm = 5.0f;  // desvio máximo aceitável entre raw e EMA (convergencia)
+
+struct EstadoEstabilidade {
+    int  amostras_validas = 0;
+    bool estavel          = false;
+};
+
+EstadoEstabilidade estab_frontal;
+EstadoEstabilidade estab_esquerdo;
+EstadoEstabilidade estab_direito;
+
+// Verifica convergência do filtro: a leitura raw deve estar a menos de kStableThreshMm
+// do valor já filtrado. Isso detecta estabilidade real, independente da distância absoluta.
+void atualizarEstabilidade(bool leitura_ok, float raw_mm,
+                            const EstadoFiltro &filtro, EstadoEstabilidade &estab) {
+    // Filtro ainda não iniciado ou leitura inválida → resetar
+    if (!leitura_ok || !filtro.iniciado) {
+        estab.amostras_validas = 0;
+        estab.estavel          = false;
+        return;
+    }
+    // |raw - EMA| < limiar → EMA convergiu para este valor
+    const float desvio = fabsf(raw_mm - filtro.distancia_filtrada_mm);
+    if (desvio < kStableThreshMm) {
+        if (estab.amostras_validas < kStableSamples) {
+            estab.amostras_validas++;
+        }
+        estab.estavel = (estab.amostras_validas >= kStableSamples);
+    } else {
+        estab.amostras_validas = 0;
+        estab.estavel          = false;
+    }
+}
+// -------------------------------------
+
 } // namespace
 
 bool tof_get_distances_mm(int *frontal, int *esquerdo, int *direito) {
     portENTER_CRITICAL(&latest_distances_lock);
     const bool valid = latest_distances_valid;
-    if (frontal) *frontal = latest_dist_frontal;
-    if (esquerdo) *esquerdo = latest_dist_esquerdo;
-    if (direito) *direito = latest_dist_direito;
+    if (frontal)   *frontal   = latest_dist_frontal;
+    if (esquerdo)  *esquerdo  = latest_dist_esquerdo;
+    if (direito)   *direito   = latest_dist_direito;
+    portEXIT_CRITICAL(&latest_distances_lock);
+    return valid;
+}
+
+// Retorna true quando TODOS os sensores acumularam kStableSamples leituras consecutivas válidas.
+// Preenche os ponteiros opcionais com o status individual de cada sensor.
+bool tof_is_stable(bool *frontal_ok, bool *esq_ok, bool *dir_ok) {
+    portENTER_CRITICAL(&latest_distances_lock);
+    const bool f_ok = estab_frontal.estavel;
+    const bool e_ok = estab_esquerdo.estavel;
+    const bool d_ok = estab_direito.estavel;
     portEXIT_CRITICAL(&latest_distances_lock);
 
-    return valid;
+    if (frontal_ok) *frontal_ok = f_ok;
+    if (esq_ok)     *esq_ok    = e_ok;
+    if (dir_ok)     *dir_ok    = d_ok;
+
+    return f_ok && e_ok && d_ok;
 }
 
 void ToFTask(void *parametrospv) {
@@ -152,23 +205,42 @@ void ToFTask(void *parametrospv) {
         const bool direitoOk = tofDireito.read(&rawDireitoMm);
         const bool frontalOk = tofFrontal.read(&rawFrontalMm);
 
+        // Calcula os valores corrigidos antes do filtro para usar na verificação de estabilidade
+        const float rawEsqCorrigidoMm  = esquerdoOk ? corrigirDistanciaMm(rawEsquerdoMm)  : -1.0f;
+        const float rawDirCorrigidoMm  = direitoOk  ? corrigirDistanciaMm(rawDireitoMm)   : -1.0f;
+
         int dEsq = -1, dDir = -1, dFron = -1;
 
         if (esquerdoOk) {
-            dEsq = static_cast<int>(aplicarFiltro(corrigirDistanciaMm(rawEsquerdoMm), filtroEsquerdo) + 0.5f);
+            dEsq = static_cast<int>(aplicarFiltro(rawEsqCorrigidoMm, filtroEsquerdo) + 0.5f);
         }
         if (direitoOk) {
-            dDir = static_cast<int>(aplicarFiltro(corrigirDistanciaMm(rawDireitoMm), filtroDireito) + 0.5f);
+            dDir = static_cast<int>(aplicarFiltro(rawDirCorrigidoMm, filtroDireito) + 0.5f);
         }
         if (frontalOk) {
-            dFron = rawFrontalMm; // Frontal sem filtro
+            dFron = rawFrontalMm; // Frontal sem filtro — estabilidade verificada por contagem simples
         }
 
         portENTER_CRITICAL(&latest_distances_lock);
         latest_dist_esquerdo = dEsq;
-        latest_dist_direito = dDir;
-        latest_dist_frontal = dFron;
+        latest_dist_direito  = dDir;
+        latest_dist_frontal  = dFron;
         latest_distances_valid = (esquerdoOk || direitoOk || frontalOk);
+
+        // Sensores laterais: critério de convergência do EMA (|raw - filtrado| < 5mm)
+        atualizarEstabilidade(esquerdoOk, rawEsqCorrigidoMm, filtroEsquerdo, estab_esquerdo);
+        atualizarEstabilidade(direitoOk,  rawDirCorrigidoMm, filtroDireito,  estab_direito);
+        // Frontal (sem EMA): estável após kStableSamples leituras brutas válidas (>0)
+        {
+            EstadoFiltro filtroFrontalProxy;
+            if (frontalOk && dFron > 0) {
+                filtroFrontalProxy.distancia_filtrada_mm = static_cast<float>(dFron);
+                filtroFrontalProxy.iniciado = true;
+                atualizarEstabilidade(frontalOk, static_cast<float>(dFron), filtroFrontalProxy, estab_frontal);
+            } else {
+                atualizarEstabilidade(false, 0.0f, filtroFrontalProxy, estab_frontal);
+            }
+        }
         portEXIT_CRITICAL(&latest_distances_lock);
 
         vTaskDelay(kReadPeriod);

@@ -12,6 +12,8 @@ struct PacoteTelemetria {
     int dist_dir;
     uint8_t paredes;
     uint32_t timestamp;
+    uint8_t calibration_progress; // 0-100: percentual do tempo de calibração decorrido
+    uint8_t tof_status;           // bitmask: bit0=frontal_ok, bit1=esq_ok, bit2=dir_ok
 };
 
 // Exportação de handlers globais e protótipos

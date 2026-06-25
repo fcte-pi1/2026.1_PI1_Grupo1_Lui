@@ -119,6 +119,8 @@ void TaskTelemetria(void *parametrospv) {
                     obj["dist_direita"] = p_lote.dist_dir;
                     obj["paredes"] = p_lote.paredes;
                     obj["timestamp"] = p_lote.timestamp;
+                    obj["calibration_progress"] = p_lote.calibration_progress;
+                    obj["tof_status"]           = p_lote.tof_status;
                     
                     obj["mazeSize"] = global_maze_size;
                     obj["mapping"] = global_mapping_mode;
@@ -148,6 +150,8 @@ void TaskTelemetria(void *parametrospv) {
                 doc["dist_direita"] = pacote.dist_dir;
                 doc["paredes"] = pacote.paredes;
                 doc["timestamp"] = pacote.timestamp;
+                doc["calibration_progress"] = pacote.calibration_progress;
+                doc["tof_status"]           = pacote.tof_status;
                 
                 doc["mazeSize"] = global_maze_size;
                 doc["mapping"] = global_mapping_mode;

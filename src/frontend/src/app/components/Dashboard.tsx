@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import {
   BatteryFull, BatteryMedium, BatteryLow,
-  Gauge, Clock, Target, MapPin, Activity, Wifi, AlertTriangle, ShieldAlert
+  Gauge, Clock, Target, MapPin, Activity, Wifi, AlertTriangle, ShieldAlert, Settings
 } from "lucide-react";
 import { RobotMap } from "./MapaTempoReal";
 import { io } from "socket.io-client";
@@ -29,6 +29,8 @@ export interface DadosTelemetria {
   velocidade_media?: number;
   rota_calculada?: { x: number; y: number }[];
   id_corrida?: string;
+  calibration_progress?: number; // 0-100: percentual do tempo de calibração decorrido
+  tof_status?: number;           // bitmask: bit0=frontal_ok, bit1=esq_ok, bit2=dir_ok
 }
 
 export interface RegistoErro {
@@ -123,6 +125,9 @@ export function Dashboard() {
   const isBateriaCritica = telemetriaAtual.bateria_v < 6.8; // HU 3.2.1
   const isFastRunReal = telemetriaAtual.estado_fsm === 'FAST_RUN'; // HU 2.4
   const isFastRun = overrideModo === 'AUTO' ? isFastRunReal : overrideModo === 'PERFORMANCE';
+  const isCalibrating = telemetriaAtual.estado_fsm === 'CALIBRATING';
+  const calibProgress = telemetriaAtual.calibration_progress ?? 0;
+  const tofStatus = telemetriaAtual.tof_status ?? 0;
 
   // Critério de Aceite 4: mostrarTrajetoRapido só pode ser true quando o estado
   // REAL da FSM (não o override de desenvolvimento) é FAST_RUN.
@@ -325,6 +330,56 @@ export function Dashboard() {
   return (
     <div className="h-full flex flex-col bg-[#F8FAFC] font-sans relative overflow-hidden">
       
+      {/* Banner de Calibração Inicial do Robô */}
+      <div className={`absolute top-0 left-0 w-full z-50 transition-all duration-500 ease-in-out ${
+        isCalibrating && !possuiErroCritico
+          ? 'translate-y-0 opacity-100'
+          : '-translate-y-full opacity-0'
+      }`}>
+        <div className="animate-calibrating-pulse bg-amber-500 text-white px-8 py-3 flex items-center justify-center gap-6 shadow-xl shadow-amber-500/30">
+          <Settings className="w-6 h-6 animate-spin shrink-0" />
+          <div className="flex flex-col items-center gap-1.5">
+            <span className="font-bold text-sm tracking-wider uppercase">
+              Calibração em andamento — Aguarde antes de iniciar a prova
+            </span>
+            <div className="flex items-center gap-4 text-amber-100 text-xs font-semibold">
+              <span>Progresso: {calibProgress}%</span>
+              <span className="flex items-center gap-1.5">
+                <span className={`w-2 h-2 rounded-full transition-colors ${
+                  tofStatus & 1 ? 'bg-green-300' : 'bg-red-400 animate-pulse'
+                }`} />
+                ToF Frontal {tofStatus & 1 ? '✓' : '…'}
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className={`w-2 h-2 rounded-full transition-colors ${
+                  tofStatus & 2 ? 'bg-green-300' : 'bg-red-400 animate-pulse'
+                }`} />
+                ToF Esq. {tofStatus & 2 ? '✓' : '…'}
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className={`w-2 h-2 rounded-full transition-colors ${
+                  tofStatus & 4 ? 'bg-green-300' : 'bg-red-400 animate-pulse'
+                }`} />
+                ToF Dir. {tofStatus & 4 ? '✓' : '…'}
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className={`w-2 h-2 rounded-full transition-colors ${
+                  calibProgress >= 100 ? 'bg-green-300' : 'bg-amber-300 animate-pulse'
+                }`} />
+                IMU {calibProgress >= 100 ? '✓' : '…'}
+              </span>
+            </div>
+          </div>
+          {/* Barra de progresso */}
+          <div className="w-32 h-2 bg-amber-700/40 rounded-full overflow-hidden shrink-0">
+            <div
+              className="h-full bg-white rounded-full transition-all duration-500"
+              style={{ width: `${calibProgress}%` }}
+            />
+          </div>
+        </div>
+      </div>
+
       {/* Alerta Crítico de Hardware */}
       <div className={`absolute top-0 left-0 w-full z-50 transition-all duration-500 ease-in-out ${possuiErroCritico ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'}`}>
         <div className="bg-red-600 text-white px-8 py-3 flex items-center justify-center gap-4 shadow-xl shadow-red-600/30">
@@ -346,7 +401,7 @@ export function Dashboard() {
       </div>
 
       {/* Cabeçalho */}
-      <div className={`px-8 py-5 flex items-center justify-between shrink-0 bg-white border-b border-slate-200 shadow-sm z-10 transition-all duration-300 ${(possuiErroCritico || isBateriaCritica) ? 'mt-12' : 'mt-0'}`}>
+      <div className={`px-8 py-5 flex items-center justify-between shrink-0 bg-white border-b border-slate-200 shadow-sm z-10 transition-all duration-300 ${(possuiErroCritico || isBateriaCritica || isCalibrating) ? 'mt-12' : 'mt-0'}`}>
         <div className="flex items-center gap-4">
           <div>
             <h1 className="text-2xl font-black text-slate-800 tracking-tight">

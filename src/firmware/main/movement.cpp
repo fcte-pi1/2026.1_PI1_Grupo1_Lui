@@ -93,16 +93,40 @@ void MoveTask(void *parametrospv) {
                 }
                 break;
 
-            case CALIBRATING:
+            case CALIBRATING: {
                 strcpy(pacote.estado_fsm, "CALIBRATING");
-                // Aguarda 2 segundos
-                if ((xTaskGetTickCount() - calibration_start_time) > pdMS_TO_TICKS(2000)) {
+
+                const TickType_t elapsed = xTaskGetTickCount() - calibration_start_time;
+                const TickType_t tempo_minimo  = pdMS_TO_TICKS(2000); // espera mínima
+                const TickType_t tempo_maximo  = pdMS_TO_TICKS(5000); // timeout de segurança
+
+                // Progresso visual: 0-100% baseado no tempo mínimo de 2s
+                pacote.calibration_progress = (elapsed >= tempo_minimo)
+                    ? 100
+                    : (uint8_t)((elapsed * 100UL) / tempo_minimo);
+
+                // Verifica estabilidade REAL dos sensores (8 leituras consecutivas válidas)
+                bool tof_frontal_ok = false, tof_esq_ok = false, tof_dir_ok = false;
+                const bool todos_estaveis = tof_is_stable(&tof_frontal_ok, &tof_esq_ok, &tof_dir_ok);
+
+                pacote.tof_status = (tof_frontal_ok ? 0x01 : 0x00) |
+                                    (tof_esq_ok     ? 0x02 : 0x00) |
+                                    (tof_dir_ok     ? 0x04 : 0x00);
+
+                // Transição somente após espera mínima E todos os ToF estáveis
+                if (elapsed >= tempo_minimo && todos_estaveis) {
                     estado_atual = MAPPING;
-                    ticks_start_left = encoder_get_left_ticks();
+                    ticks_start_left  = encoder_get_left_ticks();
                     ticks_start_right = encoder_get_right_ticks();
-                    printf("FSM: Transicao para MAPPING. Iniciando movimento.\n");
+                    printf("FSM: Calibracao concluida. Todos ToF estaveis. Iniciando MAPPING.\n");
+                }
+                // Timeout de segurança: se sensores não estabilizarem em 5s → ERROR
+                else if (elapsed >= tempo_maximo) {
+                    estado_atual = ERROR;
+                    printf("FSM: ERRO — Sensores ToF nao estabilizaram em 5s! Abortando.\n");
                 }
                 break;
+            }
 
             case MAPPING: {
                 strcpy(pacote.estado_fsm, "MAPPING");
