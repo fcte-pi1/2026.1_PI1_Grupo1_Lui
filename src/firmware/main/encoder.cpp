@@ -19,9 +19,9 @@ static void IRAM_ATTR left_encoder_isr(void *arg)
     int b = gpio_get_level(ENC_LEFT_B);
 
     if (b)
-        left_ticks++;
+        left_ticks = left_ticks + 1;
     else
-        left_ticks--;
+        left_ticks = left_ticks - 1;
 }
 
 static void IRAM_ATTR right_encoder_isr(void *arg)
@@ -29,9 +29,9 @@ static void IRAM_ATTR right_encoder_isr(void *arg)
     int b = gpio_get_level(ENC_RIGHT_B);
 
     if (b)
-        right_ticks++;
+        right_ticks = right_ticks + 1;
     else
-        right_ticks--;
+        right_ticks = right_ticks - 1;
 }
 
 void encoder_init()
@@ -65,7 +65,8 @@ void encoder_init()
 
 int32_t encoder_get_left_ticks()
 {
-    return left_ticks;
+    // MODO MANCO INVERTIDO: Encoder Esquerdo quebrado, clona do Direito!
+    return right_ticks;
 }
 
 int32_t encoder_get_right_ticks()
@@ -81,27 +82,7 @@ int32_t encoder_get_right_ticks()
 
 float encoder_get_left_velocity_cms()
 {
-    static int32_t last_left = 0;
-    static uint64_t last_time = 0;
-
-    const uint64_t now = esp_timer_get_time();
-    if (last_time == 0) {
-        last_time = now;
-        last_left = left_ticks;
-        return 0.0f;
-    }
-
-    float dt = (now - last_time) / 1000000.0f;
-    if (dt <= 0.0f) return 0.0f;
-
-    int32_t left_now = left_ticks;
-    int32_t delta_left = left_now - last_left;
-
-    last_left = left_now;
-    last_time = now;
-
-    float distance_cm = (delta_left / TICKS_POR_VOLTA) * CM_POR_VOLTA;
-    return distance_cm / dt;
+    return encoder_get_right_velocity_cms();
 }
 
 float encoder_get_right_velocity_cms()

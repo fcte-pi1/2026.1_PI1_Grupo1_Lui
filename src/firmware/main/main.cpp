@@ -46,7 +46,7 @@ extern "C" void app_main(void) {
     );
 
     // 3. Cria a tarefa de movimento no Core 0
-    xTaskCreatePinnedToCore(
+    xTaskCreatePinnedToCore(    
         MoveTask,            // Função executada
         "Movement_Core0",    // Nome para debug
         4096,                // Stack size
@@ -76,4 +76,4 @@ extern "C" void app_main(void) {
         2,                   // Prioridade mais baixa
         NULL
     );
-}
+}   

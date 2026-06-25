@@ -1,9 +1,8 @@
 #pragma once
 #include "driver/gpio.h"
 
-// Substitua os valores abaixo pelos pinos físicos reais do ESP32
-#define PIN_SWITCH_START      GPIO_NUM_4  // Ex: GPIO_NUM_4
-#define PIN_SWITCH_MAZE_SIZE  GPIO_NUM_5  // Ex: GPIO_NUM_5
+#define PIN_SWITCH_START      GPIO_NUM_34
+#define PIN_SWITCH_MAZE_SIZE  GPIO_NUM_39
 
 void switches_init();
 
