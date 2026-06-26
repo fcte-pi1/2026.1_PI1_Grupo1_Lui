@@ -10,38 +10,53 @@
 #include "freertos/task.h"
 
 // ================= CONSTANTES DE CALIBRAÇÃO =================
-// Baseado no seu teste: 222 Ticks para 5cm -> 44.4 Ticks por cm
-const float TICKS_POR_CM = 44.4f; 
+// Corrigido contra Bouncing: A metade exata da calibração manual
+const float TICKS_POR_CM = 23.0f; 
 
-// Baseado na Bitola do robô: Quantos Ticks são necessários para girar 90 graus?
-// (Ajuste esse valor após o teste das 10 voltas ou ao medir a bitola)
-const float TICKS_POR_90_GRAUS = 210.0f; 
+// Cálculo final com PIDs controlados: 538 ticks geraram 190 graus. Logo, (538 / 190) * 90 = 254.8 ~ Ajustado para 251 para cravar 180
+const float TICKS_POR_90_GRAUS = 251.0f; 
 // ============================================================
 
 // Instâncias globais (privadas deste módulo) de PID
 static PID pid_motor_dir;
 static PID pid_motor_esq;
 
+// Variáveis de estado para a Telemetria
+static int last_pwm_esq = 0;
+static int last_pwm_dir = 0;
+static float last_erro_pid = 0.0f;
+static float last_vel_media = 0.0f;
+
 // Função privada para controle de velocidade
 static void controle_velocidade(float vel_alvo_esq, float vel_alvo_dir, float dt) {
     float vel_real_esq = encoder_get_left_velocity_cms();
     float vel_real_dir = encoder_get_right_velocity_cms();
 
+    last_vel_media = (vel_real_esq + vel_real_dir) / 2.0f;
+    last_erro_pid = vel_alvo_esq - vel_real_esq; // Monitorando a roda problemática (esq) pro backend
+
     float pwm_esq = pid_motor_esq.compute(vel_alvo_esq, vel_real_esq, dt);
     float pwm_dir = pid_motor_dir.compute(vel_alvo_dir, vel_real_dir, dt);
 
-    float forca_final_esq = pwm_esq;
-    if (forca_final_esq > 0) forca_final_esq += 200.0f;
-    if (forca_final_esq < 0) forca_final_esq -= 200.0f;
+    float base_esq = 0.0f;
+    if (vel_alvo_esq > 0) base_esq = 150.0f;
+    else if (vel_alvo_esq < 0) base_esq = -150.0f;
+    
+    float forca_final_esq = base_esq + pwm_esq;
     if (vel_alvo_esq == 0) forca_final_esq = 0; // Se alvo for zero, corta de vez
 
-    float forca_final_dir = pwm_dir;
-    if (forca_final_dir > 0) forca_final_dir += 200.0f;
-    if (forca_final_dir < 0) forca_final_dir -= 200.0f;
+    float base_dir = 0.0f;
+    if (vel_alvo_dir > 0) base_dir = 150.0f;
+    else if (vel_alvo_dir < 0) base_dir = -150.0f;
+    
+    float forca_final_dir = base_dir + pwm_dir;
     if (vel_alvo_dir == 0) forca_final_dir = 0;
 
     motor_set_speed(MOTOR_LEFT, (int)forca_final_esq);
     motor_set_speed(MOTOR_RIGHT, (int)forca_final_dir);
+    
+    last_pwm_esq = (int)forca_final_esq;
+    last_pwm_dir = (int)forca_final_dir;
 }
 
 // Função privada para enviar telemetria limpa
@@ -54,12 +69,18 @@ static void despachar_telemetria(const char* estado, int32_t ticks) {
     pacote.dist_frontal = -1;
     pacote.dist_esq = -1;
     pacote.dist_dir = -1;
+    
+    pacote.pwm_esq = last_pwm_esq;
+    pacote.pwm_dir = last_pwm_dir;
+    pacote.erro_pid = last_erro_pid;
+    pacote.velocidade_media = last_vel_media;
+    
     xQueueSend(FilaTelemetria, &pacote, 0);
-}
-
+} 
+// ordem de valores é  kp,ki,kd,min,max
 void navigation_init() {
-    pid_motor_dir.init(2.0f, 0.5f, 0.0f, 100.0f, 255.0f);
-    pid_motor_esq.init(2.0f, 0.5f, 0.0f, 100.0f, 255.0f);
+    pid_motor_dir.init(5.0f, 10.0f, 0.0f, 100.0f, 255.0f);
+    pid_motor_esq.init(5.0f, 10.0f, 0.0f, 100.0f, 255.0f);
 }
 
 void andar_reto_cm(float cm) {
@@ -81,8 +102,8 @@ void andar_reto_cm(float cm) {
             break; 
         }
 
-        controle_velocidade(15.0f, 15.0f, 0.1f);
-        vTaskDelay(pdMS_TO_TICKS(100));
+        controle_velocidade(15.0f, 15.0f, 0.01f);
+        vTaskDelay(pdMS_TO_TICKS(10));
     }
 
     motor_set_speed(MOTOR_LEFT, 0);
@@ -106,8 +127,10 @@ void girar_graus(float graus, bool direita) {
     pid_motor_esq.reset();
     pid_motor_dir.reset();
 
-    float vel_esq = direita ? 15.0f : -15.0f;
-    float vel_dir = direita ? -15.0f : 15.0f;
+    // Velocidade de giro aumentada para 25.0f para garantir torque suficiente
+    // e vencer o atrito lateral da roda boba (que estava travando o motor esquerdo)
+    float vel_esq = direita ? 25.0f : -25.0f;
+    float vel_dir = direita ? -25.0f : 25.0f;
 
     while (true) {
         int32_t ticks_andados = std::abs(encoder_get_right_ticks() - ticks_inicio);
@@ -120,8 +143,8 @@ void girar_graus(float graus, bool direita) {
             break; 
         }
 
-        controle_velocidade(vel_esq, vel_dir, 0.1f); 
-        vTaskDelay(pdMS_TO_TICKS(100)); 
+        controle_velocidade(vel_esq, vel_dir, 0.01f); 
+        vTaskDelay(pdMS_TO_TICKS(10)); 
     }
 
     motor_set_speed(MOTOR_LEFT, 0);

@@ -5,11 +5,12 @@
 #include "esp_timer.h"
 #include <math.h>
 
-#define ENC_LEFT_A   GPIO_NUM_18
-#define ENC_LEFT_B   GPIO_NUM_5
+// Fiação cruzada consertada via Software
+#define ENC_LEFT_A   GPIO_NUM_17
+#define ENC_LEFT_B   GPIO_NUM_16
 
-#define ENC_RIGHT_A  GPIO_NUM_17
-#define ENC_RIGHT_B  GPIO_NUM_16
+#define ENC_RIGHT_A  GPIO_NUM_18
+#define ENC_RIGHT_B  GPIO_NUM_5
 
 static volatile int32_t left_ticks = 0;
 static volatile int32_t right_ticks = 0;
@@ -19,9 +20,9 @@ static void IRAM_ATTR left_encoder_isr(void *arg)
     int b = gpio_get_level(ENC_LEFT_B);
 
     if (b)
-        left_ticks++;
+        left_ticks++; // Polaridade Padrão
     else
-        left_ticks--;
+        left_ticks--; // Polaridade Padrão
 }
 
 static void IRAM_ATTR right_encoder_isr(void *arg)
@@ -29,9 +30,9 @@ static void IRAM_ATTR right_encoder_isr(void *arg)
     int b = gpio_get_level(ENC_RIGHT_B);
 
     if (b)
-        right_ticks++;
+        right_ticks--; // Invertido via software
     else
-        right_ticks--;
+        right_ticks++; // Invertido via software
 }
 
 void encoder_init()
@@ -74,8 +75,8 @@ int32_t encoder_get_right_ticks()
 }
 
 // --- CONSTANTES DO ROBÔ FÍSICO ---
-// Motor N20 300 RPM -> ~2800 ticks por volta da roda (valor aproximado, sujeito a calibração)
-#define TICKS_POR_VOLTA 2800.0f 
+// Calibração baseada em movimento rápido (sem ruído de bounce manual)
+#define TICKS_POR_VOLTA 330.0f 
 // Roda de 45mm de diâmetro -> 45 * PI = 141.37 mm = 14.137 cm
 #define CM_POR_VOLTA 14.137f
 

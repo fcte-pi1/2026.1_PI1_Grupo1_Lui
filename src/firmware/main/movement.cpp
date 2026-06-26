@@ -18,14 +18,19 @@ void MoveTask(void *parametrospv) {
     // Inicialização da Lógica de Navegação (PIDs)
     navigation_init();
 
-    printf("Iniciando Teste de Calibração (10 Voltas) em 3 segundos...\n");
-    vTaskDelay(pdMS_TO_TICKS(3000));
+    printf("Iniciando Teste de Validação (Andar 1 Célula - 18cm)...\n");
+    vTaskDelay(pdMS_TO_TICKS(100));
 
-    // TESTE EMPÍRICO DA BITOLA: 10 voltas para a direita (3600 graus)
-    girar_graus(3600.0f, true);
+    // TESTE DE VALIDAÇÃO: Andar uma célula em linha reta
+    mover_celula();
+    vTaskDelay(pdMS_TO_TICKS(100));
+    girar_graus(180.0,true);
+
+    vTaskDelay(pdMS_TO_TICKS(100));
+    girar_graus(180.0,false);
     
     // Fim da coreografia. Fica parado para sempre.
     while(true) {
-        vTaskDelay(pdMS_TO_TICKS(1000));
+        vTaskDelay(pdMS_TO_TICKS(100));
     }
 }

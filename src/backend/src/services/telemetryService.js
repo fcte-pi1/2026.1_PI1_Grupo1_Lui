@@ -172,6 +172,11 @@ server.on('message', (msg, rinfo) => {
       // Envia dados para clientes conectados via WebSocket
       io.emit('telemetry', data);
 
+      // --- LOG VISUAL NO TERMINAL PARA DEBUG RÁPIDO ---
+      const ticks_print = data.posicao_x !== undefined ? data.posicao_x : (data.pos_x !== undefined ? data.pos_x : 'NULL');
+      console.log(`[DADOS] Estado: ${data.estado_fsm} | Ticks X: ${ticks_print} | PWM Esq: ${data.pwm_esq} | PWM Dir: ${data.pwm_dir} | Erro PID: ${data.erro_pid}`);
+
+
       // Mapeamento dinâmico e seguro para o esquema InfluxDB
       const estado_robo = data.estado_fsm || data.estado_robo || 'IDLE';
       const id_labirinto = data.id_labirinto || 'default';

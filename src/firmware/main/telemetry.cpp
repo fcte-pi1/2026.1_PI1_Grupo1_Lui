@@ -57,6 +57,8 @@ void TaskTelemetria(void *parametrospv) {
         printf("Falha ao criar o socket UDP\n");
     } else {
         printf("Socket UDP criado com sucesso\n");
+        int broadcastEnable = 1;
+        setsockopt(sock, SOL_SOCKET, SO_BROADCAST, &broadcastEnable, sizeof(broadcastEnable));
     }
 
     // Buffer para serialização MsgPack
@@ -78,9 +80,11 @@ void TaskTelemetria(void *parametrospv) {
                     printf("Resolvido Host do PC para o IP: %s\n", inet_ntoa(dest_addr.sin_addr));
                     ip_resolved = true;
                 } else {
-                    // Fallback direto para o PC do usuário (Descoberto via hostname -I)
-                    dest_addr.sin_addr.s_addr = inet_addr("192.168.1.94");
-                    printf("Aviso: DNS falhou. Usando IP direto do PC: 192.168.1.94\n");
+                    // MUDANÇA GENIAL: Em vez de fixar o IP da sua máquina, usamos Broadcast (255.255.255.255)
+                    // Assim, o carrinho "grita" os dados para a rede Wi-Fi inteira e seu backend Node.js apenas escuta!
+                    dest_addr.sin_addr.s_addr = inet_addr("255.255.255.255");
+                    printf("Aviso: DNS falhou. Usando BROADCAST para gritar na rede: 255.255.255.255\n");
+                    ip_resolved = true; // FIX: Não travar a fila tentando resolver DNS 100x por segundo
                 }
             }
 
@@ -120,6 +124,11 @@ void TaskTelemetria(void *parametrospv) {
                     obj["paredes"] = p_lote.paredes;
                     obj["timestamp"] = p_lote.timestamp;
                     
+                    obj["pwm_esq"] = p_lote.pwm_esq;
+                    obj["pwm_dir"] = p_lote.pwm_dir;
+                    obj["erro_pid"] = p_lote.erro_pid;
+                    obj["velocidade_media"] = p_lote.velocidade_media;
+                    
                     obj["mazeSize"] = global_maze_size;
                     obj["mapping"] = global_mapping_mode;
                     obj["id_labirinto"] = "Wokwi_Maze"; // Mantido por compatibilidade
@@ -148,6 +157,11 @@ void TaskTelemetria(void *parametrospv) {
                 doc["dist_direita"] = pacote.dist_dir;
                 doc["paredes"] = pacote.paredes;
                 doc["timestamp"] = pacote.timestamp;
+                
+                doc["pwm_esq"] = pacote.pwm_esq;
+                doc["pwm_dir"] = pacote.pwm_dir;
+                doc["erro_pid"] = pacote.erro_pid;
+                doc["velocidade_media"] = pacote.velocidade_media;
                 
                 doc["mazeSize"] = global_maze_size;
                 doc["mapping"] = global_mapping_mode;

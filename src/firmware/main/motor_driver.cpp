@@ -82,14 +82,30 @@ void motor_set_speed(MotorSide side, int pwm_value) {
 
     // Direcionamento do sinal dependendo do motor escolhido
     if (side == MOTOR_LEFT) {
-        gpio_set_level(PIN_MOTOR_L_IN3, forward ? 1 : 0);
-        gpio_set_level(PIN_MOTOR_L_IN4, forward ? 0 : 1);
-        ledc_set_duty(PWM_MODE, PWM_CHANNEL_LEFT, duty_cycle);
+        if (pwm_value == 0) {
+            // MODO FREIO ABS MAGNÉTICO
+            gpio_set_level(PIN_MOTOR_L_IN3, 1);
+            gpio_set_level(PIN_MOTOR_L_IN4, 1);
+            ledc_set_duty(PWM_MODE, PWM_CHANNEL_LEFT, 255);
+        } else {
+            // MODO ACELERAÇÃO
+            gpio_set_level(PIN_MOTOR_L_IN3, forward ? 1 : 0);
+            gpio_set_level(PIN_MOTOR_L_IN4, forward ? 0 : 1);
+            ledc_set_duty(PWM_MODE, PWM_CHANNEL_LEFT, duty_cycle);
+        }
         ledc_update_duty(PWM_MODE, PWM_CHANNEL_LEFT);
     } else {
-        gpio_set_level(PIN_MOTOR_R_IN1, forward ? 1 : 0);
-        gpio_set_level(PIN_MOTOR_R_IN2, forward ? 0 : 1);
-        ledc_set_duty(PWM_MODE, PWM_CHANNEL_RIGHT, duty_cycle);
+        if (pwm_value == 0) {
+            // MODO FREIO ABS MAGNÉTICO
+            gpio_set_level(PIN_MOTOR_R_IN1, 1);
+            gpio_set_level(PIN_MOTOR_R_IN2, 1);
+            ledc_set_duty(PWM_MODE, PWM_CHANNEL_RIGHT, 255);
+        } else {
+            // MODO ACELERAÇÃO
+            gpio_set_level(PIN_MOTOR_R_IN1, forward ? 1 : 0);
+            gpio_set_level(PIN_MOTOR_R_IN2, forward ? 0 : 1);
+            ledc_set_duty(PWM_MODE, PWM_CHANNEL_RIGHT, duty_cycle);
+        }
         ledc_update_duty(PWM_MODE, PWM_CHANNEL_RIGHT);
     }
 }
