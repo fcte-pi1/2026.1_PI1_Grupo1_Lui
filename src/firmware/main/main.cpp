@@ -7,19 +7,19 @@
 #include "wifi_manager.hpp"
 
 // Task de simulação de queda de conectividade para testes do ring buffer
-void TaskSimularQuedaRede(void *pvParameters) {
-    for (;;) {
-        vTaskDelay(pdMS_TO_TICKS(15000)); // Período de operação normal
+// void TaskSimularQuedaRede(void *pvParameters) {
+//     for (;;) {
+//         vTaskDelay(pdMS_TO_TICKS(15000)); // Período de operação normal
         
-        printf("\n[TESTE] FINGINDO QUEDA DE REDE POR 15 SEGUNDOS!\n");
-        wifi_conectado = false; // Interrompe conectividade para acúmulo no buffer
+//         printf("\n[TESTE] FINGINDO QUEDA DE REDE POR 15 SEGUNDOS!\n");
+//         wifi_conectado = false; // Interrompe conectividade para acúmulo no buffer
         
-        vTaskDelay(pdMS_TO_TICKS(15000)); // Período offline simulado
+//         vTaskDelay(pdMS_TO_TICKS(15000)); // Período offline simulado
         
-        printf("\n[TESTE] REDE RESTABELECIDA! DISPARANDO O LOTE...\n");
-        wifi_conectado = true; // Restabelecimento da conexão
-    }
-}
+//         printf("\n[TESTE] REDE RESTABELECIDA! DISPARANDO O LOTE...\n");
+//         wifi_conectado = true; // Restabelecimento da conexão
+//     }
+// }
 
 extern "C" void app_main(void) {
     printf("Iniciando Micromouse Modular com FreeRTOS... \n");
@@ -68,12 +68,12 @@ extern "C" void app_main(void) {
     );
 
     // 5. Cria a tarefa de simulação de conectividade instável
-    xTaskCreate(
+    /* xTaskCreate(
         TaskSimularQuedaRede,
         "   ",
         2048,
         NULL,
         2,                   // Prioridade mais baixa
         NULL
-    );
+    ); */
 }

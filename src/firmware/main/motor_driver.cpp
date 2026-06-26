@@ -21,7 +21,7 @@ constexpr ledc_mode_t PWM_MODE             = LEDC_HIGH_SPEED_MODE;
 constexpr ledc_channel_t PWM_CHANNEL_LEFT  = LEDC_CHANNEL_0;
 constexpr ledc_channel_t PWM_CHANNEL_RIGHT = LEDC_CHANNEL_1;
 constexpr ledc_timer_bit_t PWM_RESOLUTION  = LEDC_TIMER_8_BIT; // 8 bits = 0 a 255
-constexpr uint32_t PWM_FREQUENCY_HZ        = 20000; // 20kHz evita barulho agudo no motor
+constexpr uint32_t PWM_FREQUENCY_HZ        = 1000; // 1kHz: Causa um zumbido audível, mas dá MUITO mais torque em baixas velocidades!
 
 void motor_init() {
     // 1. Configurar os pinos de direção como saída (OUTPUT)

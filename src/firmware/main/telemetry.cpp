@@ -78,9 +78,9 @@ void TaskTelemetria(void *parametrospv) {
                     printf("Resolvido Host do PC para o IP: %s\n", inet_ntoa(dest_addr.sin_addr));
                     ip_resolved = true;
                 } else {
-                    // Fallback direto
-                    dest_addr.sin_addr.s_addr = inet_addr("10.13.37.1");
-                    printf("Aviso: DNS falhou. Usando IP fallback do PC: 10.13.37.1\n");
+                    // Fallback direto para o PC do usuário (Descoberto via hostname -I)
+                    dest_addr.sin_addr.s_addr = inet_addr("192.168.1.94");
+                    printf("Aviso: DNS falhou. Usando IP direto do PC: 192.168.1.94\n");
                 }
             }
 

@@ -9,10 +9,10 @@
 bool wifi_conectado = false; // Estado global da conectividade Wi-Fi
 
 // Credenciais da rede Wi-Fi do ambiente de simulação (Wokwi)
-#define WIFI_SSID "Wokwi-GUEST"
-#define WIFI_PASS ""
-// #define WIFI_SSID "FORTUNATO"
-// #define WIFI_PASS "410671_Rocha"
+// #define WIFI_SSID "Wokwi-GUEST"
+// #define WIFI_PASS ""
+#define WIFI_SSID "ITRAC"
+#define WIFI_PASS "FG@2018UNB"
 
 static void event_handler(void* arg, esp_event_base_t event_base,
                           int32_t event_id, void* event_data) {
