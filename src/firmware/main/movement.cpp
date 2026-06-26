@@ -18,12 +18,17 @@ void MoveTask(void *parametrospv) {
     // Inicialização da Lógica de Navegação (PIDs)
     navigation_init();
 
-    printf("Iniciando Teste de Calibração (10 Voltas) em 3 segundos...\n");
+    printf("Iniciando coreografia (18cm + 90 esq + 360) em 3 segundos...\n");
     vTaskDelay(pdMS_TO_TICKS(3000));
 
-    // TESTE EMPÍRICO DA BITOLA: 10 voltas para a direita (3600 graus)
-    girar_graus(3600.0f, true);
-    
+    andar_reto_cm(6.0f);
+    vTaskDelay(pdMS_TO_TICKS(1000)); // pausa pra estabilizar antes do giro
+    girar_graus(90.0f, true); // vira pra direita
+    vTaskDelay(pdMS_TO_TICKS(1000)); // pausa pra estabilizar antes do giro
+    andar_reto_cm(6.0f);
+    vTaskDelay(pdMS_TO_TICKS(1000));
+    girar_graus(90.0f, false);
+
     // Fim da coreografia. Fica parado para sempre.
     while(true) {
         vTaskDelay(pdMS_TO_TICKS(1000));

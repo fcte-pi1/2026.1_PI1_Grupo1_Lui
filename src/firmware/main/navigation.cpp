@@ -11,11 +11,11 @@
 
 // ================= CONSTANTES DE CALIBRAÇÃO =================
 // Baseado no seu teste: 222 Ticks para 5cm -> 44.4 Ticks por cm
-const float TICKS_POR_CM = 44.4f; 
+const float TICKS_POR_CM = 44.4f;
 
 // Baseado na Bitola do robô: Quantos Ticks são necessários para girar 90 graus?
 // (Ajuste esse valor após o teste das 10 voltas ou ao medir a bitola)
-const float TICKS_POR_90_GRAUS = 210.0f; 
+const float TICKS_POR_90_GRAUS = 175.0f;
 // ============================================================
 
 // Instâncias globais (privadas deste módulo) de PID
@@ -31,8 +31,8 @@ static void controle_velocidade(float vel_alvo_esq, float vel_alvo_dir, float dt
     float pwm_dir = pid_motor_dir.compute(vel_alvo_dir, vel_real_dir, dt);
 
     float forca_final_esq = pwm_esq;
-    if (forca_final_esq > 0) forca_final_esq += 200.0f;
-    if (forca_final_esq < 0) forca_final_esq -= 200.0f;
+    if (forca_final_esq > 0) forca_final_esq += 170.0f;
+    if (forca_final_esq < 0) forca_final_esq -= 170.0f;
     if (vel_alvo_esq == 0) forca_final_esq = 0; // Se alvo for zero, corta de vez
 
     float forca_final_dir = pwm_dir;
@@ -81,7 +81,7 @@ void andar_reto_cm(float cm) {
             break; 
         }
 
-        controle_velocidade(15.0f, 15.0f, 0.1f);
+        controle_velocidade(18.0f, 18.0f, 0.1f);
         vTaskDelay(pdMS_TO_TICKS(100));
     }
 
@@ -100,9 +100,10 @@ void girar_graus(float graus, bool direita) {
     const float fator_conversao = TICKS_POR_90_GRAUS / 90.0f; 
     int32_t ticks_alvo = (int32_t)(graus * fator_conversao);
     
-    int32_t ticks_inicio = encoder_get_right_ticks();
+    int32_t ticks_inicio_dir = encoder_get_right_ticks();
+    int32_t ticks_inicio_esq = encoder_get_left_ticks();
     TickType_t tempo_inicio = xTaskGetTickCount();
-    
+
     pid_motor_esq.reset();
     pid_motor_dir.reset();
 
@@ -110,7 +111,9 @@ void girar_graus(float graus, bool direita) {
     float vel_dir = direita ? -15.0f : 15.0f;
 
     while (true) {
-        int32_t ticks_andados = std::abs(encoder_get_right_ticks() - ticks_inicio);
+        int32_t delta_dir = std::abs(encoder_get_right_ticks() - ticks_inicio_dir);
+        int32_t delta_esq = std::abs(encoder_get_left_ticks() - ticks_inicio_esq);
+        int32_t ticks_andados = (delta_dir + delta_esq) / 2;
         despachar_telemetria("GIRANDO", ticks_andados);
 
         // Calcula um timeout dinâmico: 5s base + 2s a cada 90 graus
