@@ -21,6 +21,18 @@ void mover_celula();
 void andar_reto_cm(float cm);
 
 /**
+ * Move o robô para frente até que o sensor ToF Frontal 
+ * detecte uma parede a uma distância menor ou igual a dist_parada_cm.
+ */
+void andar_ate_parede(float dist_parada_cm);
+
+/**
+ * Função segura para testes: fica num loop infinito lendo os 3 ToFs
+ * e enviando os dados para o monitor serial e backend, sem ligar os motores.
+ */
+void testar_tofs_estatico();
+
+/**
  * Gira o robô no próprio eixo usando controle PID nas duas rodas.
  * @param graus Ângulo de giro
  * @param direita Se true gira para a direita, se false para a esquerda.

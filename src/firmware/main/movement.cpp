@@ -18,16 +18,12 @@ void MoveTask(void *parametrospv) {
     // Inicialização da Lógica de Navegação (PIDs)
     navigation_init();
 
-    printf("Iniciando Teste de Validação (Andar 1 Célula - 18cm)...\n");
+    printf("Iniciando Teste Lento do ToF (Andar ate a parede)...\n");
     vTaskDelay(pdMS_TO_TICKS(100));
 
-    // TESTE DE VALIDAÇÃO: Andar uma célula em linha reta
-    mover_celula();
-    vTaskDelay(pdMS_TO_TICKS(100));
-    girar_graus(180.0,true);
-
-    vTaskDelay(pdMS_TO_TICKS(100));
-    girar_graus(180.0,false);
+    // Teste Seguro com limite de 7s (Distância de 3cm baseada no tamanho real do robô de 14cm)
+    andar_ate_parede(2.0f);
+    // testar_tofs_estatico();
     
     // Fim da coreografia. Fica parado para sempre.
     while(true) {

@@ -3,6 +3,7 @@
 #include "encoder.hpp"
 #include "motor_driver.hpp"
 #include "telemetry.hpp"
+#include "tof_sensor.hpp"
 #include <string.h>
 #include <stdio.h>
 #include <cmath>
@@ -39,15 +40,21 @@ static void controle_velocidade(float vel_alvo_esq, float vel_alvo_dir, float dt
     float pwm_dir = pid_motor_dir.compute(vel_alvo_dir, vel_real_dir, dt);
 
     float base_esq = 0.0f;
-    if (vel_alvo_esq > 0) base_esq = 150.0f;
-    else if (vel_alvo_esq < 0) base_esq = -150.0f;
+    if (vel_alvo_esq > 0) {
+        base_esq = 180.0f; 
+    } else if (vel_alvo_esq < 0) {
+        base_esq = -180.0f;
+    }
     
     float forca_final_esq = base_esq + pwm_esq;
     if (vel_alvo_esq == 0) forca_final_esq = 0; // Se alvo for zero, corta de vez
 
     float base_dir = 0.0f;
-    if (vel_alvo_dir > 0) base_dir = 150.0f;
-    else if (vel_alvo_dir < 0) base_dir = -150.0f;
+    if (vel_alvo_dir > 0) {
+        base_dir = 180.0f;
+    } else if (vel_alvo_dir < 0) {
+        base_dir = -180.0f;
+    }
     
     float forca_final_dir = base_dir + pwm_dir;
     if (vel_alvo_dir == 0) forca_final_dir = 0;
@@ -115,6 +122,50 @@ void mover_celula() {
     andar_reto_cm(18.0f);
 }
 
+void andar_ate_parede(float dist_parada_cm) {
+    printf("\n>>> MODO CAUTELOSO: Andando ate a parede! Alvo: %.1f cm\n", dist_parada_cm);
+    
+    int32_t ticks_inicio = encoder_get_right_ticks();
+    TickType_t tempo_inicio = xTaskGetTickCount();
+    
+    pid_motor_esq.reset();
+    pid_motor_dir.reset();
+
+    int dist_frontal, dist_esq, dist_dir;
+
+    while (true) {
+        int32_t ticks_andados = std::abs(encoder_get_right_ticks() - ticks_inicio);
+        despachar_telemetria("TOF_TESTE", ticks_andados);
+
+        // Medida de Segurança (Timeout de 7 segundos)
+        if ((xTaskGetTickCount() - tempo_inicio) > pdMS_TO_TICKS(7000)) {
+            printf(">>> ALARME DE SEGURANCA! Timeout de 7s estourado. FREANDO!\n");
+            break;
+        }
+
+        // Lê os lasers do ToF
+        if (tof_get_distances_mm(&dist_frontal, &dist_esq, &dist_dir)) {
+            float dist_cm = dist_frontal / 10.0f;
+            
+            // Ignora leituras de erro (8190 = out of range)
+            if (dist_frontal < 8000) {
+                if (dist_cm <= dist_parada_cm) {
+                    printf(">>> Parede detectada a %.1f cm! FREANDO!\n", dist_cm);
+                    break;
+                }
+            }
+        }
+
+        // Mantém a velocidade BEM DEVAGAR enquanto não chega na parede
+        controle_velocidade(10.0f, 10.0f, 0.01f);
+        vTaskDelay(pdMS_TO_TICKS(10));
+    }
+
+    // Curto-Circuito Magnético!
+    motor_set_speed(MOTOR_LEFT, 0);
+    motor_set_speed(MOTOR_RIGHT, 0);
+}
+
 void girar_graus(float graus, bool direita) {
     printf("\n>>> Iniciando Giro de %.1f graus para a %s...\n", graus, direita ? "Direita" : "Esquerda");
     
@@ -150,4 +201,33 @@ void girar_graus(float graus, bool direita) {
     motor_set_speed(MOTOR_LEFT, 0);
     motor_set_speed(MOTOR_RIGHT, 0);
     printf(">>> Giro Finalizado!\n");
+}
+
+void testar_tofs_estatico() {
+    printf("\n>>> INICIANDO TESTE ESTÁTICO DOS TOFS!\n");
+    printf(">>> Os motores estao desligados. Aproxime a mao dos sensores!\n");
+    
+    while (true) {
+        int f, e, d;
+        if (tof_get_distances_mm(&f, &e, &d)) {
+            printf("[LASER] Frontal: %d mm | Esquerda: %d mm | Direita: %d mm\n", f, e, d);
+            
+            // Envia para o Backend
+            PacoteTelemetria pacote;
+            pacote.bateria_v = 7.4;
+            pacote.pos_x = 0; 
+            pacote.pos_y = 0;
+            strcpy(pacote.estado_fsm, "TESTE_TOF");
+            pacote.dist_frontal = f;
+            pacote.dist_esq = e;
+            pacote.dist_dir = d;
+            pacote.pwm_esq = 0; 
+            pacote.pwm_dir = 0;
+            pacote.erro_pid = 0; 
+            pacote.velocidade_media = 0;
+            
+            xQueueSend(FilaTelemetria, &pacote, 0);
+        }
+        vTaskDelay(pdMS_TO_TICKS(500)); // Envia a cada 0.5 segundos (2Hz) para não poluir
+    }
 }

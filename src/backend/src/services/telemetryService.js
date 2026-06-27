@@ -174,7 +174,7 @@ server.on('message', (msg, rinfo) => {
 
       // --- LOG VISUAL NO TERMINAL PARA DEBUG RÁPIDO ---
       const ticks_print = data.posicao_x !== undefined ? data.posicao_x : (data.pos_x !== undefined ? data.pos_x : 'NULL');
-      console.log(`[DADOS] Estado: ${data.estado_fsm} | Ticks X: ${ticks_print} | PWM Esq: ${data.pwm_esq} | PWM Dir: ${data.pwm_dir} | Erro PID: ${data.erro_pid}`);
+      console.log(`[DADOS] Estado: ${data.estado_fsm} | Ticks X: ${ticks_print} | PWM Esq: ${data.pwm_esq} | PWM Dir: ${data.pwm_dir} | ToF F/E/D: ${data.dist_frontal}/${data.dist_esquerda}/${data.dist_direita}`);
 
 
       // Mapeamento dinâmico e seguro para o esquema InfluxDB
