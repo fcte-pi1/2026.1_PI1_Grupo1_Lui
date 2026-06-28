@@ -147,8 +147,8 @@ void andar_ate_parede(float dist_parada_cm) {
         if (tof_get_distances_mm(&dist_frontal, &dist_esq, &dist_dir)) {
             float dist_cm = dist_frontal / 10.0f;
             
-            // Ignora leituras de erro (8190 = out of range)
-            if (dist_frontal < 8000) {
+            // Ignora leituras de erro de I2C (-1) ou fora de alcance (8190)
+            if (dist_frontal > 0 && dist_frontal < 8000) {
                 if (dist_cm <= dist_parada_cm) {
                     printf(">>> Parede detectada a %.1f cm! FREANDO!\n", dist_cm);
                     break;

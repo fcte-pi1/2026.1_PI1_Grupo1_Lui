@@ -18,12 +18,11 @@ void MoveTask(void *parametrospv) {
     // Inicialização da Lógica de Navegação (PIDs)
     navigation_init();
 
-    printf("Iniciando Teste Lento do ToF (Andar ate a parede)...\n");
-    vTaskDelay(pdMS_TO_TICKS(100));
+    printf("Iniciando Teste de Parada com Sensor (ToF) em 3 segundos...\n");
+    vTaskDelay(pdMS_TO_TICKS(3000));
 
-    // Teste Seguro com limite de 7s (Distância de 3cm baseada no tamanho real do robô de 14cm)
-    andar_ate_parede(2.0f);
-    // testar_tofs_estatico();
+    // TESTE DO SENSOR: Anda reto e freia a 5.0 cm da parede
+    andar_ate_parede(5.0f);
     
     // Fim da coreografia. Fica parado para sempre.
     while(true) {
