@@ -7,8 +7,8 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
-// ================= CÉREBRO PRINCIPAL ================= //
-
+// Ponto de entrada do loop de missão do Micromouse. Concentra a inicialização de periféricos 
+// e rege a Máquina de Estados (FSM) de movimentação do robô.
 void MoveTask(void *parametrospv) {
     // Inicialização do Hardware
     encoder_init(); 
@@ -18,15 +18,22 @@ void MoveTask(void *parametrospv) {
     // Inicialização da Lógica de Navegação (PIDs)
     navigation_init();
 
-    printf("Iniciando Teste Lento do ToF (Andar ate a parede)...\n");
-    vTaskDelay(pdMS_TO_TICKS(100));
-
-    // Teste Seguro com limite de 7s (Distância de 3cm baseada no tamanho real do robô de 14cm)
-    andar_ate_parede(2.0f);
-    // testar_tofs_estatico();
+    printf("\n=== AGUARDANDO COMANDO DE START ===\n");
+    printf("Pressione o botao fisico (START) para iniciar a missao...\n\n");
     
-    // Fim da coreografia. Fica parado para sempre.
-    while(true) {
+    // Aguarda o usuário apertar o botão
+    while (!is_start_pressed()) {
         vTaskDelay(pdMS_TO_TICKS(100));
+    }
+    
+    printf("\n>>> START DETECTADO! Iniciando Wall Following...\n");
+    
+    // Missão Principal: Wall Following com Parada Segura
+    // Velocidade = 10 cm/s | Parada = 3.0 cm da parede frontal
+    andar_corredor_centralizado(10.0f, 3.0f);
+    
+    // Missão concluída. Fica em repouso.
+    while(true) {
+        vTaskDelay(pdMS_TO_TICKS(1000));
     }
 }

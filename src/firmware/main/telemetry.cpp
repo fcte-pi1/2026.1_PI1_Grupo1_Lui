@@ -41,6 +41,8 @@ bool desenfileirarBuffer(PacoteTelemetria& pacote) {
 
 
 
+// Tarefa assíncrona consumidora (Subscriber). Bloqueia a execução (Sleep) no portMAX_DELAY 
+// até que um pacote seja inserido na fila pelo Core 0, otimizando o uso da CPU.
 void TaskTelemetria(void *parametrospv) {
     PacoteTelemetria pacote;
 
@@ -80,11 +82,13 @@ void TaskTelemetria(void *parametrospv) {
                     printf("Resolvido Host do PC para o IP: %s\n", inet_ntoa(dest_addr.sin_addr));
                     ip_resolved = true;
                 } else {
-                    // MUDANÇA GENIAL: Em vez de fixar o IP da sua máquina, usamos Broadcast (255.255.255.255)
-                    // Assim, o carrinho "grita" os dados para a rede Wi-Fi inteira e seu backend Node.js apenas escuta!
+                    // Fallback para Broadcast (255.255.255.255) caso a resolução DNS do host local falhe.
+                    // Isso permite o envio cego de pacotes UDP sem a necessidade de um IP fixo na sub-rede.
                     dest_addr.sin_addr.s_addr = inet_addr("255.255.255.255");
-                    printf("Aviso: DNS falhou. Usando BROADCAST para gritar na rede: 255.255.255.255\n");
-                    ip_resolved = true; // FIX: Não travar a fila tentando resolver DNS 100x por segundo
+                    printf("Aviso: Falha no DNS. Adotando roteamento via BROADCAST (255.255.255.255).\n");
+                    
+                    // Flag de controle para evitar bloqueio da fila com repetidas tentativas de DNS
+                    ip_resolved = true; 
                 }
             }
 

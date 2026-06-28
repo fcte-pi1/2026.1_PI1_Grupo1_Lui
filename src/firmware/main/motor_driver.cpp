@@ -21,7 +21,7 @@ constexpr ledc_mode_t PWM_MODE             = LEDC_HIGH_SPEED_MODE;
 constexpr ledc_channel_t PWM_CHANNEL_LEFT  = LEDC_CHANNEL_0;
 constexpr ledc_channel_t PWM_CHANNEL_RIGHT = LEDC_CHANNEL_1;
 constexpr ledc_timer_bit_t PWM_RESOLUTION  = LEDC_TIMER_8_BIT; // 8 bits = 0 a 255
-constexpr uint32_t PWM_FREQUENCY_HZ        = 1000; // 1kHz: Causa um zumbido audível, mas dá MUITO mais torque em baixas velocidades!
+constexpr uint32_t PWM_FREQUENCY_HZ        = 1000; // Frequência de 1kHz: Pode gerar ruído audível no motor, mas maximiza o torque em baixas velocidades.
 
 void motor_init() {
     // 1. Configurar os pinos de direção como saída (OUTPUT)
@@ -72,6 +72,8 @@ void motor_init() {
     ledc_channel_config(&channel_conf_right);
 }
 
+// Lógica da Ponte H (L298N): Determina o sentido de corrente (Forward/Reverse) via pinos lógicos IN 
+// e modula a potência via Duty Cycle (Sinal PWM) no pino EN.
 void motor_set_speed(MotorSide side, int pwm_value) {
     // Garantimos que o valor do PWM nunca passe dos limites de 8 bits (-255 a 255)
     if (pwm_value > 255) pwm_value = 255;
@@ -83,7 +85,7 @@ void motor_set_speed(MotorSide side, int pwm_value) {
     // Direcionamento do sinal dependendo do motor escolhido
     if (side == MOTOR_LEFT) {
         if (pwm_value == 0) {
-            // MODO FREIO ABS MAGNÉTICO
+            // Frenagem Eletromagnética Ativa: Aciona ambos os polos (IN=1) em PWM máximo para dissipar inércia
             gpio_set_level(PIN_MOTOR_L_IN3, 1);
             gpio_set_level(PIN_MOTOR_L_IN4, 1);
             ledc_set_duty(PWM_MODE, PWM_CHANNEL_LEFT, 255);
@@ -96,7 +98,7 @@ void motor_set_speed(MotorSide side, int pwm_value) {
         ledc_update_duty(PWM_MODE, PWM_CHANNEL_LEFT);
     } else {
         if (pwm_value == 0) {
-            // MODO FREIO ABS MAGNÉTICO
+            // Frenagem Eletromagnética Ativa
             gpio_set_level(PIN_MOTOR_R_IN1, 1);
             gpio_set_level(PIN_MOTOR_R_IN2, 1);
             ledc_set_duty(PWM_MODE, PWM_CHANNEL_RIGHT, 255);
