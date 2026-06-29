@@ -1,6 +1,7 @@
 idf_component_register(SRCS "main.cpp"
                             "telemetry.cpp"
                             "movement.cpp"
+                            "navigation.cpp"
                             "wifi_manager.cpp"
                             "tof_sensor.cpp"
                             "ina219.cpp"

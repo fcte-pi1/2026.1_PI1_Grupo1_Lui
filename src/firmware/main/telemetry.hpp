@@ -12,6 +12,11 @@ struct PacoteTelemetria {
     int dist_dir;
     uint8_t paredes;
     uint32_t timestamp;
+    
+        int pwm_esq;
+    int pwm_dir;
+    float erro_pid;
+    float velocidade_media;
 };
 
 // Exportação de handlers globais e protótipos
