@@ -4,6 +4,7 @@
 #include "ina219.hpp"
 #include <string.h>
 #include <stdio.h>
+#include "encoder.hpp"
 
 void MoveTask(void *parametrospv) {
     PacoteTelemetria pacote;
@@ -12,6 +13,8 @@ void MoveTask(void *parametrospv) {
     pacote.pos_y = 0;
     strcpy(pacote.estado_fsm, "MAPPING");
     pacote.dist_frontal = -1;
+    pacote.pwm_esq = 0;
+    pacote.pwm_dir = 0;
 
     Ina219 ina;
     bool ina_ok = ina.init();
@@ -31,14 +34,11 @@ void MoveTask(void *parametrospv) {
             ina_ok = ina.init();
         }
         pacote.pos_x += 1;
-
-        // Envia telemetria para processamento assíncrono
+        pacote.velocidade_media = encoder_get_velocity_ms();
         xQueueSend(FilaTelemetria, &pacote, 0);
         printf("Core 0 -> Enviou telemetria para a fila (X: %d | ToF: %d mm)\n",
                pacote.pos_x,
                pacote.dist_frontal);
-
-        // Taxa de amostragem de controle: 1Hz (Testes) | Padrão Oficial: 10Hz
         vTaskDelay(pdMS_TO_TICKS(1000));
     }
 }
