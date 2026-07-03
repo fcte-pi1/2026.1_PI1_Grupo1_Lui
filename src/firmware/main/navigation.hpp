@@ -27,8 +27,15 @@ void andar_reto_cm(float cm);
 void andar_ate_parede(float dist_parada_cm);
 
 /**
- * Função segura para testes: fica num loop infinito lendo os 3 ToFs
- * e enviando os dados para o monitor serial e backend, sem ligar os motores.
+ * Função Avançada de Fusão de Sensores:
+ * Usa os ToFs laterais para se manter reto no corredor (Wall Following)
+ * e o ToF frontal + Encoder para frear de forma exata, ignorando a zona cega.
+ */
+void andar_corredor_centralizado(float vel_base_cm_s, float dist_parada_frontal_cm);
+
+/**
+ * Rotina de diagnóstico de hardware (I2C): Realiza pooling passivo dos sensores ToF 
+ * sem acionamento mecânico dos motores.
  */
 void testar_tofs_estatico();
 

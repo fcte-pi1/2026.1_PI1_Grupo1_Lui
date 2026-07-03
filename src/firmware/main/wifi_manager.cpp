@@ -14,6 +14,8 @@ bool wifi_conectado = false; // Estado global da conectividade Wi-Fi
 #define WIFI_SSID "A54 de Renan"
 #define WIFI_PASS "12345678"
 
+// Callback assíncrono para a máquina de estados do LwIP (Pilha TCP/IP). Reage a eventos físicos 
+// de rádio (Conexão/Queda) e rede (Obtenção de IP DHCP).
 static void event_handler(void* arg, esp_event_base_t event_base,
                           int32_t event_id, void* event_data) {
   // Inicialização do Wi-Fi em modo Station

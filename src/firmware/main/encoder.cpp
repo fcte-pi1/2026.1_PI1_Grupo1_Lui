@@ -5,34 +5,40 @@
 #include "esp_timer.h"
 #include <math.h>
 
-// Fiação cruzada consertada via Software
+// Pinos do Encoder (Motor Esquerdo)
 #define ENC_LEFT_A   GPIO_NUM_17
 #define ENC_LEFT_B   GPIO_NUM_16
 
+// Pinos do Encoder (Motor Direito)
 #define ENC_RIGHT_A  GPIO_NUM_18
 #define ENC_RIGHT_B  GPIO_NUM_5
 
 static volatile int32_t left_ticks = 0;
 static volatile int32_t right_ticks = 0;
 
+// Interrupção de hardware (ISR) acionada na borda de subida do canal A. 
+// O nível lógico do canal B determina a direção da rotação.
 static void IRAM_ATTR left_encoder_isr(void *arg)
 {
     int b = gpio_get_level(ENC_LEFT_B);
 
     if (b)
-        left_ticks++; // Polaridade Padrão
+        left_ticks++;
     else
-        left_ticks--; // Polaridade Padrão
+        left_ticks--;
 }
 
+// Interrupção de hardware (ISR) acionada na borda de subida do canal A. 
+// O nível lógico do canal B determina a direção da rotação.
 static void IRAM_ATTR right_encoder_isr(void *arg)
 {
     int b = gpio_get_level(ENC_RIGHT_B);
 
+    // Leitura invertida via software para corrigir pinagem física invertida
     if (b)
-        right_ticks--; // Invertido via software
+        right_ticks--;
     else
-        right_ticks++; // Invertido via software
+        right_ticks++;
 }
 
 void encoder_init()
@@ -74,12 +80,13 @@ int32_t encoder_get_right_ticks()
     return right_ticks;
 }
 
-// --- CONSTANTES DO ROBÔ FÍSICO ---
-// Calibração baseada em movimento rápido (sem ruído de bounce manual)
+// --- Constantes de Conversão de Odometria ---
 #define TICKS_POR_VOLTA 330.0f 
 // Roda de 45mm de diâmetro -> 45 * PI = 141.37 mm = 14.137 cm
 #define CM_POR_VOLTA 14.137f
 
+// Cálculo da velocidade instantânea via aproximação temporal (Delta de Distância / Delta de Tempo) 
+// usando o timer de hardware de alta resolução (esp_timer).
 float encoder_get_left_velocity_cms()
 {
     static int32_t last_left = 0;

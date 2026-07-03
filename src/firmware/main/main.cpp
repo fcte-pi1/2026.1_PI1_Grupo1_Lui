@@ -6,17 +6,17 @@
 #include "tof_sensor.hpp"
 #include "wifi_manager.hpp"
 
-// Task de simulação de queda de conectividade para testes do ring buffer
+// Task para simulação de instabilidade de rede (Validação do Ring Buffer)
 // void TaskSimularQuedaRede(void *pvParameters) {
 //     for (;;) {
 //         vTaskDelay(pdMS_TO_TICKS(15000)); // Período de operação normal
-        
-//         printf("\n[TESTE] FINGINDO QUEDA DE REDE POR 15 SEGUNDOS!\n");
-//         wifi_conectado = false; // Interrompe conectividade para acúmulo no buffer
-        
+//         
+//         printf("\n[DIAGNOSTICO] Simulando queda de conectividade Wi-Fi (15s)...\n");
+//         wifi_conectado = false; // Interrompe conectividade lógica para forçar acúmulo no buffer offline
+//         
 //         vTaskDelay(pdMS_TO_TICKS(15000)); // Período offline simulado
-        
-//         printf("\n[TESTE] REDE RESTABELECIDA! DISPARANDO O LOTE...\n");
+//         
+//         printf("\n[DIAGNOSTICO] Conectividade restabelecida. Acionando descarregamento em lote.\n");
 //         wifi_conectado = true; // Restabelecimento da conexão
 //     }
 // }
@@ -45,7 +45,7 @@ extern "C" void app_main(void) {
         0
     );
 
-    // 3. Cria a tarefa de movimento no Core 0
+    // 3. Fixação da tarefa de controle motor e PID no Core 0 (alta prioridade) para garantir determinismo de tempo real.
     xTaskCreatePinnedToCore(
         MoveTask,            // Função executada
         "Movement_Core0",    // Nome para debug
@@ -56,7 +56,7 @@ extern "C" void app_main(void) {
         0                    // Executa no Core 0
     );
     
-    // 4. Cria a tarefa de telemetria no Core 1
+    // 4. Isolamento da carga de rede (Wi-Fi/UDP) no Core 1 para evitar jitter no loop de controle do Core 0.
     xTaskCreatePinnedToCore(
         TaskTelemetria,
         "Telemetry_core1",
