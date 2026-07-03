@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "wallfollowing.hpp" // <-- Corrigido aqui
 
 // Ponto de entrada do loop de missão do Micromouse. Concentra a inicialização de periféricos 
 // e rege a Máquina de Estados (FSM) de movimentação do robô.
@@ -26,11 +27,12 @@ void MoveTask(void *parametrospv) {
         vTaskDelay(pdMS_TO_TICKS(100));
     }
     
-    printf("\n>>> START DETECTADO! Iniciando Wall Following...\n");
-    
-    // Missão Principal: Wall Following com Parada Segura
-    // Velocidade = 10 cm/s | Parada = 3.0 cm da parede frontal
-    andar_corredor_centralizado(10.0f, 3.0f);
+    printf("\n>>> START DETECTADO!\n");
+    printf("Iniciando Teste de Parada com Sensor (ToF) em 3 segundos...\n");
+    vTaskDelay(pdMS_TO_TICKS(3000)); // Adicionado o delay de 3 segundos que o printf promete
+
+    // TESTE DO SENSOR: Chama a coreografia exportada
+    wallfollowing();
     
     // Missão concluída. Fica em repouso.
     while(true) {

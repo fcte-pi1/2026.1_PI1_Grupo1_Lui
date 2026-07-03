@@ -11,8 +11,8 @@ bool wifi_conectado = false; // Estado global da conectividade Wi-Fi
 // Credenciais da rede Wi-Fi do ambiente de simulação (Wokwi)
 // #define WIFI_SSID "Wokwi-GUEST"
 // #define WIFI_PASS ""
-#define WIFI_SSID "TOTE-B046"
-#define WIFI_PASS "7678212002"
+#define WIFI_SSID "A54 de Renan"
+#define WIFI_PASS "12345678"
 
 // Callback assíncrono para a máquina de estados do LwIP (Pilha TCP/IP). Reage a eventos físicos 
 // de rádio (Conexão/Queda) e rede (Obtenção de IP DHCP).
