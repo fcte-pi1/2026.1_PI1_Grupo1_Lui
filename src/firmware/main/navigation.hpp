@@ -27,8 +27,17 @@ void mover_celula_wallfollowing();
 void andar_reto_cm(float cm);
 
 /**
- * Move o robô para frente até que o sensor ToF Frontal 
- * detecte uma parede a uma distância menor ou igual a dist_parada_cm.
+ * Funções de Acesso (Getters) para dados internos do PID e motores.
+ * Utilizado pelo movement.cpp para compor a telemetria oficial.
+ */
+int get_last_pwm_esq();
+int get_last_pwm_dir();
+float get_last_erro_pid();
+float get_last_vel_media();
+
+/**
+ * Move o robô em modo cauteloso (apenas odometria cega)
+ * até encontrar uma parede na distância especificada.
  */
 void andar_ate_parede(float dist_parada_cm);
 

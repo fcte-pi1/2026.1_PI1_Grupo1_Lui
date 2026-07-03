@@ -67,7 +67,7 @@ void MoveTask(void *parametrospv) {
         int f=-1, e=-1, d=-1;
         tof_get_distances_mm(&f, &e, &d);
 
-        // Prepara o pacote base de telemetria
+        // Prepara o pacote base de telemetria oficial
         PacoteTelemetria pkt;
         memset(&pkt, 0, sizeof(PacoteTelemetria));
         pkt.pos_x = pos_x;
@@ -77,6 +77,12 @@ void MoveTask(void *parametrospv) {
         pkt.dist_frontal = f;
         pkt.dist_esq = e;
         pkt.dist_dir = d;
+
+        // Anexando dados extraídos do controlador de navegação (PID/Motores)
+        pkt.pwm_esq = get_last_pwm_esq();
+        pkt.pwm_dir = get_last_pwm_dir();
+        pkt.erro_pid = (int)get_last_erro_pid();
+        pkt.velocidade_media = (int)get_last_vel_media();
 
         switch (estado_atual) {
 

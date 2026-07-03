@@ -66,30 +66,25 @@ static void controle_velocidade(float vel_alvo_esq, float vel_alvo_dir, float dt
     last_pwm_dir = (int)forca_final_dir;
 }
 
-// Função privada para enviar telemetria limpa
-static void despachar_telemetria(const char* estado, int32_t ticks_x = 0) {
-    PacoteTelemetria pacote;
-    memset(&pacote, 0, sizeof(PacoteTelemetria));
-    pacote.bateria_v = 7.4;
-    pacote.pos_x = ticks_x;
-    pacote.pos_y = 0;
-    strncpy(pacote.estado_fsm, estado, sizeof(pacote.estado_fsm) - 1);
-    pacote.estado_fsm[sizeof(pacote.estado_fsm) - 1] = '\0';
-    
-    int f = -1, e = -1, d = -1;
-    tof_get_distances_mm(&f, &e, &d);
-    
-    pacote.dist_frontal = f;
-    pacote.dist_esq = e;
-    pacote.dist_dir = d;
-    
-    pacote.pwm_esq = (int)last_pwm_esq;
-    pacote.pwm_dir = (int)last_pwm_dir;
-    pacote.erro_pid = (int)last_erro_pid;
-    pacote.velocidade_media = (int)last_vel_media;
-    
-    xQueueSend(FilaTelemetria, &pacote, 0);
-} 
+// Getter: Retorna o último PWM calculado para o motor esquerdo
+int get_last_pwm_esq() {
+    return last_pwm_esq;
+}
+
+// Getter: Retorna o último PWM calculado para o motor direito
+int get_last_pwm_dir() {
+    return last_pwm_dir;
+}
+
+// Getter: Retorna o último erro de controle de velocidade
+float get_last_erro_pid() {
+    return last_erro_pid;
+}
+
+// Getter: Retorna a última velocidade média registrada
+float get_last_vel_media() {
+    return last_vel_media;
+}
 void navigation_init() {
     /* 
      * Inicialização dos Controladores PID de Velocidade
@@ -117,7 +112,6 @@ void andar_reto_cm(float cm) {
 
     while (true) {
         int32_t ticks_andados = std::abs(encoder_get_right_ticks() - ticks_inicio);
-        despachar_telemetria("ANDANDO", ticks_andados);
 
         if (ticks_andados >= ticks_alvo || (xTaskGetTickCount() - tempo_inicio) > pdMS_TO_TICKS(10000)) {
             break; 
@@ -154,7 +148,6 @@ void mover_celula_wallfollowing() {
     while (true) {
         int32_t ticks_atuais = encoder_get_right_ticks();
         int32_t ticks_andados = std::abs(ticks_atuais - ticks_inicio);
-        despachar_telemetria("MOVENDO_CELULA", ticks_andados);
 
         // 1. Condição de Parada (Odometria Exata da Célula)
         if (ticks_andados >= ticks_alvo || (xTaskGetTickCount() - tempo_inicio) > pdMS_TO_TICKS(5000)) {
@@ -220,7 +213,6 @@ void andar_ate_parede(float dist_parada_cm) {
 
     while (true) {
         int32_t ticks_andados = std::abs(encoder_get_right_ticks() - ticks_inicio);
-        despachar_telemetria("TOF_TESTE", ticks_andados);
 
         // Timeout de Segurança (7 segundos máximo para evitar travamento)
         if ((xTaskGetTickCount() - tempo_inicio) > pdMS_TO_TICKS(7000)) {
@@ -270,7 +262,6 @@ void andar_corredor_centralizado(float vel_base_cm_s, float dist_parada_frontal_
     while (true) {
         int32_t ticks_atuais = encoder_get_right_ticks();
         int32_t ticks_andados = std::abs(ticks_atuais - ticks_inicio);
-        despachar_telemetria("WALL_FOLLOW", ticks_andados);
 
         float vel_alvo_esq = vel_base_cm_s;
         float vel_alvo_dir = vel_base_cm_s;
@@ -374,7 +365,6 @@ void girar_graus(float graus, bool direita) {
 
     while (true) {
         int32_t ticks_andados = std::abs(encoder_get_right_ticks() - ticks_inicio);
-        despachar_telemetria("GIRANDO", ticks_andados);
 
         // Calcula um timeout dinâmico: 5s base + 2s a cada 90 graus
         uint32_t timeout_ms = 5000 + (uint32_t)((graus / 90.0f) * 2000);
