@@ -42,8 +42,8 @@ void MoveTask(void *parametrospv) {
     switches_init();
     navigation_init();
 
-    // Lendo a chave de tamanho apenas uma vez no inicio
-    int tamanho_labirinto = is_maze_size_8x8() ? 8 : 4;
+    bool is_8x8 = is_maze_size_8x8();
+    int tamanho_labirinto = is_8x8 ? 8 : 4;
     std::vector<std::pair<int,int>> metas;
     if (tamanho_labirinto == 8) {
         metas = {{3,3}, {3,4}, {4,3}, {4,4}};
@@ -97,6 +97,20 @@ void MoveTask(void *parametrospv) {
             case IDLE: {
                 strncpy(pkt.estado_fsm, "IDLE", 15);
                 xQueueSend(FilaTelemetria, &pkt, 0);
+
+                // Leitura dinâmica da chave
+                bool current_is_8x8 = is_maze_size_8x8();
+                if (current_is_8x8 != is_8x8) {
+                    is_8x8 = current_is_8x8;
+                    tamanho_labirinto = is_8x8 ? 8 : 4;
+                    if (tamanho_labirinto == 8) {
+                        metas = {{3,3}, {3,4}, {4,3}, {4,4}};
+                    } else { 
+                        metas = {{1,1}, {1,2}, {2,1}, {2,2}};
+                    }
+                    ff_inicializar(tamanho_labirinto, tamanho_labirinto, metas);
+                    printf("\n>>> CHAVE DETECTADA: Labirinto alterado dinamicamente para %dx%d <<<\n\n", tamanho_labirinto, tamanho_labirinto);
+                }
 
                 // Print periódico sem travar a tela (a cada 1 segundo = 10 ticks de 100ms)
                 ticks_idle++;
