@@ -69,10 +69,10 @@ static void controle_velocidade(float vel_alvo_esq, float vel_alvo_dir, float dt
 // Função privada para enviar telemetria limpa
 static void despachar_telemetria(const char* estado, int32_t ticks_x = 0) {
     PacoteTelemetria pacote;
+    memset(&pacote, 0, sizeof(PacoteTelemetria));
     pacote.bateria_v = 7.4;
     pacote.pos_x = ticks_x;
     pacote.pos_y = 0;
-    
     strncpy(pacote.estado_fsm, estado, sizeof(pacote.estado_fsm) - 1);
     pacote.estado_fsm[sizeof(pacote.estado_fsm) - 1] = '\0';
     
@@ -134,6 +134,77 @@ void andar_reto_cm(float cm) {
 
 void mover_celula() {
     andar_reto_cm(18.0f);
+}
+
+void mover_celula_wallfollowing() {
+
+    
+    int32_t ticks_alvo = (int32_t)(18.0f * TICKS_POR_CM);
+    int32_t ticks_inicio = encoder_get_right_ticks();
+    TickType_t tempo_inicio = xTaskGetTickCount();
+    
+    pid_motor_esq.reset();
+    pid_motor_dir.reset();
+
+    int dist_frontal, dist_esq, dist_dir;
+    float Kp_parede = 0.2f; 
+    float vel_base_cm_s = 15.0f; // Mesma velocidade base
+    float centro_ideal = 32.5f;
+
+    while (true) {
+        int32_t ticks_atuais = encoder_get_right_ticks();
+        int32_t ticks_andados = std::abs(ticks_atuais - ticks_inicio);
+        despachar_telemetria("MOVENDO_CELULA", ticks_andados);
+
+        // 1. Condição de Parada (Odometria Exata da Célula)
+        if (ticks_andados >= ticks_alvo || (xTaskGetTickCount() - tempo_inicio) > pdMS_TO_TICKS(5000)) {
+            break; 
+        }
+
+        float vel_alvo_esq = vel_base_cm_s;
+        float vel_alvo_dir = vel_base_cm_s;
+
+        // 2. Leitura e Wall Following
+        if (tof_get_distances_mm(&dist_frontal, &dist_esq, &dist_dir)) {
+            float erro_parede_mm = 0;
+            bool tem_parede = false;
+            
+            if (dist_esq < 150 && dist_dir < 150) {
+                //  sensores: Centraliza baseado nas duas paredes
+                erro_parede_mm = (float)(dist_esq - dist_dir);
+                tem_parede = true;
+            } else if (dist_esq < 150) {
+                // Repulsão esquerda
+                if (dist_esq < centro_ideal) {
+                    erro_parede_mm = (dist_esq - centro_ideal) * 2.0f;
+                    tem_parede = true;
+                }
+            } else if (dist_dir < 150) {
+                // Repulsão direita
+                if (dist_dir < centro_ideal) {
+                    erro_parede_mm = (centro_ideal - dist_dir) * 2.0f; 
+                    tem_parede = true;
+                }
+            }
+
+            if (tem_parede) {
+                float correcao = erro_parede_mm * Kp_parede;
+                if (correcao > 8.0f) correcao = 8.0f;
+                if (correcao < -8.0f) correcao = -8.0f;
+                vel_alvo_esq -= correcao;
+                vel_alvo_dir += correcao;
+            }
+        }
+
+        // 3. Aplicação do PID de Velocidade
+        controle_velocidade(vel_alvo_esq, vel_alvo_dir, 0.01f);
+        vTaskDelay(pdMS_TO_TICKS(10));
+    }
+
+    // Frenagem e Finalização
+    motor_set_speed(MOTOR_LEFT, 0);
+    motor_set_speed(MOTOR_RIGHT, 0);
+    printf(">>> Celula avancada e centralizada com sucesso!\n");
 }
 
 void andar_ate_parede(float dist_parada_cm) {

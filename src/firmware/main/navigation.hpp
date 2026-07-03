@@ -15,6 +15,12 @@ void navigation_init();
 void mover_celula();
 
 /**
+ * Avança exatos 18cm utilizando PID e Fusão de Sensores ToF laterais
+ * para se manter perfeitamente no centro do corredor (Wall Following Inteligente).
+ */
+void mover_celula_wallfollowing();
+
+/**
  * Move o robô para frente a distância especificada em centímetros.
  * Essa função é bloqueante e usa PID duplo.
  */
