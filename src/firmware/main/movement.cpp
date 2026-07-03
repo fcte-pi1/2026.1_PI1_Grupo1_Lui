@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "wallfollowing.hpp" // <-- Corrigido aqui
 
 // ================= CÉREBRO PRINCIPAL ================= //
 
@@ -19,10 +20,10 @@ void MoveTask(void *parametrospv) {
     navigation_init();
 
     printf("Iniciando Teste de Parada com Sensor (ToF) em 3 segundos...\n");
-    vTaskDelay(pdMS_TO_TICKS(3000));
+    vTaskDelay(pdMS_TO_TICKS(3000)); // Adicionado o delay de 3 segundos que o printf promete
 
-    // TESTE DO SENSOR: Anda reto e freia a 5.0 cm da parede
-    andar_ate_parede(5.0f);
+    // TESTE DO SENSOR: Chama a coreografia exportada
+    wallfollowing();
     
     // Fim da coreografia. Fica parado para sempre.
     while(true) {

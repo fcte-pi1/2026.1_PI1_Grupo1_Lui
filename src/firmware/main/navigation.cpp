@@ -86,8 +86,8 @@ static void despachar_telemetria(const char* estado, int32_t ticks) {
 } 
 // ordem de valores é  kp,ki,kd,min,max
 void navigation_init() {
-    pid_motor_dir.init(5.0f, 10.0f, 0.0f, 100.0f, 255.0f);
-    pid_motor_esq.init(5.0f, 10.0f, 0.0f, 100.0f, 255.0f);
+    pid_motor_dir.init(5.0f, 10.0f, 0.0f, 100.0f, 220.0f);
+    pid_motor_esq.init(5.0f, 10.0f, 0.0f, 100.0f, 220.0f);
 }
 
 void andar_reto_cm(float cm) {
