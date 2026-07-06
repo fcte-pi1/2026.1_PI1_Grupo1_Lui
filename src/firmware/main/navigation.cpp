@@ -127,7 +127,7 @@ void andar_reto_cm(float cm) {
 }
 
 void mover_celula() {
-    andar_reto_cm(18.0f);
+    andar_reto_cm(16.0f);
 }
 
 void mover_celula_wallfollowing() {

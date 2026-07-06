@@ -19,7 +19,7 @@ constexpr uint32_t kI2cFreqHz = 400000;
 // Pinos XSHUT (Conforme definido pelo usuário)
 constexpr gpio_num_t kXshutEsquerdo = GPIO_NUM_13;
 constexpr gpio_num_t kXshutDireito = GPIO_NUM_19;
-constexpr gpio_num_t kXshutFrontal = GPIO_NUM_4;
+constexpr gpio_num_t kXshutFrontal = GPIO_NUM_23;
 
 // Novos endereços I2C
 constexpr uint8_t kEnderecoEsquerdo = 0x30;
