@@ -69,8 +69,9 @@ void TaskTelemetria(void *parametrospv) {
     for (;;) {
         // Fica aguardando novos pacotes na fila
         if (xQueueReceive(FilaTelemetria, &pacote, portMAX_DELAY) == pdPASS) {
-            printf("Recebido no Core 1 -> bateria: %.2f | X:%d | FSM: %s\n",
-                   pacote.bateria_v, pacote.pos_x, pacote.estado_fsm);
+            printf("Recebido no Core 1 -> bateria: %.2f | X:%d | FSM: %s | TOF(F/E/D): %d/%d/%d\n",
+                   pacote.bateria_v, pacote.pos_x, pacote.estado_fsm, 
+                   pacote.dist_frontal, pacote.dist_esq, pacote.dist_dir);
 
             // Tenta resolver o hostname se ainda não foi resolvido
             if (!ip_resolved) {
