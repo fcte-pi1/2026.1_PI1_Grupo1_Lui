@@ -11,10 +11,11 @@
 #include "freertos/task.h"
 
 // --- Parâmetros de Calibração da Odometria ---
-const float TICKS_POR_CM = 23.0f; 
+const float TICKS_POR_CM = 18.0f; 
 
 // Fator de conversão angular (Ticks necessários para girar 90 graus no próprio eixo)
-const float TICKS_POR_90_GRAUS = 251.0f; 
+// Valor original: 251.0f. Reduzido para compensar derrapagem (skid) na frenagem brusca.
+const float TICKS_POR_90_GRAUS = 150.0f; 
 // ---------------------------------------------
 
 // Instâncias globais (privadas deste módulo) de PID
@@ -149,8 +150,8 @@ void mover_celula_wallfollowing() {
         int32_t ticks_atuais = encoder_get_right_ticks();
         int32_t ticks_andados = std::abs(ticks_atuais - ticks_inicio);
 
-        // 1. Condição de Parada (Odometria Exata da Célula)
-        if (ticks_andados >= ticks_alvo || (xTaskGetTickCount() - tempo_inicio) > pdMS_TO_TICKS(5000)) {
+        // 1. Condição de Parada (Odometria Exata da Célula) - TIMEOUT REMOVIDO PARA NUNCA DESISTIR
+        if (ticks_andados >= ticks_alvo) {
             break; 
         }
 
@@ -352,24 +353,26 @@ void girar_graus(float graus, bool direita) {
     const float fator_conversao = TICKS_POR_90_GRAUS / 90.0f; 
     int32_t ticks_alvo = (int32_t)(graus * fator_conversao);
     
-    int32_t ticks_inicio = encoder_get_right_ticks();
+    int32_t ticks_inicio_dir = encoder_get_right_ticks();
+    int32_t ticks_inicio_esq = encoder_get_left_ticks();
     TickType_t tempo_inicio = xTaskGetTickCount();
     
     pid_motor_esq.reset();
     pid_motor_dir.reset();
 
-    // Velocidade de giro aumentada para 25.0f para garantir torque suficiente
-    // e vencer o atrito lateral da roda boba (que estava travando o motor esquerdo)
-    float vel_esq = direita ? 25.0f : -25.0f;
-    float vel_dir = direita ? -25.0f : 25.0f;
+    // Velocidade de giro aumentada para 20.0f para ajudar a vencer o atrito do rolamento ruim
+    float vel_esq = direita ? 20.0f : -20.0f;
+    float vel_dir = direita ? -20.0f : 20.0f;
 
     while (true) {
-        int32_t ticks_andados = std::abs(encoder_get_right_ticks() - ticks_inicio);
+        int32_t delta_dir = std::abs(encoder_get_right_ticks() - ticks_inicio_dir);
+        int32_t delta_esq = std::abs(encoder_get_left_ticks() - ticks_inicio_esq);
+        int32_t ticks_andados = (delta_dir + delta_esq) / 2;
 
-        // Calcula um timeout dinâmico: 5s base + 2s a cada 90 graus
+        // Calcula um timeout dinâmico (mantido apenas para logs, mas não quebra mais o loop)
         uint32_t timeout_ms = 5000 + (uint32_t)((graus / 90.0f) * 2000);
 
-        if (ticks_andados >= ticks_alvo || (xTaskGetTickCount() - tempo_inicio) > pdMS_TO_TICKS(timeout_ms)) {
+        if (ticks_andados >= ticks_alvo) {
             break; 
         }
 

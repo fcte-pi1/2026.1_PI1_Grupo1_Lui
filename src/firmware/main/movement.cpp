@@ -44,6 +44,7 @@ void MoveTask(void *parametrospv) {
 
     bool is_8x8 = is_maze_size_8x8();
     int tamanho_labirinto = is_8x8 ? 8 : 4;
+    global_maze_size = tamanho_labirinto;
     std::vector<std::pair<int,int>> metas;
     if (tamanho_labirinto == 8) {
         metas = {{3,3}, {3,4}, {4,3}, {4,4}};
@@ -77,6 +78,14 @@ void MoveTask(void *parametrospv) {
         pkt.dist_frontal = f;
         pkt.dist_esq = e;
         pkt.dist_dir = d;
+        
+        // Sempre envia as paredes já conhecidas (como as paredes estáticas iniciais)
+        uint8_t paredes_conhecidas = 0;
+        if (labirinto[pos_x][pos_y].parede_norte) paredes_conhecidas |= 1;
+        if (labirinto[pos_x][pos_y].parede_leste) paredes_conhecidas |= 2;
+        if (labirinto[pos_x][pos_y].parede_sul)   paredes_conhecidas |= 4;
+        if (labirinto[pos_x][pos_y].parede_oeste) paredes_conhecidas |= 8;
+        pkt.paredes = paredes_conhecidas;
 
         // Anexando dados extraídos do controlador de navegação (PID/Motores)
         pkt.pwm_esq = get_last_pwm_esq();
@@ -109,6 +118,7 @@ void MoveTask(void *parametrospv) {
                 if (current_is_8x8 != is_8x8) {
                     is_8x8 = current_is_8x8;
                     tamanho_labirinto = is_8x8 ? 8 : 4;
+                    global_maze_size = tamanho_labirinto;
                     if (tamanho_labirinto == 8) {
                         metas = {{3,3}, {3,4}, {4,3}, {4,4}};
                     } else { 
@@ -155,12 +165,21 @@ void MoveTask(void *parametrospv) {
                 if (labirinto[pos_x][pos_y].parede_sul)   mascara_paredes |= 4;
                 if (labirinto[pos_x][pos_y].parede_oeste) mascara_paredes |= 8;
 
+                pkt.paredes = mascara_paredes; // Atualiza o pacote com as novas paredes
+
                 ff_visitado(pos_x, pos_y);
                 ff_recalcular();
 
+                printf("\n--- Mapeando Celula (%d, %d) ---\n", pos_x, pos_y);
+                printf("Leitura ToF - Frente: %dmm, Esq: %dmm, Dir: %dmm\n", f, e, d);
+                printf("Paredes Fechadas: [ %s %s %s %s ]\n", 
+                        (mascara_paredes & 1) ? "Norte" : "",
+                        (mascara_paredes & 2) ? "Leste" : "",
+                        (mascara_paredes & 4) ? "Sul" : "",
+                        (mascara_paredes & 8) ? "Oeste" : "");
+
                 // Completa o pacote com dados de mapping
                 strncpy(pkt.estado_fsm, "MAPPING", 15);
-                pkt.paredes = mascara_paredes;
                 xQueueSend(FilaTelemetria, &pkt, 0);
 
                 bool na_meta = false;

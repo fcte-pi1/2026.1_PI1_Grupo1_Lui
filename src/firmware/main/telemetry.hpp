@@ -21,6 +21,7 @@ struct PacoteTelemetria {
 
 // Exportação de handlers globais e protótipos
 extern QueueHandle_t FilaTelemetria;
+extern int global_maze_size;
 void TaskTelemetria(void *parametrospv);
 
 #define CAPACIDADE_BUFFER 600

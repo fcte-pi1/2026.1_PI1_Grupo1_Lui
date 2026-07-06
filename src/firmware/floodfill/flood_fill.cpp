@@ -72,6 +72,10 @@ void ff_inicializar(int larg, int alt, vector<pair<int,int>> meta){
         labirinto[larg - 1][i].parede_leste = true;
     }
 
+    // Regra do Micromouse: A célula inicial (0,0) é sempre uma "caixa" com saída apenas para o Norte.
+    // Garante que a parede Leste exista mesmo que o sensor falhe na primeira leitura.
+    labirinto[0][0].parede_leste = true;
+
     propagar_bfs();
 }
 
