@@ -16,9 +16,7 @@ const float TICKS_POR_CM = 18.0f;
 
 // Fator de conversão angular (Ticks necessários para girar 90 graus no próprio eixo)
 // Valor original: 251.0f. Reduzido para compensar derrapagem (skid) na frenagem brusca.
-const float TICKS_POR_90_GRAUS = 170.0f; 
-// ---------------------------------------------
-
+const float TICKS_POR_90_GRAUS = 150.0f; 
 // Instâncias globais (privadas deste módulo) de PID
 static PID pid_motor_dir;
 static PID pid_motor_esq;
