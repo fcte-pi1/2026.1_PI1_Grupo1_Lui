@@ -5,6 +5,7 @@
 #include "esp_event.h"
 #include "esp_log.h"
 #include "nvs_flash.h"
+// #include "esp_eap_client.h"
 
 bool wifi_conectado = false; // Estado global da conectividade Wi-Fi
 
@@ -70,12 +71,24 @@ void wifi_init_sta(void) {
     // Configuração das credenciais da rede
     wifi_config_t wifi_config = {};
     strcpy((char*)wifi_config.sta.ssid, WIFI_SSID);
+
+#ifndef WIFI_EAP_ID
+    // Rede Comum (WPA2-PSK)
     strcpy((char*)wifi_config.sta.password, WIFI_PASS);
+#endif
 
     // Definição do modo operacional como Station
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config));
     
+#ifdef WIFI_EAP_ID
+    // Configuração WPA2 Enterprise (Eduroam / Universidades)
+    ESP_ERROR_CHECK(esp_eap_client_set_identity((uint8_t *)WIFI_EAP_ID, strlen(WIFI_EAP_ID)));
+    ESP_ERROR_CHECK(esp_eap_client_set_username((uint8_t *)WIFI_EAP_USERNAME, strlen(WIFI_EAP_USERNAME)));
+    ESP_ERROR_CHECK(esp_eap_client_set_password((uint8_t *)WIFI_EAP_PASSWORD, strlen(WIFI_EAP_PASSWORD)));
+    ESP_ERROR_CHECK(esp_wifi_sta_enterprise_enable());
+#endif
+
     // Inicialização do rádio Wi-Fi
     ESP_ERROR_CHECK(esp_wifi_start());
 

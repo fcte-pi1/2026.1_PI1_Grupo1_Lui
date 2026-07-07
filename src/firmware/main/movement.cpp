@@ -11,6 +11,7 @@
 #include <string.h>
 #include "tof_sensor.hpp"
 #include "telemetry.hpp"
+#include "mpu6050.hpp"
 
 const char* direcao_to_string(Direcao d) {
     switch(d) {
@@ -40,6 +41,12 @@ void MoveTask(void *parametrospv) {
     encoder_init(); 
     motor_init();   
     switches_init();
+    
+    // IMPORTANTE: Aguarda a ToFTask inicializar o driver I2C_NUM_0 primeiro!
+    // Sem esse delay, o MPU6050 tenta conversar num barramento fechado e falha.
+    vTaskDelay(pdMS_TO_TICKS(1000)); 
+    mpu6050_init();
+    
     navigation_init();
 
     bool is_8x8 = is_maze_size_8x8();

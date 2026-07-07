@@ -360,3 +360,4 @@ issues_repositorio.json
 open_issues.json
 src/firmware/floodfill/test_runner
 .aider*
+src/firmware/main/wifi_credentials.h

@@ -4,6 +4,7 @@
 #include "motor_driver.hpp"
 #include "telemetry.hpp"
 #include "tof_sensor.hpp"
+#include "mpu6050.hpp"
 #include <string.h>
 #include <stdio.h>
 #include <cmath>
@@ -15,7 +16,7 @@ const float TICKS_POR_CM = 18.0f;
 
 // Fator de conversão angular (Ticks necessários para girar 90 graus no próprio eixo)
 // Valor original: 251.0f. Reduzido para compensar derrapagem (skid) na frenagem brusca.
-const float TICKS_POR_90_GRAUS = 150.0f; 
+const float TICKS_POR_90_GRAUS = 170.0f; 
 // ---------------------------------------------
 
 // Instâncias globais (privadas deste módulo) de PID
@@ -348,14 +349,13 @@ void andar_corredor_centralizado(float vel_base_cm_s, float dist_parada_frontal_
 }
 
 void girar_graus(float graus, bool direita) {
-    printf("\n>>> Iniciando Giro de %.1f graus para a %s...\n", graus, direita ? "Direita" : "Esquerda");
+    printf("\n>>> Iniciando Giro de %.1f graus para a %s (Usando MPU6050)...\n", graus, direita ? "Direita" : "Esquerda");
     
-    const float fator_conversao = TICKS_POR_90_GRAUS / 90.0f; 
-    int32_t ticks_alvo = (int32_t)(graus * fator_conversao);
+    mpu6050_reset_yaw();
     
-    int32_t ticks_inicio_dir = encoder_get_right_ticks();
-    int32_t ticks_inicio_esq = encoder_get_left_ticks();
-    TickType_t tempo_inicio = xTaskGetTickCount();
+    // Desconto empírico de overshoot de frenagem calculado via inércia (~4.5 graus para esse motor)
+    float graus_alvo = graus - 4.5f;
+    if (graus_alvo <= 0) graus_alvo = graus; // Proteção para giros minúsculos
     
     pid_motor_esq.reset();
     pid_motor_dir.reset();
@@ -364,15 +364,17 @@ void girar_graus(float graus, bool direita) {
     float vel_esq = direita ? 20.0f : -20.0f;
     float vel_dir = direita ? -20.0f : 20.0f;
 
+    int debug_turn_cnt = 0;
     while (true) {
-        int32_t delta_dir = std::abs(encoder_get_right_ticks() - ticks_inicio_dir);
-        int32_t delta_esq = std::abs(encoder_get_left_ticks() - ticks_inicio_esq);
-        int32_t ticks_andados = (delta_dir + delta_esq) / 2;
+        float yaw_atual = std::abs(mpu6050_get_yaw());
 
-        // Calcula um timeout dinâmico (mantido apenas para logs, mas não quebra mais o loop)
-        uint32_t timeout_ms = 5000 + (uint32_t)((graus / 90.0f) * 2000);
+        debug_turn_cnt++;
+        if (debug_turn_cnt >= 10) { // a cada 100ms
+            printf("  [GIRO] Yaw Atual: %.1f / Alvo: %.1f\n", yaw_atual, graus_alvo);
+            debug_turn_cnt = 0;
+        }
 
-        if (ticks_andados >= ticks_alvo) {
+        if (yaw_atual >= graus_alvo) {
             break; 
         }
 
