@@ -10,15 +10,15 @@ static const char *TAG = "MPU6050";
 #define MPU6050_ADDR         0x68
 #define MPU6050_PWR_MGMT_1   0x6B
 #define MPU6050_GYRO_CONFIG  0x1B
-#define MPU6050_GYRO_XOUT_H  0x43
-#define MPU6050_GYRO_XOUT_L  0x44
+#define MPU6050_GYRO_ZOUT_H  0x47
+#define MPU6050_GYRO_ZOUT_L  0x48
 
 // Fator empírico de correção: Se o robô gira 180º físicos quando deveria ser 90º,
 // significa que a integração está pela metade. Multiplicar por 2.0 corrige o erro de escala do chip.
 #define GYRO_SCALE_FACTOR 2.0f 
 
 static volatile float global_yaw = 0.0f;
-static float gyro_x_offset = 0.0f;
+static float gyro_z_offset = 0.0f;
 
 static esp_err_t i2c_write_reg(uint8_t reg, uint8_t data) {
     i2c_cmd_handle_t cmd = i2c_cmd_link_create();
@@ -57,8 +57,8 @@ static void mpu6050_task(void *pvParameters) {
     int64_t last_time = esp_timer_get_time();
     
     while (1) {
-        int16_t raw_x = 0;
-        if (i2c_read_reg16(MPU6050_GYRO_XOUT_H, &raw_x) == ESP_OK) {
+        int16_t raw_z = 0;
+        if (i2c_read_reg16(MPU6050_GYRO_ZOUT_H, &raw_z) == ESP_OK) {
             int64_t current_time = esp_timer_get_time();
             float dt = (current_time - last_time) / 1000000.0f;
             last_time = current_time;
@@ -67,11 +67,11 @@ static void mpu6050_task(void *pvParameters) {
             if (dt > 0.1f) dt = 0.01f;
 
             // Conversão com LSB 65.5 para escala ±500°/s e aplicação do Fator de Correção Física
-            float rate_x = (((float)raw_x / 65.5f) - gyro_x_offset) * GYRO_SCALE_FACTOR;
+            float rate_z = (((float)raw_z / 65.5f) - gyro_z_offset) * GYRO_SCALE_FACTOR;
             
-            if (rate_x > -1.0f && rate_x < 1.0f) rate_x = 0.0f;
+            if (rate_z > -1.0f && rate_z < 1.0f) rate_z = 0.0f;
             
-            global_yaw += rate_x * dt;
+            global_yaw += rate_z * dt;
         } else {
             ESP_LOGE(TAG, "Falha ao ler o MPU6050");
             last_time = esp_timer_get_time(); // Evita acumular dt durante falhas
@@ -96,20 +96,20 @@ void mpu6050_init() {
     
     // Calibração de Offset (lê parado para achar o zero)
     ESP_LOGI(TAG, "Calibrando Giroscópio (NÃO MOVA O ROBÔ)...");
-    float sum_x = 0;
+    float sum_z = 0;
     int samples = 0;
     for (int i = 0; i < 100; i++) {
-        int16_t raw_x = 0;
-        if (i2c_read_reg16(MPU6050_GYRO_XOUT_H, &raw_x) == ESP_OK) {
-            sum_x += (float)raw_x / 65.5f;
+        int16_t raw_z = 0;
+        if (i2c_read_reg16(MPU6050_GYRO_ZOUT_H, &raw_z) == ESP_OK) {
+            sum_z += (float)raw_z / 65.5f;
             samples++;
         }
         vTaskDelay(pdMS_TO_TICKS(10));
     }
     if (samples > 0) {
-        gyro_x_offset = sum_x / samples;
+        gyro_z_offset = sum_z / samples;
     }
-    ESP_LOGI(TAG, "Calibração completa. Offset X: %.2f", gyro_x_offset);
+    ESP_LOGI(TAG, "Calibração completa. Offset Z: %.2f", gyro_z_offset);
     
     // Inicia a task de integração do giroscópio
     xTaskCreatePinnedToCore(mpu6050_task, "MPU6050_Task", 4096, NULL, 5, NULL, 1);
