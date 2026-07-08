@@ -4,6 +4,7 @@
 #include "motor_driver.hpp"
 #include "telemetry.hpp"
 #include "tof_sensor.hpp"
+#include "mpu6050.hpp"
 #include <string.h>
 #include <stdio.h>
 #include <cmath>
@@ -11,12 +12,11 @@
 #include "freertos/task.h"
 
 // --- Parâmetros de Calibração da Odometria ---
-const float TICKS_POR_CM = 23.0f; 
+const float TICKS_POR_CM = 18.0f; 
 
 // Fator de conversão angular (Ticks necessários para girar 90 graus no próprio eixo)
-const float TICKS_POR_90_GRAUS = 251.0f; 
-// ---------------------------------------------
-
+// Valor original: 251.0f. Reduzido para compensar derrapagem (skid) na frenagem brusca.
+const float TICKS_POR_90_GRAUS = 150.0f; 
 // Instâncias globais (privadas deste módulo) de PID
 static PID pid_motor_dir;
 static PID pid_motor_esq;
@@ -66,30 +66,25 @@ static void controle_velocidade(float vel_alvo_esq, float vel_alvo_dir, float dt
     last_pwm_dir = (int)forca_final_dir;
 }
 
-// Função privada para enviar telemetria limpa
-static void despachar_telemetria(const char* estado, int32_t ticks_x = 0) {
-    PacoteTelemetria pacote;
-    pacote.bateria_v = 7.4;
-    pacote.pos_x = ticks_x;
-    pacote.pos_y = 0;
-    
-    strncpy(pacote.estado_fsm, estado, sizeof(pacote.estado_fsm) - 1);
-    pacote.estado_fsm[sizeof(pacote.estado_fsm) - 1] = '\0';
-    
-    int f = -1, e = -1, d = -1;
-    tof_get_distances_mm(&f, &e, &d);
-    
-    pacote.dist_frontal = f;
-    pacote.dist_esq = e;
-    pacote.dist_dir = d;
-    
-    pacote.pwm_esq = (int)last_pwm_esq;
-    pacote.pwm_dir = (int)last_pwm_dir;
-    pacote.erro_pid = (int)last_erro_pid;
-    pacote.velocidade_media = (int)last_vel_media;
-    
-    xQueueSend(FilaTelemetria, &pacote, 0);
-} 
+// Getter: Retorna o último PWM calculado para o motor esquerdo
+int get_last_pwm_esq() {
+    return last_pwm_esq;
+}
+
+// Getter: Retorna o último PWM calculado para o motor direito
+int get_last_pwm_dir() {
+    return last_pwm_dir;
+}
+
+// Getter: Retorna o último erro de controle de velocidade
+float get_last_erro_pid() {
+    return last_erro_pid;
+}
+
+// Getter: Retorna a última velocidade média registrada
+float get_last_vel_media() {
+    return last_vel_media;
+}
 void navigation_init() {
     /* 
      * Inicialização dos Controladores PID de Velocidade
@@ -117,7 +112,6 @@ void andar_reto_cm(float cm) {
 
     while (true) {
         int32_t ticks_andados = std::abs(encoder_get_right_ticks() - ticks_inicio);
-        despachar_telemetria("ANDANDO", ticks_andados);
 
         if (ticks_andados >= ticks_alvo || (xTaskGetTickCount() - tempo_inicio) > pdMS_TO_TICKS(10000)) {
             break; 
@@ -133,7 +127,77 @@ void andar_reto_cm(float cm) {
 }
 
 void mover_celula() {
-    andar_reto_cm(18.0f);
+    andar_reto_cm(16.0f);
+}
+
+void mover_celula_wallfollowing() {
+
+    
+    int32_t ticks_alvo = (int32_t)(18.0f * TICKS_POR_CM);
+    int32_t ticks_inicio = encoder_get_right_ticks();
+    TickType_t tempo_inicio = xTaskGetTickCount();
+    
+    pid_motor_esq.reset();
+    pid_motor_dir.reset();
+
+    int dist_frontal, dist_esq, dist_dir;
+    float Kp_parede = 0.2f; 
+    float vel_base_cm_s = 15.0f; // Mesma velocidade base
+    float centro_ideal = 32.5f;
+
+    while (true) {
+        int32_t ticks_atuais = encoder_get_right_ticks();
+        int32_t ticks_andados = std::abs(ticks_atuais - ticks_inicio);
+
+        // 1. Condição de Parada (Odometria Exata da Célula) - TIMEOUT REMOVIDO PARA NUNCA DESISTIR
+        if (ticks_andados >= ticks_alvo) {
+            break; 
+        }
+
+        float vel_alvo_esq = vel_base_cm_s;
+        float vel_alvo_dir = vel_base_cm_s;
+
+        // 2. Leitura e Wall Following
+        if (tof_get_distances_mm(&dist_frontal, &dist_esq, &dist_dir)) {
+            float erro_parede_mm = 0;
+            bool tem_parede = false;
+            
+            if (dist_esq < 150 && dist_dir < 150) {
+                //  sensores: Centraliza baseado nas duas paredes
+                erro_parede_mm = (float)(dist_esq - dist_dir);
+                tem_parede = true;
+            } else if (dist_esq < 150) {
+                // Repulsão esquerda
+                if (dist_esq < centro_ideal) {
+                    erro_parede_mm = (dist_esq - centro_ideal) * 2.0f;
+                    tem_parede = true;
+                }
+            } else if (dist_dir < 150) {
+                // Repulsão direita
+                if (dist_dir < centro_ideal) {
+                    erro_parede_mm = (centro_ideal - dist_dir) * 2.0f; 
+                    tem_parede = true;
+                }
+            }
+
+            if (tem_parede) {
+                float correcao = erro_parede_mm * Kp_parede;
+                if (correcao > 8.0f) correcao = 8.0f;
+                if (correcao < -8.0f) correcao = -8.0f;
+                vel_alvo_esq -= correcao;
+                vel_alvo_dir += correcao;
+            }
+        }
+
+        // 3. Aplicação do PID de Velocidade
+        controle_velocidade(vel_alvo_esq, vel_alvo_dir, 0.01f);
+        vTaskDelay(pdMS_TO_TICKS(10));
+    }
+
+    // Frenagem e Finalização
+    motor_set_speed(MOTOR_LEFT, 0);
+    motor_set_speed(MOTOR_RIGHT, 0);
+    printf(">>> Celula avancada e centralizada com sucesso!\n");
 }
 
 void andar_ate_parede(float dist_parada_cm) {
@@ -149,7 +213,6 @@ void andar_ate_parede(float dist_parada_cm) {
 
     while (true) {
         int32_t ticks_andados = std::abs(encoder_get_right_ticks() - ticks_inicio);
-        despachar_telemetria("TOF_TESTE", ticks_andados);
 
         // Timeout de Segurança (7 segundos máximo para evitar travamento)
         if ((xTaskGetTickCount() - tempo_inicio) > pdMS_TO_TICKS(7000)) {
@@ -199,7 +262,6 @@ void andar_corredor_centralizado(float vel_base_cm_s, float dist_parada_frontal_
     while (true) {
         int32_t ticks_atuais = encoder_get_right_ticks();
         int32_t ticks_andados = std::abs(ticks_atuais - ticks_inicio);
-        despachar_telemetria("WALL_FOLLOW", ticks_andados);
 
         float vel_alvo_esq = vel_base_cm_s;
         float vel_alvo_dir = vel_base_cm_s;
@@ -285,30 +347,32 @@ void andar_corredor_centralizado(float vel_base_cm_s, float dist_parada_frontal_
 }
 
 void girar_graus(float graus, bool direita) {
-    printf("\n>>> Iniciando Giro de %.1f graus para a %s...\n", graus, direita ? "Direita" : "Esquerda");
+    printf("\n>>> Iniciando Giro de %.1f graus para a %s (Usando MPU6050)...\n", graus, direita ? "Direita" : "Esquerda");
     
-    const float fator_conversao = TICKS_POR_90_GRAUS / 90.0f; 
-    int32_t ticks_alvo = (int32_t)(graus * fator_conversao);
+    mpu6050_reset_yaw();
     
-    int32_t ticks_inicio = encoder_get_right_ticks();
-    TickType_t tempo_inicio = xTaskGetTickCount();
+    // Desconto empírico de overshoot de frenagem calculado via inércia (~4.5 graus para esse motor)
+    float graus_alvo = graus - 4.5f;
+    if (graus_alvo <= 0) graus_alvo = graus; // Proteção para giros minúsculos
     
     pid_motor_esq.reset();
     pid_motor_dir.reset();
 
-    // Velocidade de giro aumentada para 25.0f para garantir torque suficiente
-    // e vencer o atrito lateral da roda boba (que estava travando o motor esquerdo)
-    float vel_esq = direita ? 25.0f : -25.0f;
-    float vel_dir = direita ? -25.0f : 25.0f;
+    // Velocidade de giro aumentada para 20.0f para ajudar a vencer o atrito do rolamento ruim
+    float vel_esq = direita ? 20.0f : -20.0f;
+    float vel_dir = direita ? -20.0f : 20.0f;
 
+    int debug_turn_cnt = 0;
     while (true) {
-        int32_t ticks_andados = std::abs(encoder_get_right_ticks() - ticks_inicio);
-        despachar_telemetria("GIRANDO", ticks_andados);
+        float yaw_atual = std::abs(mpu6050_get_yaw());
 
-        // Calcula um timeout dinâmico: 5s base + 2s a cada 90 graus
-        uint32_t timeout_ms = 5000 + (uint32_t)((graus / 90.0f) * 2000);
+        debug_turn_cnt++;
+        if (debug_turn_cnt >= 10) { // a cada 100ms
+            printf("  [GIRO] Yaw Atual: %.1f / Alvo: %.1f\n", yaw_atual, graus_alvo);
+            debug_turn_cnt = 0;
+        }
 
-        if (ticks_andados >= ticks_alvo || (xTaskGetTickCount() - tempo_inicio) > pdMS_TO_TICKS(timeout_ms)) {
+        if (yaw_atual >= graus_alvo) {
             break; 
         }
 

@@ -10,7 +10,9 @@ idf_component_register(SRCS "main.cpp"
                             "wallfollowing.cpp"
                             "switches.cpp"
                             "motor_driver.cpp"
-                    INCLUDE_DIRS "."
+                            "mpu6050.cpp"
+                            "../floodfill/flood_fill.cpp"
+                    INCLUDE_DIRS "." "../floodfill"
                     REQUIRES ESP32_VL53L0X
                              bblanchon__arduinojson
                              driver

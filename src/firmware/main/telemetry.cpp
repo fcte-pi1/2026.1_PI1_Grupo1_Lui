@@ -69,8 +69,9 @@ void TaskTelemetria(void *parametrospv) {
     for (;;) {
         // Fica aguardando novos pacotes na fila
         if (xQueueReceive(FilaTelemetria, &pacote, portMAX_DELAY) == pdPASS) {
-            printf("Recebido no Core 1 -> bateria: %.2f | X:%d | FSM: %s\n",
-                   pacote.bateria_v, pacote.pos_x, pacote.estado_fsm);
+            // printf("Recebido no Core 1 -> bateria: %.2f | X:%d | FSM: %s | TOF(F/E/D): %d/%d/%d\n",
+                   // pacote.bateria_v, pacote.pos_x, pacote.estado_fsm, 
+                   // pacote.dist_frontal, pacote.dist_esq, pacote.dist_dir);
 
             // Tenta resolver o hostname se ainda não foi resolvido
             if (!ip_resolved) {
@@ -119,8 +120,8 @@ void TaskTelemetria(void *parametrospv) {
 
                     JsonObject obj = arr.add<JsonObject>();
                     obj["bateria_v"] = p_lote.bateria_v;
-                    obj["posicao_x"] = p_lote.pos_x;
-                    obj["posicao_y"] = p_lote.pos_y;
+                    obj["pos_x"] = p_lote.pos_x;
+                    obj["pos_y"] = p_lote.pos_y;
                     obj["estado_fsm"] = p_lote.estado_fsm;
                     obj["dist_frontal"] = p_lote.dist_frontal;
                     obj["dist_esquerda"] = p_lote.dist_esq;
@@ -144,17 +145,17 @@ void TaskTelemetria(void *parametrospv) {
                 int err = sendto(sock, tx_buffer, bytes_written, 0, (struct sockaddr *)&dest_addr, sizeof(dest_addr));
                 
                 if (err < 0) {
-                    printf("Falha ao descarregar Batch MsgPack.\n");
+                    // printf("Falha ao descarregar Batch MsgPack.\n");
                 } else {
-                    printf("Lote despachado: %d pacotes antigos enviados! (%d bytes)\n", lote_size, (int)bytes_written);
+                    // printf("Lote despachado: %d pacotes antigos enviados! (%d bytes)\n", lote_size, (int)bytes_written);
                 }
             } 
             // Envio de pacote individual
             else {
                 JsonDocument doc;
                 doc["bateria_v"] = pacote.bateria_v;
-                doc["posicao_x"] = pacote.pos_x;
-                doc["posicao_y"] = pacote.pos_y;
+                doc["pos_x"] = pacote.pos_x;
+                doc["pos_y"] = pacote.pos_y;
                 doc["estado_fsm"] = pacote.estado_fsm;
                 doc["dist_frontal"] = pacote.dist_frontal;
                 doc["dist_esquerda"] = pacote.dist_esq;
@@ -179,7 +180,7 @@ void TaskTelemetria(void *parametrospv) {
                 if (err < 0) {
                     enfileirarBuffer(pacote);
                 } else {
-                    printf("UDP MsgPack enviado com sucesso! (%d bytes)\n", (int)bytes_written);
+                    // printf("UDP MsgPack enviado com sucesso! (%d bytes)\n", (int)bytes_written);
                 }
             }
         }

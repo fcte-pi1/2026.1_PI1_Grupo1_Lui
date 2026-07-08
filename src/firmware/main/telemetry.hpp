@@ -7,13 +7,13 @@ struct PacoteTelemetria {
     int pos_x;
     int pos_y;
     char estado_fsm[16];
+    char orientacao[8];
     int dist_frontal;
     int dist_esq;
     int dist_dir;
     uint8_t paredes;
     uint32_t timestamp;
-    
-        int pwm_esq;
+    int pwm_esq;
     int pwm_dir;
     float erro_pid;
     float velocidade_media;
@@ -21,6 +21,7 @@ struct PacoteTelemetria {
 
 // Exportação de handlers globais e protótipos
 extern QueueHandle_t FilaTelemetria;
+extern int global_maze_size;
 void TaskTelemetria(void *parametrospv);
 
 #define CAPACIDADE_BUFFER 600

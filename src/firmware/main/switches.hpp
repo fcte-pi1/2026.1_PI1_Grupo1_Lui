@@ -3,7 +3,7 @@
 
 // Pino configurado com Pull-up interno via software para detecção ativa em borda de descida (GND).
 #define PIN_SWITCH_START      GPIO_NUM_34
-#define PIN_SWITCH_MAZE_SIZE  GPIO_NUM_39
+#define PIN_SWITCH_MAZE_SIZE  GPIO_NUM_4
 
 void switches_init();
 
