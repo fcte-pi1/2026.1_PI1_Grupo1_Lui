@@ -6,6 +6,7 @@
 # ...
 node_modules/
 src/frontend/node_modules/
+.openclaude
 
 # Build (Catch2 tests)
 **/build/
@@ -358,3 +359,5 @@ extract_issues.sh
 issues_repositorio.json
 open_issues.json
 src/firmware/floodfill/test_runner
+.aider*
+src/firmware/main/wifi_credentials.h

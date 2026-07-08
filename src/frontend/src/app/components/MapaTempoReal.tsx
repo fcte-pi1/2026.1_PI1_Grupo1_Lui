@@ -31,19 +31,22 @@ export function RobotMap({ telemetria, celulasExploradas, trajetoRapido, mostrar
             gridTemplateRows: `repeat(${tamanho}, minmax(0, 1fr))` 
           }}
         >
-          {Array.from({ length: tamanho }).map((_, y) => (
-            Array.from({ length: tamanho }).map((_, x) => {
+          {Array.from({ length: tamanho }).map((_, i) => {
+            // y invertido: 0 fica embaixo (plano cartesiano)
+            const y = tamanho - 1 - i;
+            return Array.from({ length: tamanho }).map((_, x) => {
               
               const chave = `${x}-${y}`;
               const celula = celulasExploradas[chave];
               const isRoboAqui = telemetria.posicao_x === x && telemetria.posicao_y === y;
               const isCaminhoRapido = trajetoRapido?.some(p => p.x === x && p.y === y);
  
-              let classesParedes = "border-slate-800/40 border border-dashed"; 
+              let classesParedes = "border-slate-800/40 border border-dashed";
               let corFundo = "bg-transparent";
- 
+              let brilhoTrajeto = "";
+
               if (celula) {
-                corFundo = "bg-[#1e293b]"; 
+                corFundo = "bg-[#1e293b]";
                 classesParedes = `
                   ${celula.paredes.norte ? 'border-t-[3px] border-t-red-500' : 'border-t border-t-slate-700/50'}
                   ${celula.paredes.sul ? 'border-b-[3px] border-b-red-500' : 'border-b border-b-slate-700/50'}
@@ -51,18 +54,20 @@ export function RobotMap({ telemetria, celulasExploradas, trajetoRapido, mostrar
                   ${celula.paredes.oeste ? 'border-l-[3px] border-l-red-500' : 'border-l border-l-slate-700/50'}
                 `;
               }
- 
+
               if (isRoboAqui) {
                 corFundo = "bg-blue-500/20";
               } else if (isCaminhoRapido && mostrarTrajetoRapido) {
-                corFundo = "bg-emerald-950/20";
+                // emerald-950/20 era quase preto e não dava o efeito "neon" esperado
+                corFundo = "bg-emerald-400/30";
+                brilhoTrajeto = "shadow-[inset_0_0_12px_2px_#34d399]";
               }
- 
+
               return (
-                <div key={chave} className={`relative flex items-center justify-center transition-all duration-300 ${classesParedes} ${corFundo}`}>
+                <div key={chave} className={`relative flex items-center justify-center transition-all duration-300 ${classesParedes} ${corFundo} ${brilhoTrajeto}`}>
                   {isRoboAqui && (
-                    <div 
-                      className="absolute w-[65%] h-[65%] drop-shadow-[0_0_12px_rgba(59,130,246,0.9)] transition-transform duration-500 ease-in-out" 
+                    <div
+                      className="absolute w-[65%] h-[65%] drop-shadow-[0_0_12px_rgba(59,130,246,0.9)] transition-transform duration-500 ease-in-out"
                       style={{ transform: `rotate(${obterRotacaoRobo(telemetria.orientacao)})` }}
                     >
                       <svg viewBox="0 0 24 24" fill="none" className="w-full h-full text-blue-400">
@@ -76,7 +81,7 @@ export function RobotMap({ telemetria, celulasExploradas, trajetoRapido, mostrar
                 </div>
               );
             })
-          ))}
+          })}
         </div>
       </div>
     </div>

@@ -45,7 +45,58 @@ if (!fs.existsSync(MAZE_RUNS_DIR)) {
 // -----------------------------------
 
 // Cria servidor HTTP e WebSocket
-export const httpServer = createServer();
+export const httpServer = createServer((req, res) => {
+  // Endpoint REST para listar e servir arquivos maze_runs
+  // Isso funciona tanto em dev quanto em produção (Docker)
+  if (req.url?.startsWith('/api/maze_runs')) {
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+
+    const pathParts = req.url.replace('/api/maze_runs', '').replace(/^\//, '');
+    
+    // GET /api/maze_runs → lista os arquivos
+    if (!pathParts || pathParts === '') {
+      try {
+        const files = fs.readdirSync(MAZE_RUNS_DIR)
+          .filter(f => f.endsWith('.json'))
+          .sort()
+          .reverse();
+        res.end(JSON.stringify(files));
+      } catch {
+        res.statusCode = 500;
+        res.end(JSON.stringify({ error: 'Erro ao listar maze_runs' }));
+      }
+      return;
+    }
+
+    // GET /api/maze_runs/arquivo.json → serve o arquivo
+    if (pathParts.endsWith('.json')) {
+      const filePath = path.join(MAZE_RUNS_DIR, pathParts);
+      try {
+        if (fs.existsSync(filePath)) {
+          const content = fs.readFileSync(filePath, 'utf-8');
+          res.end(content);
+        } else {
+          res.statusCode = 404;
+          res.end(JSON.stringify({ error: 'Arquivo não encontrado' }));
+        }
+      } catch {
+        res.statusCode = 500;
+        res.end(JSON.stringify({ error: 'Erro ao ler arquivo' }));
+      }
+      return;
+    }
+
+    res.statusCode = 400;
+    res.end(JSON.stringify({ error: 'Formato inválido' }));
+    return;
+  }
+
+  // Para outras rotas, retorna 404
+  res.statusCode = 404;
+  res.end('Not Found');
+});
+
 export const io = new Server(httpServer, {
   cors: {
     origin: "*",
@@ -89,8 +140,17 @@ server.on('listening', () => {
 
 server.on('message', (msg, rinfo) => {
   try {
-    // Decodifica o payload recebido via MsgPack
-    const dataDecoded = decode(msg);
+    // Tenta decodificar o payload recebido via MsgPack ou JSON.parse()
+    let dataDecoded;
+    try {
+      dataDecoded = decode(msg);
+    } catch (msgPackErr) {
+      try {
+        dataDecoded = JSON.parse(msg.toString());
+      } catch (jsonErr) {
+        throw new Error(`Falha ao decodificar MsgPack e JSON: ${msgPackErr.message} / ${jsonErr.message}`);
+      }
+    }
     
     // Normaliza para sempre iterar, mesmo se for apenas 1 pacote solto
     const pacotes = Array.isArray(dataDecoded) ? dataDecoded : [dataDecoded];
@@ -103,8 +163,19 @@ server.on('message', (msg, rinfo) => {
 
     // Processa cada pacote do lote (ou o único pacote)
     for (const data of pacotes) {
+      // Adiciona um console.log condicional avisando que uma rota foi recebida
+      if (data.rota_calculada) {
+        const passos = Array.isArray(data.rota_calculada) ? data.rota_calculada.length : 0;
+        console.log(`Rota otimizada recebida: ${passos} passos`);
+      }
+
       // Envia dados para clientes conectados via WebSocket
       io.emit('telemetry', data);
+
+      // --- LOG VISUAL NO TERMINAL PARA DEBUG RÁPIDO ---
+      const ticks_print = data.posicao_x !== undefined ? data.posicao_x : (data.pos_x !== undefined ? data.pos_x : 'NULL');
+      console.log(`[DADOS] Estado: ${data.estado_fsm} | Ticks X: ${ticks_print} | PWM Esq: ${data.pwm_esq} | PWM Dir: ${data.pwm_dir} | ToF F/E/D: ${data.dist_frontal}/${data.dist_esquerda}/${data.dist_direita}`);
+
 
       // Mapeamento dinâmico e seguro para o esquema InfluxDB
       const estado_robo = data.estado_fsm || data.estado_robo || 'IDLE';
@@ -115,13 +186,25 @@ server.on('message', (msg, rinfo) => {
       // --- LÓGICA DE GERAÇÃO DO JSON AUTOMÁTICO ---
       if (!sessoesAtivas[id_corrida]) {
         let larg = 16, alt = 16;
-        const match = id_labirinto.match(/(\d+)x(\d+)/);
-        if (match) { larg = parseInt(match[1]); alt = parseInt(match[2]); }
+        
+        // Prioriza a informação explícita enviada pelo firmware
+        if (data.mazeSize) {
+          larg = data.mazeSize;
+          alt = data.mazeSize;
+        } else {
+          // Fallback para deduzir pela string
+          const match = id_labirinto.match(/(\d+)x(\d+)/);
+          if (match) { larg = parseInt(match[1]); alt = parseInt(match[2]); }
+        }
+
+        const mapping = data.mapping !== undefined ? data.mapping : true;
 
         sessoesAtivas[id_corrida] = {
           id_corrida,
           id_labirinto,
           tamanho: { larg, alt },
+          mapping,
+          goalReached: false,
           historico: []
         };
       }
@@ -149,6 +232,9 @@ server.on('message', (msg, rinfo) => {
       if (estado_robo === 'GOAL_REACHED') {
         console.log(`[JSON Automático] Gatilho de fim recebido para corrida: ${id_corrida}`);
         if (sessoesAtivas[id_corrida] && sessoesAtivas[id_corrida].historico.length > 0) {
+          // Marca explicitamente que o objetivo foi atingido
+          sessoesAtivas[id_corrida].goalReached = true;
+          
           const dataAtual = new Date();
           const dataFormatada = dataAtual.toISOString().replace(/[:.]/g, '-').substring(0, 19);
           const filename = `corrida_${id_corrida}_${dataFormatada}.json`;
@@ -217,7 +303,7 @@ server.on('message', (msg, rinfo) => {
       });
 
   } catch (err) {
-    console.error('[UDP] Erro ao processar mensagem ou decodificar MsgPack:', err.message);
+    console.error('[UDP] Erro ao processar mensagem ou decodificar MsgPack/JSON:', err.message);
     console.log('[UDP] Pacote bruto recebido (String):', msg.toString());
   }
 });

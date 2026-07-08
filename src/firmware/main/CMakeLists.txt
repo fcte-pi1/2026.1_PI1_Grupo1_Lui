@@ -1,10 +1,18 @@
 idf_component_register(SRCS "main.cpp"
                             "telemetry.cpp"
                             "movement.cpp"
+                            "navigation.cpp"
                             "wifi_manager.cpp"
                             "tof_sensor.cpp"
                             "ina219.cpp"
-                    INCLUDE_DIRS "."
+                            "pid.cpp"
+                            "encoder.cpp"
+                            "wallfollowing.cpp"
+                            "switches.cpp"
+                            "motor_driver.cpp"
+                            "mpu6050.cpp"
+                            "../floodfill/flood_fill.cpp"
+                    INCLUDE_DIRS "." "../floodfill"
                     REQUIRES ESP32_VL53L0X
                              bblanchon__arduinojson
                              driver

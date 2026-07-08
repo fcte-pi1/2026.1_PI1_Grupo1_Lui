@@ -11,6 +11,9 @@ QueueHandle_t FilaTelemetria;
 
 #define UDP_DEST_PORT 41234
 
+// Configurações fonte da verdade definidas pelo Firmware na inicialização
+int global_maze_size = 16;
+bool global_mapping_mode = true;
 
 
 RingBufferTelemetria bufferOffline = {{}, 0, 0, 0};
@@ -38,6 +41,8 @@ bool desenfileirarBuffer(PacoteTelemetria& pacote) {
 
 
 
+// Tarefa assíncrona consumidora (Subscriber). Bloqueia a execução (Sleep) no portMAX_DELAY 
+// até que um pacote seja inserido na fila pelo Core 0, otimizando o uso da CPU.
 void TaskTelemetria(void *parametrospv) {
     PacoteTelemetria pacote;
 
@@ -54,6 +59,8 @@ void TaskTelemetria(void *parametrospv) {
         printf("Falha ao criar o socket UDP\n");
     } else {
         printf("Socket UDP criado com sucesso\n");
+        int broadcastEnable = 1;
+        setsockopt(sock, SOL_SOCKET, SO_BROADCAST, &broadcastEnable, sizeof(broadcastEnable));
     }
 
     // Buffer para serialização MsgPack
@@ -62,8 +69,9 @@ void TaskTelemetria(void *parametrospv) {
     for (;;) {
         // Fica aguardando novos pacotes na fila
         if (xQueueReceive(FilaTelemetria, &pacote, portMAX_DELAY) == pdPASS) {
-            printf("Recebido no Core 1 -> bateria: %.2f | X:%d | FSM: %s\n",
-                   pacote.bateria_v, pacote.pos_x, pacote.estado_fsm);
+            // printf("Recebido no Core 1 -> bateria: %.2f | X:%d | FSM: %s | TOF(F/E/D): %d/%d/%d\n",
+                   // pacote.bateria_v, pacote.pos_x, pacote.estado_fsm, 
+                   // pacote.dist_frontal, pacote.dist_esq, pacote.dist_dir);
 
             // Tenta resolver o hostname se ainda não foi resolvido
             if (!ip_resolved) {
@@ -75,9 +83,13 @@ void TaskTelemetria(void *parametrospv) {
                     printf("Resolvido Host do PC para o IP: %s\n", inet_ntoa(dest_addr.sin_addr));
                     ip_resolved = true;
                 } else {
-                    // Fallback direto
-                    dest_addr.sin_addr.s_addr = inet_addr("10.13.37.1");
-                    printf("Aviso: DNS falhou. Usando IP fallback do PC: 10.13.37.1\n");
+                    // Fallback para Broadcast (255.255.255.255) caso a resolução DNS do host local falhe.
+                    // Isso permite o envio cego de pacotes UDP sem a necessidade de um IP fixo na sub-rede.
+                    dest_addr.sin_addr.s_addr = inet_addr("255.255.255.255");
+                    printf("Aviso: Falha no DNS. Adotando roteamento via BROADCAST (255.255.255.255).\n");
+                    
+                    // Flag de controle para evitar bloqueio da fila com repetidas tentativas de DNS
+                    ip_resolved = true; 
                 }
             }
 
@@ -108,14 +120,23 @@ void TaskTelemetria(void *parametrospv) {
 
                     JsonObject obj = arr.add<JsonObject>();
                     obj["bateria_v"] = p_lote.bateria_v;
-                    obj["posicao_x"] = p_lote.pos_x;
-                    obj["posicao_y"] = p_lote.pos_y;
+                    obj["pos_x"] = p_lote.pos_x;
+                    obj["pos_y"] = p_lote.pos_y;
                     obj["estado_fsm"] = p_lote.estado_fsm;
                     obj["dist_frontal"] = p_lote.dist_frontal;
+                    obj["dist_esquerda"] = p_lote.dist_esq;
+                    obj["dist_direita"] = p_lote.dist_dir;
                     obj["paredes"] = p_lote.paredes;
                     obj["timestamp"] = p_lote.timestamp;
                     
-                    obj["id_labirinto"] = "Wokwi_Maze";
+                    obj["pwm_esq"] = p_lote.pwm_esq;
+                    obj["pwm_dir"] = p_lote.pwm_dir;
+                    obj["erro_pid"] = p_lote.erro_pid;
+                    obj["velocidade_media"] = p_lote.velocidade_media;
+                    
+                    obj["mazeSize"] = global_maze_size;
+                    obj["mapping"] = global_mapping_mode;
+                    obj["id_labirinto"] = "Wokwi_Maze"; // Mantido por compatibilidade
                     obj["id_corrida"] = "Simulated_Run";
                     obj["objetivo"] = "Center";
                 }
@@ -124,23 +145,32 @@ void TaskTelemetria(void *parametrospv) {
                 int err = sendto(sock, tx_buffer, bytes_written, 0, (struct sockaddr *)&dest_addr, sizeof(dest_addr));
                 
                 if (err < 0) {
-                    printf("Falha ao descarregar Batch MsgPack.\n");
+                    // printf("Falha ao descarregar Batch MsgPack.\n");
                 } else {
-                    printf("Lote despachado: %d pacotes antigos enviados! (%d bytes)\n", lote_size, (int)bytes_written);
+                    // printf("Lote despachado: %d pacotes antigos enviados! (%d bytes)\n", lote_size, (int)bytes_written);
                 }
             } 
             // Envio de pacote individual
             else {
                 JsonDocument doc;
                 doc["bateria_v"] = pacote.bateria_v;
-                doc["posicao_x"] = pacote.pos_x;
-                doc["posicao_y"] = pacote.pos_y;
+                doc["pos_x"] = pacote.pos_x;
+                doc["pos_y"] = pacote.pos_y;
                 doc["estado_fsm"] = pacote.estado_fsm;
                 doc["dist_frontal"] = pacote.dist_frontal;
+                doc["dist_esquerda"] = pacote.dist_esq;
+                doc["dist_direita"] = pacote.dist_dir;
                 doc["paredes"] = pacote.paredes;
                 doc["timestamp"] = pacote.timestamp;
                 
-                doc["id_labirinto"] = "Wokwi_Maze";
+                doc["pwm_esq"] = pacote.pwm_esq;
+                doc["pwm_dir"] = pacote.pwm_dir;
+                doc["erro_pid"] = pacote.erro_pid;
+                doc["velocidade_media"] = pacote.velocidade_media;
+                
+                doc["mazeSize"] = global_maze_size;
+                doc["mapping"] = global_mapping_mode;
+                doc["id_labirinto"] = "Wokwi_Maze"; // Mantido por compatibilidade
                 doc["id_corrida"] = "Simulated_Run";
                 doc["objetivo"] = "Center";
 
@@ -150,7 +180,7 @@ void TaskTelemetria(void *parametrospv) {
                 if (err < 0) {
                     enfileirarBuffer(pacote);
                 } else {
-                    printf("UDP MsgPack enviado com sucesso! (%d bytes)\n", (int)bytes_written);
+                    // printf("UDP MsgPack enviado com sucesso! (%d bytes)\n", (int)bytes_written);
                 }
             }
         }

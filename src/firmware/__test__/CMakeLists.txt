@@ -44,3 +44,22 @@ target_link_libraries(test_floodfill PRIVATE Catch2::Catch2WithMain)
 include(CTest)
 include(Catch)
 catch_discover_tests(test_floodfill)
+
+# Bancada virtual do PID (sem dependencia de FreeRTOS/ESP-IDF)
+set(PID_SOURCES
+  ${CMAKE_SOURCE_DIR}/../main/pid.cpp
+)
+
+add_executable(test_pid
+  test_pid_convergencia.cpp
+  test_pid_antiwindup.cpp
+  ${PID_SOURCES}
+)
+
+target_include_directories(test_pid PRIVATE
+  ${CMAKE_SOURCE_DIR}/../main
+)
+
+target_link_libraries(test_pid PRIVATE Catch2::Catch2WithMain)
+
+catch_discover_tests(test_pid)

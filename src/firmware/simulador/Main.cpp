@@ -150,10 +150,11 @@ int main() {
 // Algoritmo pra salvar o json das paredes
 void salva_json(int larg, int alt){
     // Cria diretório para o histórico da corrida
+    // Usa o mesmo local que o backend: src/maze_runs/
     #ifdef PROJECT_ROOT_DIR
-        string diretorio = string(PROJECT_ROOT_DIR) + "/maze_runs";
+        string diretorio = string(PROJECT_ROOT_DIR) + "/src/maze_runs";
     #else
-        string diretorio = "../../maze_runs";
+        string diretorio = "../../src/maze_runs";
     #endif
     
     #ifdef _WIN32
@@ -175,6 +176,7 @@ void salva_json(int larg, int alt){
     arquivo << "    \"larg\": " << larg << ",\n";
     arquivo << "    \"alt\": " << alt << "\n";
     arquivo << "  },\n";
+    arquivo << "  \"goalReached\": true,\n";
     arquivo << "  \"historico\": [\n";
     
     for (size_t i = 0; i < historico_exploracao.size(); i++) {
