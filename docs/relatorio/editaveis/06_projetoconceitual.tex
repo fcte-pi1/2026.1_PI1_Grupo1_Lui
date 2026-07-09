@@ -589,10 +589,10 @@ e, uma vez validadas as leituras, zera a odometria e avança para o estado
 Core~0 assume o controle de movimento e a FSM, enquanto o Core~1 transmite
 telemetria continuamente para o \textit{backend} (Node.js + InfluxDB) e o
 Dashboard em React.
+Flood Fill; caso contrário, adota a exploração sistemática por DFS/Tremaux.
 
 Na fase de exploração (\texttt{MAPPING}), o Core~0 aplica uma abordagem
 híbrida: caso o destino já seja conhecido, propaga a matriz de distâncias via
-Flood Fill; caso contrário, adota a exploração sistemática por DFS/Tremaux.
 O ciclo se repete até que o centro do labirinto seja atingido
 (\texttt{GOAL\_REACHED}), momento em que os motores são interrompidos e a rota
 ótima é calculada com base no mapa construído.
