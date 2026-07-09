@@ -1,11 +1,11 @@
 \chapter{Lições Aprendidas}
 \label{licoes}
 
-\textcolor{red}{Documentar as lições aprendidas de modo a aperfeiçoar os processos e evitar que os erros e problemas encontrados se repitam em futuros projetos.}
+Durante o desenvolvimento do projeto a equipe lidou com vários desafios que levaram a aprendizados que serão levados para a vida inteira. 
 
 \section{Análise SWOT}
 
-\textcolor{red}{A análise SWOT (\textit{Strengths}, \textit{Weaknesses}, \textit{Opportunities}, \textit{Threats}) é usada para identificar os pontos fortes e fracos do produto, e as principais oportunidades e ameaças normalmente associadas aos pontos fortes e fracos identificados. Preencha a Tabela \ref{tab:swot} de forma correspondente.}
+A Tabela \ref{tab:swot} consta os pontos fortes e fracos o projeto.
 
 \begin{table}[ht]
 % \label{tab:swot}
@@ -15,90 +15,108 @@
  & \textbf{Pontos fortes} & \textbf{Pontos fracos}  \\ \hline 
     {\parbox{0.1\textwidth}{ \textbf{Fatores \\ internos}}}  &
     {\parbox{0.4\textwidth}{ Forças: 
-        \\ \textcolor{red}{Descreva seus diferenciais competitivos: aquilo que faz de você melhor que seus concorrentes.}
         \begin{itemize}
-            \item Lorem ipsum
-            \item Lorem ipsum
+            \item A telemetria funciona;
+            \item O \textit{Front-end} do projeto está intuitivo e era consistente com a telemtria;
+            \item O esquemático de eletrôncia está intuitivo.
         \end{itemize} }} & 
     {\parbox{0.4\textwidth}{ Fraquezas:
-        \\ \textcolor{red}{Descreva suas principais deficiências: aquilo que faz de você pior que seus concorrentes, e pontos a serem melhorados ou revistos.}
         \begin{itemize}
-            \item Lorem ipsum
-            \item Lorem ipsum
+            \item A estrutura final projetada não previa a altura do tof para ler as paredes;
+            \item Problemas com a roda e a engrenagem do carrinho.
         \end{itemize} }}\\ \hline
     {\parbox{0.1\textwidth}{ \textbf{Fatores \\ externos}}}  &
     {\parbox{0.4\textwidth}{ Oportunidades:
-        \\ \textcolor{red}{Descreva as principais oportunidades identificadas: eventos potenciais que podem gerar grandes benefícios.}
         \begin{itemize}
-            \item Lorem ipsum 
-            \item Lorem ipsum
+            \item Ajuda de alguns professores externos a disciplina;
+            \item Ajuda de alguns alunos externos a disciplinas ajudando a identificar problemas.
         \end{itemize} }} & 
     {\parbox{0.4\textwidth}{ Ameaças:
-        \\ \textcolor{red}{Descreva as principais ameaças identificadas: eventos potenciais que podem causar um grande estrago ao seu negócio.}
         \begin{itemize}
-            \item Lorem ipsum 
-            \item Lorem ipsum
+            \item Entrega de pedidos atrasaram;
         \end{itemize} }}\\ \hline
 \end{tabular}
 \label{tab:swot}
 \end{table}
 
 
-\section{Planejado x realizado}
-\subsection{Objetivos}
-\textcolor{red}{Os objetivos foram alcançados? Responda as questões e comente os pontos mais relevantes – até 700 caracteres, considerando os espaços.}
-\subsection{Prazos}
-\textcolor{red}{O projeto foi entregue dentro do prazo? Responda as questões e comente os pontos mais relevantes – até 700 caracteres, considerando os espaços.}
-\subsection{Orçamento}
-\textcolor{red}{O projeto foi entregue dentro do orçamento? Responda as questões e comente os pontos mais relevantes – até 700 caracteres, considerando os espaços.}
-\subsection{Escopo}
-\textcolor{red}{O  projeto atendeu ao escopo? Responda as questões e comente os pontos mais relevantes – até 700 caracteres, considerando os espaços.}
+\subsection{Gerenciamento de Projeto: Planejado \textit{versus} Realizado}
+\label{subsec:planejado_realizado}
 
+\subsubsection{Objetivos}
+\label{subsubsec:objetivos_proj}
+
+O escopo inicial estabelecido no Termo de Abertura do Projeto (TAP) previa o desenvolvimento completo de um robô autônomo Micromouse capaz de mapear e solucionar labirintos em malhas geométricas de diversas dimensões, operando de forma integrada a um sistema \textit{web} de monitoramento e telemetria em tempo real. A avaliação final do cumprimento desses objetivos revela uma clara disparidade entre o sucesso obtido no domínio lógico e as severas restrições encontradas no domínio físico:
+
+\begin{itemize}
+    \item \textbf{Objetivos Plenamente Atingidos e Extensões de Escopo:} A infraestrutura de \textit{software}, que engloba a camada de ingestão de dados e a interface reativa do painel, atingiu plenamente os requisitos de operabilidade. O sistema de telemetria funcionou de forma satisfatória, exibindo dados em tempo real sempre que a plataforma física operou estável. Adicionalmente, a equipe expandiu de forma proativa o escopo técnico do projeto através do desenvolvimento de funcionalidades extras de alta complexidade: a implementação de um sistema para armazenamento e recuperação de históricos de corridas; a capacidade de transmissão de pacotes via protocolo UDP para múltiplos nós simultâneos na rede; e a criação de uma rotina de contingência local via \textit{ringbuffer}, assegurando a retenção e a integridade dos dados no microcontrolador em cenários de queda da conectividade Wi-Fi.
+    
+    \item \textbf{Objetivos Não Atingidos e Adaptações Mecânicas:} O objetivo de validação de uma navegação autônoma fluida e consistente não pôde ser consolidado devido a falhas estruturais crônicas no subsistema mecânico. O robô apresentou um nível severo de atrito estático e dinâmico entre as rodas e o chassi. Para superar essa resistência mecânica inicial, o algoritmo de controle foi forçado a aplicar sinais de modulação por largura de pulso (PWM) em níveis excessivamente elevados. Consequentemente, o veículo tornou-se incapaz de trafegar sob baixas velocidades, resultando em um deslocamento bruto, impreciso e de comportamento errático, o que inviabilizou a realização de testes consistentes de resolução autônoma do labirinto.
+\end{itemize}
+
+\subsubsection{Prazos}
+\label{subsubsec:prazos_proj}
+
+A gestão temporal do projeto foi balizada pelos marcos regulatórios da disciplina, compreendendo as entregas documentais ED1, ED2 e a Apresentação Final do produto. O contraste entre o planejamento cronológico formal e a execução prática é detalhado a seguir:
+
+\begin{itemize}
+    \item \textbf{Cumprimento dos Marcos Documentais:} Sob a perspectiva gerencial, de planejamento de escopo e de redação técnica, a equipe manteve rigores absolutos. Todas as entregas de relatórios parciais (ED1 e ED2) e finais em ambiente \LaTeX{} foram submetidas estritamente dentro dos prazos regulamentares previamente acordados.
+    
+    \item \textbf{Desvios e Gargalos Cronológicos na Integração:} A linha do tempo voltada à fabricação e testes práticos sofreu impactos críticos. O subsistema de eletrônica demandou aproximadamente uma semana de desvio além do estimado para calibração fina de sensores. No entanto, o principal gargalo temporal centrou-se na iteração contínua do chassi. O problema recorrente de travamento mecânico das rodas gerou ciclos repetitivos de retrabalho mecânico que consumiram a janela que seria dedicada à validação de campo do \textit{software}. Este bloqueio culminou em uma falha de \textit{hardware} catastrófica: a queima do microcontrolador ESP32 devido a uma sobrecarga de corrente elétrica, ocasionada pelo esforço extremo exigido pelos motores na tentativa de vencer o atrito da roda travada.
+    
+    \item \textbf{Ações de Contingência e Alocação de Recursos:} Para mitigar os atrasos gerados pelas constantes remontagens estruturais, a gerência adotou estratégias de realocação dinâmica de recursos humanos. Membros de frentes de trabalho com menor sobrecarga foram temporariamente deslocados para apoiar as equipes de estruturas e documentação. Foram executadas \textit{sprints} intensivas de desenvolvimento (viradas de trabalho) logo após cada nova iteração do chassi na tentativa de validar a integração a tempo. Embora tais manobras de gestão tenham assegurado a conformidade documental dentro do prazo, a complexidade estrutural mecânica limitou o sucesso da validação física final do robô.
+\end{itemize}
+
+\subsection{Orçamento}
+
+O projeto saiu do orçamento previsto pois teve a impressão de dois chassis que não funcionaram, devido a falhas na estrutura, tivemos três componentes queimados, sendo dois sensores ToFs e uma ponte H, tivemos que comprar um componente giroscópio para garantir que a curva estivesse correta, já que só nos Encoders estava com muita falha e, por fim, a compra de coisas que não estavam previstas, como enforca gato e mais jumpers para a soldagem.
+
+\subsection{Escopo}
+
+Atendemos o escopo na inspeção prévia do projeto, porém, com a alteração  da estrutura e a perda de um componente eletrõnico, a equipe não conseguiu fazer o \textit{micromouse} se locomover.
+
+Porém, o \textit{micromouse} conseguiu ir para a frente, o software mostrar a telemetria  incluindo as paredes do labirinto descobertas e em alguns testes ele alçancou o objetivo final.
+
+Todavia, durante o desenvolvimento ele não atendeu todos os critérios pois não fazia curvas com precisão, não perpetuando os mesmos resultados nos testes sem alteração em código, logo, achar o centro do labirinto era imprevisível por conta de problemas na curva, não permitindo garantir o alcance do objetivo final em diferentes testes.
 
 \section{Projeto}
-\textcolor{red}{Comente os pontos mais relevantes a serem aperfeiçoados ou adotados em próximos projetos.}
 \subsection{Pontos fortes}
 \begin{enumerate}
-	\item \textcolor{red}{Até 200 caracteres, considerando os espaços.}
-	\item \textcolor{red}{Até 200 caracteres, considerando os espaços.}
-	\item \textcolor{red}{Até 200 caracteres, considerando os espaços.}
-	\item \textcolor{red}{Até 200 caracteres, considerando os espaços.}
+	\item O projeto permitiu que os estudantes, especialmente de software, tivessem contato com outras áreas, trazendo aprendizados de eletrônica, sobre matriz energética, entre outras coisas.  
 \end{enumerate}
 \subsection{Pontos fracos}
 \begin{enumerate}
-	\item \textcolor{red}{Até 200 caracteres, considerando os espaços.}
-	\item \textcolor{red}{Até 200 caracteres, considerando os espaços.}
-	\item \textcolor{red}{Até 200 caracteres, considerando os espaços.}
-	\item \textcolor{red}{Até 200 caracteres, considerando os espaços.}
+	\item O escopo desse projeto foi grande, até os estudantes do oitavo e sétimo semestre tiveram dificuldades para realizá-lo, considerando que é uma disciplina de quarto semestre, recomendamos não usá-lo de novo. Sem os estudantes avançados entendemos que o projeto teria sido um completo fracasso.
 \end{enumerate}
 
 \section{Recomendações para projetos futuros}
 
 \begin{enumerate}
-	\item \textcolor{red}{Até 200 caracteres, considerando os espaços.}
-	\item \textcolor{red}{Até 200 caracteres, considerando os espaços.}
-	\item \textcolor{red}{Até 200 caracteres, considerando os espaços.}
-	\item \textcolor{red}{Até 200 caracteres, considerando os espaços.}
+	\item Equilibrar os estudantes das outras engenharias nos grupos, o nosso teve dificuldade por não ter nenhum estudante de eletrônica, trazendo uma carga de trabalho maior que a esperada para a disciplina.
 \end{enumerate}
 
 \section{Questões em aberto}
+\label{sec:questoes_em_aberto}
 
-\textcolor{red}{Usar caso haja alguma questão pendente em relação às entregas do projeto (Ex.: Requisitos não entregues, melhoria na programação do software, troca de sensores, entre outros.}
+No atual estágio de integração do projeto, a principal questão em aberto e de maior criticidade para a viabilidade do produto concentra-se no sistema mecânico de locomoção. Durante os testes físicos, constatou-se que o Micromouse não consegue se deslocar de maneira previsível devido ao travamento da roda direita. Esse impedimento mecânico impossibilita a validação final da odometria, da malha de controle PID e do algoritmo de navegação (\textit{Flood Fill}) na pista de testes.
 
-\begin{enumerate}
-	\item \textcolor{red}{Até 200 caracteres, considerando os espaços.}
-	\item \textcolor{red}{Até 200 caracteres, considerando os espaços.}
-	\item \textcolor{red}{Até 200 caracteres, considerando os espaços.}
-	\item \textcolor{red}{Até 200 caracteres, considerando os espaços.}
-\end{enumerate}
+A investigação da causa raiz aponta para problemas de tolerância dimensional nas engrenagens e no acoplamento da roda com o chassi, possivelmente agravados pelas configurações de preenchimento (\textit{infill}) adotadas durante a impressão 3D. O chassi atual foi fabricado com o intuito de ser a solução definitiva para inconsistências mecânicas de uma versão anterior; no entanto, na prática, a nova peça apresentou um desempenho inferior e agravou o problema de atrito.
 
+Como medida de mitigação, a equipe precisou recorrer ao lixamento manual das peças de contato. Observou-se que quanto mais o material é desgastado, mais livre fica o movimento da roda. Cabe ressaltar, contudo, que esse retrabalho mecânico corretivo vem sendo executado de forma emergencial pela equipe de Eletrônica. Esse desvio de escopo evidencia uma falha na entrega de componentes prontos para montagem e testados por parte da equipe de Estruturas, transferindo o ônus dos ajustes finos mecânicos para o time responsável pela integração dos circuitos, o que impacta o fluxo de trabalho.
+
+Atualmente, não existe um plano de contingência (Plano B) estritamente viável e isento de riscos. A única alternativa seria o retrocesso para o chassi antigo, o qual, embora apresentasse falhas mais brandas, já havia sido preterido por suas próprias inconsistências, caracterizando-se como um recurso indesejado.
+
+Por fim, no que diz respeito aos demais subsistemas --- como a comunicação de telemetria com o InfluxDB, o sistema de alimentação e a lógica de \textit{software} ---, os testes parciais e isolados indicam que todos operam conforme o planejado. Contudo, a validação plena (100\%) do projeto operando de forma integrada na pista permanece inatingível e em aberto até que se obtenha uma locomoção fisicamente perfeita.
 \section{Desempenho dos fornecedores}
 
 \subsection{Fornecedores com desempenho acima do esperado}
-\textcolor{red}{Fornecedores que você certamente convidaria para um próximo projeto. Citar AAAA – justificativa. Até 200 caracteres, considerando os espaços.}
+
+Recomendamos a Robocore e a Hu Infinito, pois os preços podem ser elevados em comparação com a Ali Express, mas a Robocore entrega rapidamente e o Hu Inifinito se localiza na Asa Norte.
 
 \subsection{Fornecedores com desempenho conforme esperado}
-\textcolor{red}{Fornecedores que você provavelmente convidaria para um próximo projeto. Citar AAAA – justificativa. Até 200 caracteres, considerando os espaços.}
+
+A Ali Express foi utilizada como principalfornecedora de componentes eletrônicos no início do projeto, a equipe recomenda utilizar devido ao baixo custo e boa qualidade, mas a entrega pode demorar.
 
 \subsection{Fornecedores com desempenho abaixo do esperado}
-\textcolor{red}{Fornecedores que você não convidaria para um próximo projeto. Citar AAAA – justificativa. Até 200 caracteres, considerando os espaços.}
+
+Não tivemos fornecedores com desempenho abaixo do esperado.

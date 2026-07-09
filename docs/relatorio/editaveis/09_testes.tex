@@ -3,20 +3,11 @@
 
 \section{Características Gerais}
 
-\textcolor{red}{Introduzir os principais pontos deste capítulo. Cada teste deve conter explicações completas que garantam sua repetibilidade:
-\begin{itemize}
-    \item Hipóteses levantadas
-    \item Condições de contorno
-    \item Resultados esperados
-    \item Materiais e métodos
-    \item Precisão e acurácia das medidas obtidas.
-\end{itemize}
-}
+Este capítulo apresenta os testes de verificação e validação realizados no projeto Micromouse, com o objetivo de avaliar se os subsistemas desenvolvidos atendem aos requisitos definidos e se, quando integrados, são capazes de operar de forma coerente com a proposta do produto. Os ensaios contemplam aspectos estruturais, eletrônicos, energéticos, de software e de integração global, considerando tanto a análise individual dos componentes quanto o comportamento do sistema completo.
 
 \section{Testes da Estrutura}
 
 Esta seção apresenta os ensaios e metodologias de verificação e validação aplicados ao ecossistema estrutural do Micromouse. O propósito fundamental desta etapa consiste em assegurar que o chassi manufaturado e o ambiente de testes físico repliquem com fidelidade as premissas analíticas estabelecidas no projeto conceitual. Para tanto, avaliam-se parâmetros críticos de tolerância dimensional, estabilidade cinemática, rigidez a impactos e a dinâmica de rolamento do sistema de locomoção.
-
 
 \subsection{Inventário Físico e Conformidade de Peças}
 
@@ -31,9 +22,8 @@ A análise visual das peças físicas revela um alto nível de fidelidade geomé
     \label{fig:pecas_separadas}
 \end{figure}
 
-Para fins de rastreabilidade e controle de qualidade industrial, a disposição e a correta identificação geométrica de cada um desses 8 subsistemas podem ser correlacionadas diretamente com o diagrama técnico de detalhamento e a listagem estruturada presentes na  Figura~\ref{fig:Draft Micromouse explodido}.
+Para fins de rastreabilidade e controle de qualidade industrial, a disposição e a correta identificação geométrica de cada um desses 8 subsistemas podem ser correlacionadas diretamente com o diagrama técnico de detalhamento e a listagem estruturada presentes na Figura~\ref{fig:Draft Micromouse explodido}.
 
-  
 \subsubsection{Montagem Estrutural e Consistência com o Modelo CAD}
 
 Após o inventário inicial, executou-se a montagem mecânica do chassi para análise de rigidez e acoplamento. A Figura~\ref{fig:estrutura_montada} ilustra a carcaça do Micromouse montada, evidenciando o posicionamento preliminar de componentes de fiação e elementos eletrônicos internos em seus respectivos nichos de fixação. Para assegurar a estabilidade mecânica do conjunto e mitigar vibrações estruturais que possam comprometer as leituras dos sensores, a união entre os planos estratificados foi realizada de forma híbrida, empregando guias de encaixe por pressão integradas ao design do PLA em conjunto com elementos de fixação roscados (parafusos metálicos passantes).
@@ -45,9 +35,7 @@ Após o inventário inicial, executou-se a montagem mecânica do chassi para an�
     \label{fig:estrutura_montada}
 \end{figure}
 
-
 Essa configuração física comprova a eficiência do projeto estrutural em prover proteção passiva aos componentes internos, mantendo o acesso para manutenção prático. Para certificar que a execução real não divergiu das premissas geométricas teóricas, o protótipo montado foi confrontado com o ambiente virtual. A Figura~\ref{fig:carro_cad} expõe o modelo tridimensional renderizado em ambiente CAD, servindo como ferramenta de controle de qualidade para atestar que as furações concêntricas de união, os suportes de sensoriamento e as folgas de acoplamento foram rigorosamente respeitados. A validação dessa montagem estratificada toma como referência técnica a vista explodida oficial do projeto, documentada detalhadamente no desenho técnico presente na Figura~\ref{fig:Draft Micromouse explodido}.
-
 
 \begin{figure}[htbp]
     \centering
@@ -56,11 +44,10 @@ Essa configuração física comprova a eficiência do projeto estrutural em prov
     \label{fig:carro_cad}
 \end{figure}
 
-
 \subsection{Ensaios de Verificação Dimensional e de Tolerâncias}
 Utilizando instrumentos de medição de precisão (paquímetro), aferiu-se o envelope volumétrico final do robô montado. Os resultados confirmaram que o chassi manteve a largura nominal de $110 mm$ e o comprimento de $156 mm$ dentro de uma margem de tolerância física de $\pm 0,5mm$, validando a conformidade com o projeto conceitual e o CAD elaborado.
 
-Estas dimensões críticas e os limites de tolerância adotados na fabricação foram validados e estão devidamente cotados nas projeções ortogonais (vistas superior, lateral e seções transversais) localizadas na  Figura~\ref{fig:carro_cad}
+Estas dimensões críticas e os limites de tolerância adotados na fabricação foram validados e estão devidamente cotados nas projeções ortogonais (vistas superior, lateral e seções transversais) localizadas na Figura~\ref{fig:carro_cad}.
 
 \subsection{Validação de Locomoção, Rodas e Rolamentos}
 O sistema de suspensão estática e acoplamento dos eixos passou por ensaios cinemáticos para verificar o alinhamento das rodas e a eficiência dos rolamentos. O conjunto apresentou baixo coeficiente de fricção interna, assegurando que o torque fornecido pelos motores GA12-N20-S0310D-E seja eficientemente convertido em força trativa.
@@ -75,7 +62,6 @@ Como ação corretiva e de otimização para o próximo ponto de controle, deter
 
 \subsection{Ensaio de Resistência a Impactos}
 Por fim, realizou-se um teste de resistência passiva estrutural submetendo o chassi a pequenas colisões frontais e laterais simuladas em velocidade nominal. A estrutura absorveu satisfatoriamente a energia cinética dos impactos devido à flexibilidade controlada e preenchimento interno do filamento PLA, garantindo proteção total aos sensores ToF e circuitos internos sem apresentar trincas, fraturas ou folgas nos encaixes da tampa superior.
-
 
 \section{Testes de \textit{hardware}}
 
@@ -133,7 +119,7 @@ As Figuras \ref{fig:leituraToF}, \ref{fig:leituraINA} e \ref{fig:leituraEncoders
 
 \subsubsection{Validação e calibragem de leituras}
 
-A calibragem dos sensores ToF foi feita a partir de medições reais comparadas com as medições do sensor, montamos primeiro um gráfico sendo o eixo x as medições reais, e o eixo y sendo as medições feitas pelo sensor ToF. Depois fizemos pelo método de regressão linear dos mínimos quadrados uma reta no formato $ a\times x + b$ para achar a reta mais próxima. 
+A calibragem dos sensores ToF foi feita a partir de medições reais comparadas com as medições do sensor, montamos primeiro um gráfico sendo o eixo x as medições reais, e o eixo y sendo as medições feitas pelo sensor ToF. Depois fizemos pelo método de regressão linear dos mínimos quadrados uma reta no formato $a \times x + b$ para achar a reta mais próxima. 
 
 Por fim, chegamos a reta $0.9951 \times x + 17.475$, a qual usamos da seguinte forma para corrigir as leituras do sensor: $real = 0.9951 \times sensor - 17.475$; e depois aplicamos o filtro EMA \cite{pieterp_ema} que consistem em:
 
@@ -253,11 +239,9 @@ Depois da validação das especificações, foi feito o teste em repouso, afim d
         \label{fig:Teste tensao bateria}
     \end{figure}
 
-
 \subsection{Teste de autonomia cronometrada}
 
 Neste teste, o objetivo foi avaliar a capacidade de fornecimento de energia da bateria aos componentes eletrônicos do sistema. Durante a execução, algumas limitações estiveram presentes: o terceiro sensor ToF ainda não havia sido entregue e um dos motores não foi acionado no ensaio principal. Além disso, a ESP32 foi alimentada externamente via USB, de forma a manter o controle sobre a leitura e transmissão dos dados dos sensores ao computador sem interferir na medição de autonomia da bateria. Os componentes efetivamente alimentados por ela ao longo do experimento foram os dois sensores ToF, o módulo INA219 e um motor DC. Na Figura \ref{fig:Teste energia integrado} é possível visualizar o cronômetro e os componentes eletrônicos em operação durante o ensaio de 18 minutos.
-
 
 Paralelamente, a bateria foi cedida à equipe de eletrônica para testes individuais e combinados realizados com uma única carga completa. Nesses ensaios adicionais, foram acionados componentes além dos presentes no teste principal, incluindo os dois motores operando simultaneamente. O conjunto de testes realizados, ainda que sem operar todos os componentes de forma integrada em um único ensaio, fornece respaldo suficiente para a equipe confiar que a bateria suportará a carga total do sistema ao longo de uma corrida completa.
 
@@ -273,12 +257,14 @@ Paralelamente, a bateria foi cedida à equipe de eletrônica para testes individ
 \subsection{Histórias de Usuário Implementadas}
 
 Das várias histórias de usuário (HUs) mapeadas no \textit{backlog} do projeto no GitHub, boa parte de sua fundação estrutural já foi implementada e exaustivamente testada nesta fase. A Tabela \ref{tab:historias_usuario_implementadas} lista as HUs principais deste pacote e como elas se materializam no sistema.
-\begin{figure}
+
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.5\linewidth]{figuras/teste_e2e_playwright.png}
-    \caption{Enter Caption}
+    \caption{Execução de fluxos E2E no sistema.}
     \label{fig:placeholder}
 \end{figure}
+
 \begin{table}[H]
     \centering
     \caption{Histórias de Usuário Implementadas e Validadas}
@@ -318,13 +304,30 @@ Foram validados pacotes corrompidos, decodificação correta de inteiros e valor
 
 \subsubsection{Testes de Front-end}
 
-Os testes unitários do Front-end foram implementados com \textbf{Vitest} e \textbf{Testing Library}, cobrindo componentes React e funções utilitárias de forma isolada, sem dependência de rede ou estado externo. O ambiente de execução utiliza \textit{jsdom} para simular o DOM do navegador em Node.js. É possível observar o resultado dos testes e a cobertura de código na Figura~\ref{fig:teste-cobertura-front}.
+Os testes unitários do Front-end foram implementados com \textbf{Vitest} e \textbf{Testing Library}, cobrindo componentes React e funções utilitárias de forma isolada, sem dependência de rede ou estado externo. O ambiente de execução utiliza \textit{jsdom} para simular o DOM do navegador em Node.js. O resultado geral dessa suíte pode ser observado na Figura~\ref{fig:teste-cobertura-front-geral}.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.7\textwidth]{figuras/cobertura-teste-frontend.png}
-    \caption{Resultado dos testes unitários do Front-end.}
-    \label{fig:teste-cobertura-front}
+    \caption{Resultado geral dos testes unitários do Front-end.}
+    \label{fig:teste-cobertura-front-geral}
+\end{figure}
+
+Com o objetivo de aumentar a testabilidade e garantir a pureza das funções, a lógica de manipulação da malha do labirinto foi recentemente refatorada. As funções foram extraídas do componente \texttt{HistoryPage.tsx} para o módulo utilitário independente \texttt{historyUtils.ts}. Foram implementados e validados 13 casos de teste focados nas operações primordiais desse módulo:
+
+\begin{itemize}
+    \item \textbf{Criação e Dimensionamento de Grid:} Geração de malhas bidimensionais vazias (\texttt{criarGridVazio}) com marcação precisa de bordas (para 4x4 e 16x16), além do arredondamento dinâmico das proporções do labirinto (\texttt{detectarTamanho}) para os padrões estruturais de 4, 8, 16 ou 32 células.
+    \item \textbf{Manipulação Dinâmica do Labirinto:} Validação do espelhamento de obstáculos para as células vizinhas (\texttt{aplicarParede}) e reconstrução histórica do trajeto (\texttt{reconstruirAteStep}), atestando que todas as células visitadas são demarcadas corretamente até o passo analisado.
+    \item \textbf{Parseamento e Formatação:} Extração segura do histórico de movimentos (\texttt{extrairPassos}) com tratamento adequado de exceções para formatos inválidos, e validação rigorosa via expressões regulares (\textit{Regex}) na formatação de \textit{timestamps} para atestar o padrão de datas pt-BR (\texttt{formatarTimestamp}).
+\end{itemize}
+
+É possível observar o resultado dessa suíte de testes recém-integrada e a respectiva cobertura de código na Figura~\ref{fig:teste-cobertura-history-utils}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{figuras/cobertura-history-utils.png}
+    \caption{Resultado e cobertura dos testes unitários do módulo \texttt{historyUtils}.}
+    \label{fig:teste-cobertura-history-utils}
 \end{figure}
 
 \subsubsection{Testes Algorítmicos do Firmware (C++)}
